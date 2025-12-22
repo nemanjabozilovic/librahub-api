@@ -1,0 +1,25 @@
+name: librahub-catalog
+
+services:
+  catalog-api:
+    build:
+      context: ../..
+      dockerfile: services/Catalog/Dockerfile
+    container_name: librahub-catalog-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__CatalogDb=Host=postgres;Port=5432;Database=librahub_catalog;Username=librahub_admin;Password=L1br@Hub_DB_2026!S3cur3_P@ss
+      - ConnectionStrings__RabbitMQ=amqp://librahub_mq:R%40bb1tMQ_L1br%40Hub_2026%21S3cur3_P%40ss@rabbitmq:5672/
+    ports:
+      - "60960:8080"
+      - "60961:8081"
+    networks:
+      - librahub-network
+    restart: unless-stopped
+
+networks:
+  librahub-network:
+    external: true
+    name: librahub_librahub-network
+

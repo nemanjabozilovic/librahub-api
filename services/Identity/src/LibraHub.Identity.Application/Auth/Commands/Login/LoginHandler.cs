@@ -2,8 +2,10 @@ using LibraHub.BuildingBlocks.Abstractions;
 using LibraHub.BuildingBlocks.Results;
 using LibraHub.Identity.Application.Abstractions;
 using LibraHub.Identity.Application.Auth.Dtos;
+using LibraHub.Identity.Application.Options;
 using LibraHub.Identity.Domain.Users;
 using MediatR;
+using Microsoft.Extensions.Options;
 using Error = LibraHub.BuildingBlocks.Results.Error;
 
 namespace LibraHub.Identity.Application.Auth.Commands.Login;
@@ -13,10 +15,9 @@ public class LoginHandler(
     IRefreshTokenRepository refreshTokenRepository,
     IPasswordHasher passwordHasher,
     ITokenService tokenService,
-    IClock clock) : IRequestHandler<LoginCommand, Result<AuthTokensDto>>
+    IClock clock,
+    IOptions<SecurityOptions> securityOptions) : IRequestHandler<LoginCommand, Result<AuthTokensDto>>
 {
-    private const int MaxFailedAttempts = 5;
-    private static readonly TimeSpan LockoutDuration = TimeSpan.FromMinutes(15);
 
     public async Task<Result<AuthTokensDto>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
@@ -40,7 +41,9 @@ public class LoginHandler(
 
         if (!passwordHasher.VerifyPassword(request.Password, user.PasswordHash))
         {
-            user.RecordFailedLogin(MaxFailedAttempts, LockoutDuration);
+            var maxAttempts = securityOptions.Value.MaxFailedLoginAttempts;
+            var lockoutDuration = TimeSpan.FromMinutes(securityOptions.Value.LockoutDurationMinutes);
+            user.RecordFailedLogin(maxAttempts, lockoutDuration);
             await userRepository.UpdateAsync(user, cancellationToken);
             return Result.Failure<AuthTokensDto>(Error.Unauthorized("Invalid credentials"));
         }
