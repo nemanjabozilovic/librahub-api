@@ -9,10 +9,6 @@ namespace LibraHub.Notifications.Infrastructure.Persistence;
 
 public class NotificationsDbContext : DbContext
 {
-    public NotificationsDbContext()
-    {
-    }
-
     public NotificationsDbContext(DbContextOptions<NotificationsDbContext> options) : base(options)
     {
     }
