@@ -1,9 +1,9 @@
-using LibraHub.Content.Application.Abstractions;
-using LibraHub.Content.Infrastructure.Options;
+using LibraHub.BuildingBlocks.Abstractions;
+using LibraHub.BuildingBlocks.Options;
 using Microsoft.Extensions.Options;
 using Minio;
 
-namespace LibraHub.Content.Infrastructure.Storage;
+namespace LibraHub.BuildingBlocks.Storage;
 
 public class MinioObjectStorage : IObjectStorage
 {

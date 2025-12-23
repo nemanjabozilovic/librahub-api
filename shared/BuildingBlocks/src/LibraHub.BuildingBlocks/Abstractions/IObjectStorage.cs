@@ -1,4 +1,4 @@
-namespace LibraHub.Content.Application.Abstractions;
+namespace LibraHub.BuildingBlocks.Abstractions;
 
 public interface IObjectStorage
 {

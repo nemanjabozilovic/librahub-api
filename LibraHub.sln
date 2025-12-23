@@ -65,6 +65,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraHub.Library.Infrastruc
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Library", "Library", "{DFB9BA1A-E413-4CFE-9B3F-C87240043FC9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraHub.Notifications.Api", "services\Notifications\src\LibraHub.Notifications.Api\LibraHub.Notifications.Api.csproj", "{E36E4F5D-CB88-487B-A924-28BC00ABE712}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraHub.Notifications.Application", "services\Notifications\src\LibraHub.Notifications.Application\LibraHub.Notifications.Application.csproj", "{1C80329C-EEF1-49C4-99CF-BB9684630ABD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraHub.Notifications.Domain", "services\Notifications\src\LibraHub.Notifications.Domain\LibraHub.Notifications.Domain.csproj", "{D9DA836A-4B8F-4625-BF1E-639B394F776D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraHub.Notifications.Infrastructure", "services\Notifications\src\LibraHub.Notifications.Infrastructure\LibraHub.Notifications.Infrastructure.csproj", "{9CB08559-1563-4701-A849-73718E43E75D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Notifications", "Notifications", "{49F3428A-FD58-416A-B7E4-DFD1934026C3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -159,6 +169,22 @@ Global
 		{EED1B347-E57E-459C-98AA-FCD415A5A524}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EED1B347-E57E-459C-98AA-FCD415A5A524}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EED1B347-E57E-459C-98AA-FCD415A5A524}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E36E4F5D-CB88-487B-A924-28BC00ABE712}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E36E4F5D-CB88-487B-A924-28BC00ABE712}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E36E4F5D-CB88-487B-A924-28BC00ABE712}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E36E4F5D-CB88-487B-A924-28BC00ABE712}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C80329C-EEF1-49C4-99CF-BB9684630ABD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C80329C-EEF1-49C4-99CF-BB9684630ABD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C80329C-EEF1-49C4-99CF-BB9684630ABD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C80329C-EEF1-49C4-99CF-BB9684630ABD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9DA836A-4B8F-4625-BF1E-639B394F776D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9DA836A-4B8F-4625-BF1E-639B394F776D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9DA836A-4B8F-4625-BF1E-639B394F776D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9DA836A-4B8F-4625-BF1E-639B394F776D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9CB08559-1563-4701-A849-73718E43E75D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CB08559-1563-4701-A849-73718E43E75D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CB08559-1563-4701-A849-73718E43E75D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CB08559-1563-4701-A849-73718E43E75D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -191,6 +217,11 @@ Global
 		{40137B55-ED5D-4C96-A0D9-91893AFE2BB8} = {DFB9BA1A-E413-4CFE-9B3F-C87240043FC9}
 		{EED1B347-E57E-459C-98AA-FCD415A5A524} = {DFB9BA1A-E413-4CFE-9B3F-C87240043FC9}
 		{DFB9BA1A-E413-4CFE-9B3F-C87240043FC9} = {B2C3D4E5-F6A7-4B5C-9D0E-1F2A3B4C5D6E}
+		{E36E4F5D-CB88-487B-A924-28BC00ABE712} = {49F3428A-FD58-416A-B7E4-DFD1934026C3}
+		{1C80329C-EEF1-49C4-99CF-BB9684630ABD} = {49F3428A-FD58-416A-B7E4-DFD1934026C3}
+		{D9DA836A-4B8F-4625-BF1E-639B394F776D} = {49F3428A-FD58-416A-B7E4-DFD1934026C3}
+		{9CB08559-1563-4701-A849-73718E43E75D} = {49F3428A-FD58-416A-B7E4-DFD1934026C3}
+		{49F3428A-FD58-416A-B7E4-DFD1934026C3} = {B2C3D4E5-F6A7-4B5C-9D0E-1F2A3B4C5D6E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3F9716D5-3141-4AD7-BF6B-B408615464E3}

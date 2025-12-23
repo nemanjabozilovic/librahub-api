@@ -51,6 +51,29 @@ public class UserConfig : IEntityTypeConfiguration<User>
         builder.Property(u => u.LockedOutUntil)
             .HasColumnName("locked_out_until");
 
+        builder.Property(u => u.FirstName)
+            .HasColumnName("first_name")
+            .HasMaxLength(100)
+            .IsRequired();
+
+        builder.Property(u => u.LastName)
+            .HasColumnName("last_name")
+            .HasMaxLength(100)
+            .IsRequired();
+
+        builder.Ignore(u => u.DisplayName); // Computed property
+
+        builder.Property(u => u.Phone)
+            .HasColumnName("phone")
+            .HasMaxLength(20);
+
+        builder.Property(u => u.Avatar)
+            .HasColumnName("avatar")
+            .HasMaxLength(500);
+
+        builder.Property(u => u.DateOfBirth)
+            .HasColumnName("date_of_birth");
+
         builder.HasMany(u => u.Roles)
             .WithOne()
             .HasForeignKey(ur => ur.UserId)

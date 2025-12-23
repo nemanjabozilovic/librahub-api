@@ -2,6 +2,9 @@ using LibraHub.BuildingBlocks.Results;
 using LibraHub.Identity.Api.Dtos.Users;
 using LibraHub.Identity.Application.Admin.Commands.AssignRole;
 using LibraHub.Identity.Application.Admin.Commands.DisableUser;
+using LibraHub.Identity.Application.Users.Commands.CompleteRegistration;
+using LibraHub.Identity.Application.Users.Commands.CreateUser;
+using LibraHub.Identity.Application.Users.Commands.UploadAvatar;
 using LibraHub.Identity.Domain.Users;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -59,6 +62,50 @@ public class UsersController(IMediator mediator) : ControllerBase
         CancellationToken cancellationToken)
     {
         var command = new DisableUserCommand(id, string.Empty, false);
+        var result = await mediator.Send(command, cancellationToken);
+        return result.ToActionResult(this);
+    }
+
+    [HttpPost]
+    [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CreateUser(
+        [FromBody] CreateUserRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        var role = Enum.Parse<Role>(request.Role, ignoreCase: true);
+        var command = new CreateUserCommand(request.Email, role);
+        var result = await mediator.Send(command, cancellationToken);
+        return result.ToActionResult(this);
+    }
+
+    [HttpPost("complete-registration")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CompleteRegistration(
+        [FromBody] CompleteRegistrationRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        var command = new CompleteRegistrationCommand(
+            request.Token,
+            request.FirstName,
+            request.LastName,
+            request.Phone,
+            request.DateOfBirth);
+        var result = await mediator.Send(command, cancellationToken);
+        return result.ToActionResult(this);
+    }
+
+    [HttpPost("{id}/avatar")]
+    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UploadAvatar(
+        [FromRoute] Guid id,
+        IFormFile file,
+        CancellationToken cancellationToken)
+    {
+        var command = new UploadAvatarCommand(id, file);
         var result = await mediator.Send(command, cancellationToken);
         return result.ToActionResult(this);
     }

@@ -1,0 +1,26 @@
+name: librahub-notifications
+
+services:
+  notifications-api:
+    build:
+      context: ../..
+      dockerfile: services/Notifications/Dockerfile
+    container_name: librahub-notifications-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__NotificationsDb=Host=postgres;Port=5432;Database=librahub_notifications;Username=librahub_admin;Password=L1br@Hub_DB_2026!S3cur3_P@ss
+      - ConnectionStrings__RabbitMQ=amqp://librahub_mq:R%40bb1tMQ_L1br%40Hub_2026%21S3cur3_P%40ss@rabbitmq:5672/
+      - Notifications__IdentityApiUrl=http://identity-api:8080
+    ports:
+      - "60992:8080"
+      - "60993:8081"
+    networks:
+      - librahub-network
+    restart: unless-stopped
+
+networks:
+  librahub-network:
+    external: true
+    name: librahub_librahub-network
+

@@ -1,16 +1,17 @@
 using FluentValidation;
+using LibraHub.BuildingBlocks.Abstractions;
 using LibraHub.BuildingBlocks.Auth;
 using LibraHub.BuildingBlocks.Health;
 using LibraHub.BuildingBlocks.Messaging;
+using LibraHub.BuildingBlocks.Options;
 using LibraHub.BuildingBlocks.Outbox;
+using LibraHub.BuildingBlocks.Storage;
 using LibraHub.Content.Application;
 using LibraHub.Content.Application.Abstractions;
 using LibraHub.Content.Application.Options;
 using LibraHub.Content.Infrastructure.Clients;
-using LibraHub.Content.Infrastructure.Options;
 using LibraHub.Content.Infrastructure.Persistence;
 using LibraHub.Content.Infrastructure.Repositories;
-using LibraHub.Content.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Minio;
@@ -40,10 +41,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICoverRepository, CoverRepository>();
         services.AddScoped<IAccessGrantRepository, AccessGrantRepository>();
 
-        services.AddScoped<BuildingBlocks.Abstractions.IOutboxWriter, OutboxEventPublisher<ContentDbContext>>();
-        services.AddScoped<BuildingBlocks.Abstractions.IClock, BuildingBlocks.Clock>();
+        services.AddScoped<IOutboxWriter, OutboxEventPublisher<ContentDbContext>>();
+        services.AddScoped<IClock, BuildingBlocks.Clock>();
         services.AddHttpContextAccessor();
-        services.AddScoped<BuildingBlocks.Abstractions.ICurrentUser, BuildingBlocks.CurrentUser.CurrentUser>();
+        services.AddScoped<ICurrentUser, BuildingBlocks.CurrentUser.CurrentUser>();
 
         services.Configure<StorageOptions>(configuration.GetSection(StorageOptions.SectionName));
         services.AddSingleton<MinioClient>(sp =>

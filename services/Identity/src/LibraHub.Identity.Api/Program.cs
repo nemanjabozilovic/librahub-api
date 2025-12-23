@@ -9,7 +9,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddIdentitySwagger();
 builder.Services.AddIdentityDatabase(builder.Configuration);
-builder.Services.AddIdentityApplicationServices();
+builder.Services.AddIdentityApplicationServices(builder.Configuration);
 builder.Services.AddIdentityJwtAuthentication(builder.Configuration);
 builder.Services.AddIdentityRabbitMq(builder.Configuration);
 builder.Services.AddIdentityHealthChecks(builder.Configuration);

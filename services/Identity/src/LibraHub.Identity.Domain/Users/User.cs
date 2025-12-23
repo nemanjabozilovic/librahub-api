@@ -5,6 +5,12 @@ public class User
     public Guid Id { get; private set; }
     public string Email { get; private set; } = string.Empty;
     public string PasswordHash { get; private set; } = string.Empty;
+    public string FirstName { get; private set; } = string.Empty;
+    public string LastName { get; private set; } = string.Empty;
+    public string DisplayName => $"{FirstName} {LastName}".Trim();
+    public string? Phone { get; private set; }
+    public string? Avatar { get; private set; }
+    public DateTime? DateOfBirth { get; private set; }
     public bool EmailVerified { get; private set; }
     public UserStatus Status { get; private set; }
     public DateTime CreatedAt { get; private set; }
@@ -18,11 +24,15 @@ public class User
     private User()
     { } // For EF Core
 
-    public User(Guid id, string email, string passwordHash)
+    public User(Guid id, string email, string passwordHash, string firstName, string lastName, string? phone = null, DateTime? dateOfBirth = null)
     {
         Id = id;
         Email = email;
         PasswordHash = passwordHash;
+        FirstName = firstName;
+        LastName = lastName;
+        Phone = phone;
+        DateOfBirth = dateOfBirth;
         EmailVerified = false;
         Status = UserStatus.Active;
         CreatedAt = DateTime.UtcNow;
@@ -93,6 +103,24 @@ public class User
     public bool IsAdmin()
     {
         return HasRole(Role.Admin);
+    }
+
+    public void UpdatePassword(string newPasswordHash)
+    {
+        PasswordHash = newPasswordHash;
+    }
+
+    public void UpdateProfile(string firstName, string lastName, string? phone, DateTime? dateOfBirth)
+    {
+        FirstName = firstName;
+        LastName = lastName;
+        Phone = phone;
+        DateOfBirth = dateOfBirth;
+    }
+
+    public void UpdateAvatar(string avatarUrl)
+    {
+        Avatar = avatarUrl;
     }
 }
 

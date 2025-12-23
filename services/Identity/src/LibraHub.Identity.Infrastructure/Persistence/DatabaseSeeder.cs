@@ -44,7 +44,9 @@ public class DatabaseSeeder
         var adminUser = new User(
             id: Guid.NewGuid(),
             email: defaultAdminEmail,
-            passwordHash: passwordHash);
+            passwordHash: passwordHash,
+            firstName: "Admin",
+            lastName: "User");
 
         adminUser.MarkEmailAsVerified();
         adminUser.RemoveRole(Role.User); // Remove default User role

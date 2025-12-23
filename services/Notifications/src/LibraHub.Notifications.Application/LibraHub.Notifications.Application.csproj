@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>LibraHub.Notifications.Application</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="14.0.0" />
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+    <PackageReference Include="System.Text.Json" Version="10.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LibraHub.Notifications.Domain\LibraHub.Notifications.Domain.csproj" />
+    <ProjectReference Include="..\..\..\..\shared\BuildingBlocks\src\LibraHub.BuildingBlocks\LibraHub.BuildingBlocks.csproj" />
+    <ProjectReference Include="..\..\..\..\shared\Contracts\src\LibraHub.Contracts\LibraHub.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>
