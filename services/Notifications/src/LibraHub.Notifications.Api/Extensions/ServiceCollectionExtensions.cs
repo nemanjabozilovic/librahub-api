@@ -66,7 +66,6 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-
     public static IServiceCollection AddNotificationsJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
         return services.AddLibraHubJwtAuthentication(configuration);
