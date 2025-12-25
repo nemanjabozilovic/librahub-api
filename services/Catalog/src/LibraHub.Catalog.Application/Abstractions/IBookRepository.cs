@@ -12,9 +12,7 @@ public interface IBookRepository
 
     Task<int> CountAllAsync(CancellationToken cancellationToken = default);
 
-    Task<int> CountByStatusAsync(BookStatus status, CancellationToken cancellationToken = default);
-
-    Task<int> CountCreatedAfterAsync(DateTime date, CancellationToken cancellationToken = default);
+    Task<BookStatisticsResult> GetStatisticsAsync(DateTime last30Days, CancellationToken cancellationToken = default);
 
     Task AddAsync(Book book, CancellationToken cancellationToken = default);
 

@@ -45,16 +45,22 @@ public class BookRepository : IBookRepository
         return await _context.Books.CountAsync(cancellationToken);
     }
 
-    public async Task<int> CountByStatusAsync(BookStatus status, CancellationToken cancellationToken = default)
+    public async Task<BookStatisticsResult> GetStatisticsAsync(DateTime last30Days, CancellationToken cancellationToken = default)
     {
-        return await _context.Books
-            .CountAsync(b => b.Status == status, cancellationToken);
-    }
+        var total = await _context.Books.CountAsync(cancellationToken);
+        var published = await _context.Books.CountAsync(b => b.Status == BookStatus.Published, cancellationToken);
+        var draft = await _context.Books.CountAsync(b => b.Status == BookStatus.Draft, cancellationToken);
+        var unlisted = await _context.Books.CountAsync(b => b.Status == BookStatus.Unlisted, cancellationToken);
+        var newLast30Days = await _context.Books.CountAsync(b => b.CreatedAt >= last30Days, cancellationToken);
 
-    public async Task<int> CountCreatedAfterAsync(DateTime date, CancellationToken cancellationToken = default)
-    {
-        return await _context.Books
-            .CountAsync(b => b.CreatedAt >= date, cancellationToken);
+        return new BookStatisticsResult
+        {
+            Total = total,
+            Published = published,
+            Draft = draft,
+            Unlisted = unlisted,
+            NewLast30Days = newLast30Days
+        };
     }
 
     private IQueryable<Book> BuildSearchQuery(string? searchTerm)

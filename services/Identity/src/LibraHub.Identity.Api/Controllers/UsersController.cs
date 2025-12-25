@@ -4,7 +4,9 @@ using LibraHub.Identity.Application.Admin.Commands.AssignRole;
 using LibraHub.Identity.Application.Admin.Commands.DisableUser;
 using LibraHub.Identity.Application.Users.Commands.CompleteRegistration;
 using LibraHub.Identity.Application.Users.Commands.CreateUser;
+using LibraHub.Identity.Application.Users.Commands.UpdateUser;
 using LibraHub.Identity.Application.Users.Commands.UploadAvatar;
+using LibraHub.Identity.Application.Users.Queries.GetUsers;
 using LibraHub.Identity.Domain.Users;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -17,6 +19,18 @@ namespace LibraHub.Identity.Api.Controllers;
 [Authorize(Roles = "Admin")]
 public class UsersController(IMediator mediator) : ControllerBase
 {
+    [HttpGet]
+    [ProducesResponseType(typeof(GetUsersResponseDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetUsers(
+        [FromQuery] int skip = 0,
+        [FromQuery] int take = 50,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetUsersQuery(skip, take);
+        var result = await mediator.Send(query, cancellationToken);
+        return result.ToActionResult(this);
+    }
+
     [HttpPost("{id}/roles")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> AssignRole(
@@ -62,6 +76,26 @@ public class UsersController(IMediator mediator) : ControllerBase
         CancellationToken cancellationToken)
     {
         var command = new DisableUserCommand(id, string.Empty, false);
+        var result = await mediator.Send(command, cancellationToken);
+        return result.ToActionResult(this);
+    }
+
+    [HttpPut("{id}")]
+    [ProducesResponseType(typeof(LibraHub.Identity.Application.Users.Queries.GetUsers.UserDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateUser(
+        [FromRoute] Guid id,
+        [FromBody] UpdateUserRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        var command = new UpdateUserCommand(
+            id,
+            request.FirstName,
+            request.LastName,
+            request.Phone,
+            request.DateOfBirth,
+            request.EmailVerified);
         var result = await mediator.Send(command, cancellationToken);
         return result.ToActionResult(this);
     }

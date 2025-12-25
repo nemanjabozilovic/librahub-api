@@ -59,9 +59,13 @@ public class StatisticsCacheHelper
     }
 
     public static string GetUserStatisticsKey() => "statistics:users";
+
     public static string GetBookStatisticsKey() => "statistics:books";
+
     public static string GetOrderStatisticsKey() => "statistics:orders";
+
     public static string GetEntitlementStatisticsKey() => "statistics:entitlements";
+
     public static string GetDashboardSummaryKey() => "statistics:dashboard:summary";
 }
 

@@ -1,4 +1,5 @@
 using FluentValidation;
+using LibraHub.BuildingBlocks.Constants;
 
 namespace LibraHub.Catalog.Application.Books.Commands.SetPricing;
 
@@ -14,7 +15,7 @@ public class SetPricingValidator : AbstractValidator<SetPricingCommand>
 
         RuleFor(x => x.Currency)
             .NotEmpty().WithMessage("Currency is required")
-            .Length(3).WithMessage("Currency must be 3 characters (ISO code)");
+            .Equal(Currency.USD).WithMessage($"Only {Currency.USD} currency is supported");
 
         RuleFor(x => x.VatRate)
             .InclusiveBetween(0, 100).WithMessage("VAT rate must be between 0 and 100")

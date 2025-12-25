@@ -50,45 +50,51 @@ public class OrderRepository : IOrderRepository
         return await _context.Orders.CountAsync(cancellationToken);
     }
 
-    public async Task<int> CountByStatusAsync(OrderStatus status, CancellationToken cancellationToken = default)
+    public async Task<OrderStatisticsResult> GetStatisticsAsync(DateTime last30Days, DateTime last7Days, DateTime now, CancellationToken cancellationToken = default)
     {
-        return await _context.Orders
-            .CountAsync(o => o.Status == status, cancellationToken);
-    }
+        var total = await _context.Orders.CountAsync(cancellationToken);
+        var paid = await _context.Orders.CountAsync(o => o.Status == OrderStatus.Paid, cancellationToken);
+        var pending = await _context.Orders.CountAsync(o => o.Status == OrderStatus.PaymentPending, cancellationToken);
+        var cancelled = await _context.Orders.CountAsync(o => o.Status == OrderStatus.Cancelled, cancellationToken);
+        var refunded = await _context.Orders.CountAsync(o => o.Status == OrderStatus.Refunded, cancellationToken);
 
-    public async Task<OrderPeriodStatistics> GetStatisticsForPeriodAsync(DateTime from, DateTime to, CancellationToken cancellationToken = default)
-    {
-        var orders = await _context.Orders
-            .Where(o => o.Status == OrderStatus.Paid
-                && o.CreatedAt >= from
-                && o.CreatedAt <= to)
-            .ToListAsync(cancellationToken);
-
-        var count = orders.Count;
-        var revenue = orders.Sum(o => o.Total.Amount);
-        var currency = orders.FirstOrDefault()?.Currency ?? "USD";
-
-        return new OrderPeriodStatistics
-        {
-            Count = count,
-            Revenue = revenue,
-            Currency = currency
-        };
-    }
-
-    public async Task<OrderRevenue> GetTotalRevenueAsync(CancellationToken cancellationToken = default)
-    {
-        var orders = await _context.Orders
+        var totalRevenue = await _context.Orders
             .Where(o => o.Status == OrderStatus.Paid)
-            .ToListAsync(cancellationToken);
+            .SumAsync(o => o.Total.Amount, cancellationToken);
 
-        var amount = orders.Sum(o => o.Total.Amount);
-        var currency = orders.FirstOrDefault()?.Currency ?? "USD";
+        var last30DaysRevenue = await _context.Orders
+            .Where(o => o.Status == OrderStatus.Paid && o.CreatedAt >= last30Days && o.CreatedAt <= now)
+            .SumAsync(o => o.Total.Amount, cancellationToken);
 
-        return new OrderRevenue
+        var last7DaysRevenue = await _context.Orders
+            .Where(o => o.Status == OrderStatus.Paid && o.CreatedAt >= last7Days && o.CreatedAt <= now)
+            .SumAsync(o => o.Total.Amount, cancellationToken);
+
+        var last30DaysCount = await _context.Orders
+            .CountAsync(o => o.Status == OrderStatus.Paid && o.CreatedAt >= last30Days && o.CreatedAt <= now, cancellationToken);
+
+        var last7DaysCount = await _context.Orders
+            .CountAsync(o => o.Status == OrderStatus.Paid && o.CreatedAt >= last7Days && o.CreatedAt <= now, cancellationToken);
+
+        return new OrderStatisticsResult
         {
-            Amount = amount,
-            Currency = currency
+            Total = total,
+            Paid = paid,
+            Pending = pending,
+            Cancelled = cancelled,
+            Refunded = refunded,
+            Last30Days = new PeriodStatisticsData
+            {
+                Count = last30DaysCount,
+                Revenue = last30DaysRevenue
+            },
+            Last7Days = new PeriodStatisticsData
+            {
+                Count = last7DaysCount,
+                Revenue = last7DaysRevenue
+            },
+            TotalRevenue = totalRevenue,
+            Currency = LibraHub.BuildingBlocks.Constants.Currency.USD
         };
     }
 

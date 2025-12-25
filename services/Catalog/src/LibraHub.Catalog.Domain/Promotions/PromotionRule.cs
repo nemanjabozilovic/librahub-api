@@ -14,6 +14,8 @@ public class PromotionRule
     public List<Guid>? Exclusions { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
+    private const string SupportedCurrency = "USD";
+
     private PromotionRule()
     { } // For EF Core
 
@@ -56,9 +58,17 @@ public class PromotionRule
             throw new ArgumentException("Percentage discount cannot exceed 100%", nameof(DiscountValue));
         }
 
-        if (DiscountType == DiscountType.FixedAmount && string.IsNullOrWhiteSpace(Currency))
+        if (DiscountType == DiscountType.FixedAmount)
         {
-            throw new ArgumentException("Currency is required for fixed amount discount", nameof(Currency));
+            if (string.IsNullOrWhiteSpace(Currency))
+            {
+                throw new ArgumentException("Currency is required for fixed amount discount", nameof(Currency));
+            }
+
+            if (Currency != SupportedCurrency)
+            {
+                throw new ArgumentException($"Only {SupportedCurrency} currency is supported", nameof(Currency));
+            }
         }
 
         if (MinPriceAfterDiscount.HasValue && MinPriceAfterDiscount.Value < 0)

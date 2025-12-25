@@ -45,22 +45,34 @@ public class UserRepository : IUserRepository
         return await _context.Users.CountAsync(cancellationToken);
     }
 
-    public async Task<int> CountByStatusAsync(UserStatus status, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<User>> GetUsersPagedAsync(int skip, int take, CancellationToken cancellationToken = default)
     {
         return await _context.Users
-            .CountAsync(u => u.Status == status, cancellationToken);
+            .Include(u => u.Roles)
+            .OrderBy(u => u.CreatedAt)
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task<int> CountPendingEmailVerificationAsync(CancellationToken cancellationToken = default)
+    public async Task<UserStatisticsResult> GetStatisticsAsync(DateTime last30Days, DateTime last7Days, CancellationToken cancellationToken = default)
     {
-        return await _context.Users
-            .CountAsync(u => !u.EmailVerified && u.Status == UserStatus.Active, cancellationToken);
-    }
+        var total = await _context.Users.CountAsync(cancellationToken);
+        var active = await _context.Users.CountAsync(u => u.Status == UserStatus.Active, cancellationToken);
+        var disabled = await _context.Users.CountAsync(u => u.Status == UserStatus.Disabled, cancellationToken);
+        var pending = await _context.Users.CountAsync(u => !u.EmailVerified && u.Status == UserStatus.Active, cancellationToken);
+        var newLast30Days = await _context.Users.CountAsync(u => u.CreatedAt >= last30Days, cancellationToken);
+        var newLast7Days = await _context.Users.CountAsync(u => u.CreatedAt >= last7Days, cancellationToken);
 
-    public async Task<int> CountCreatedAfterAsync(DateTime date, CancellationToken cancellationToken = default)
-    {
-        return await _context.Users
-            .CountAsync(u => u.CreatedAt >= date, cancellationToken);
+        return new UserStatisticsResult
+        {
+            Total = total,
+            Active = active,
+            Disabled = disabled,
+            Pending = pending,
+            NewLast30Days = newLast30Days,
+            NewLast7Days = newLast7Days
+        };
     }
 
     public async Task AddAsync(User user, CancellationToken cancellationToken = default)

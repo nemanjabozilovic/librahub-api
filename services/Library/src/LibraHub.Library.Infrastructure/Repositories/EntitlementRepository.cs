@@ -63,16 +63,20 @@ public class EntitlementRepository : IEntitlementRepository
         return await _context.Entitlements.CountAsync(cancellationToken);
     }
 
-    public async Task<int> CountByStatusAsync(EntitlementStatus status, CancellationToken cancellationToken = default)
+    public async Task<EntitlementStatisticsResult> GetStatisticsAsync(DateTime last30Days, CancellationToken cancellationToken = default)
     {
-        return await _context.Entitlements
-            .CountAsync(e => e.Status == status, cancellationToken);
-    }
+        var total = await _context.Entitlements.CountAsync(cancellationToken);
+        var active = await _context.Entitlements.CountAsync(e => e.Status == EntitlementStatus.Active, cancellationToken);
+        var revoked = await _context.Entitlements.CountAsync(e => e.Status == EntitlementStatus.Revoked, cancellationToken);
+        var grantedLast30Days = await _context.Entitlements.CountAsync(e => e.AcquiredAt >= last30Days, cancellationToken);
 
-    public async Task<int> CountAcquiredAfterAsync(DateTime date, CancellationToken cancellationToken = default)
-    {
-        return await _context.Entitlements
-            .CountAsync(e => e.AcquiredAt >= date, cancellationToken);
+        return new EntitlementStatisticsResult
+        {
+            Total = total,
+            Active = active,
+            Revoked = revoked,
+            GrantedLast30Days = grantedLast30Days
+        };
     }
 
     public async Task<bool> HasAccessAsync(Guid userId, Guid bookId, CancellationToken cancellationToken = default)

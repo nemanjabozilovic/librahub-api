@@ -18,7 +18,7 @@ public class DatabaseSeeder(
     private async Task SeedDefaultAdminAsync(CancellationToken cancellationToken)
     {
         const string defaultAdminEmail = "admin@librahub.com";
-        const string defaultAdminPassword = "Admin123!";
+        const string defaultAdminPassword = "RHV2YWogZ2E=";
 
         var existingAdmin = await context.Users
             .FirstOrDefaultAsync(u => u.Email == defaultAdminEmail, cancellationToken);

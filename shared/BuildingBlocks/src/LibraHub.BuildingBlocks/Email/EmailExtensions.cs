@@ -17,7 +17,7 @@ public static class EmailExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        var emailConfig = configuration.GetSection(EmailConfigOptions.SectionName).Get<EmailConfigOptions>();
+        var emailConfig = configuration.GetSection(EmailConfigOptions.SectionName).Get<EmailConfigOptions>() ?? throw new InvalidOperationException("Email configuration is missing.");
         var smtpClient = new SmtpClient(emailConfig.Host)
         {
             Port = emailConfig.Port,

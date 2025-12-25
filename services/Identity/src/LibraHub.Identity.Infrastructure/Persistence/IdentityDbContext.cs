@@ -6,12 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LibraHub.Identity.Infrastructure.Persistence;
 
-public class IdentityDbContext : DbContext
+public class IdentityDbContext(DbContextOptions<IdentityDbContext> options) : DbContext(options)
 {
-    public IdentityDbContext(DbContextOptions<IdentityDbContext> options) : base(options)
-    {
-    }
-
     public DbSet<User> Users { get; set; } = null!;
     public DbSet<UserRole> UserRoles { get; set; } = null!;
     public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;

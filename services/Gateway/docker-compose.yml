@@ -18,6 +18,7 @@ services:
       - ReverseProxy__Clusters__orders__Destinations__default__Address=http://librahub-orders-api:8080
       - ReverseProxy__Clusters__library__Destinations__default__Address=http://librahub-library-api:8080
       - ReverseProxy__Clusters__notifications__Destinations__default__Address=http://librahub-notifications-api:8080
+      - ConnectionStrings__Redis=redis:6379
     ports:
       - "5000:8080"
       - "5001:8081"

@@ -1,4 +1,5 @@
 using FluentValidation;
+using LibraHub.BuildingBlocks.Constants;
 
 namespace LibraHub.Catalog.Application.Promotions.Commands.AddPromotionRule;
 
@@ -13,13 +14,8 @@ public class AddPromotionRuleValidator : AbstractValidator<AddPromotionRuleComma
             .GreaterThan(0).WithMessage("Discount value must be greater than zero");
 
         RuleFor(x => x.Currency)
-            .NotEmpty()
+            .Equal(Currency.USD)
             .When(x => x.DiscountType == Domain.Promotions.DiscountType.FixedAmount)
-            .WithMessage("Currency is required for fixed amount discount");
-
-        RuleFor(x => x.Currency)
-            .Length(3)
-            .When(x => !string.IsNullOrEmpty(x.Currency))
-            .WithMessage("Currency must be 3 characters (ISO code)");
+            .WithMessage($"Only {Currency.USD} currency is supported for fixed amount discount");
     }
 }

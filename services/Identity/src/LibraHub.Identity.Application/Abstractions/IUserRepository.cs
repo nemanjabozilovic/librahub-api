@@ -14,11 +14,9 @@ public interface IUserRepository
 
     Task<int> CountAllAsync(CancellationToken cancellationToken = default);
 
-    Task<int> CountByStatusAsync(UserStatus status, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<User>> GetUsersPagedAsync(int skip, int take, CancellationToken cancellationToken = default);
 
-    Task<int> CountPendingEmailVerificationAsync(CancellationToken cancellationToken = default);
-
-    Task<int> CountCreatedAfterAsync(DateTime date, CancellationToken cancellationToken = default);
+    Task<UserStatisticsResult> GetStatisticsAsync(DateTime last30Days, DateTime last7Days, CancellationToken cancellationToken = default);
 
     Task AddAsync(User user, CancellationToken cancellationToken = default);
 

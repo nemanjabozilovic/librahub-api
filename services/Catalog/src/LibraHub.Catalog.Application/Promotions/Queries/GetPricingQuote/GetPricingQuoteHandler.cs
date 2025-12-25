@@ -1,4 +1,5 @@
 using LibraHub.BuildingBlocks.Abstractions;
+using LibraHub.BuildingBlocks.Constants;
 using LibraHub.BuildingBlocks.Results;
 using LibraHub.Catalog.Application.Abstractions;
 using LibraHub.Catalog.Domain.Errors;
@@ -16,6 +17,13 @@ public class GetPricingQuoteHandler(
 {
     public async Task<Result<PricingQuoteResponseDto>> Handle(GetPricingQuoteQuery request, CancellationToken cancellationToken)
     {
+        var currency = string.IsNullOrWhiteSpace(request.Currency) ? Currency.USD : request.Currency;
+
+        if (currency != Currency.USD)
+        {
+            return Result.Failure<PricingQuoteResponseDto>(Error.Validation($"Only {Currency.USD} currency is supported"));
+        }
+
         var utcNow = request.AtUtc ?? clock.UtcNow;
         var activeCampaigns = await promotionRepository.GetActiveAsync(utcNow, cancellationToken);
         var evaluator = new PromotionEvaluator();
@@ -37,11 +45,11 @@ public class GetPricingQuoteHandler(
             }
 
             var basePrice = pricing.Price.Amount;
-            var currency = pricing.Price.Currency;
+            var bookCurrency = pricing.Price.Currency;
 
-            if (currency != request.Currency)
+            if (bookCurrency != currency)
             {
-                return Result.Failure<PricingQuoteResponseDto>(Error.Validation($"Book {itemRequest.BookId} has price in {currency}, but quote requested in {request.Currency}"));
+                return Result.Failure<PricingQuoteResponseDto>(Error.Validation($"Book {itemRequest.BookId} has price in {bookCurrency}, but only {Currency.USD} is supported"));
             }
 
             var promotionResult = evaluator.EvaluateBestDiscount(book, basePrice, currency, utcNow, activeCampaigns);
@@ -70,7 +78,7 @@ public class GetPricingQuoteHandler(
 
         return Result.Success(new PricingQuoteResponseDto
         {
-            Currency = request.Currency,
+            Currency = currency,
             Items = items
         });
     }

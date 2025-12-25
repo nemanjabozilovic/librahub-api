@@ -1,7 +1,6 @@
 using LibraHub.BuildingBlocks.Abstractions;
 using LibraHub.BuildingBlocks.Results;
 using LibraHub.Identity.Application.Abstractions;
-using LibraHub.Identity.Domain.Users;
 using MediatR;
 
 namespace LibraHub.Identity.Application.Statistics.Queries.GetUserStatistics;
@@ -16,23 +15,16 @@ public class GetUserStatisticsHandler(
         var last30Days = now.AddDays(-30);
         var last7Days = now.AddDays(-7);
 
-        var totalTask = userRepository.CountAllAsync(cancellationToken);
-        var activeTask = userRepository.CountByStatusAsync(UserStatus.Active, cancellationToken);
-        var disabledTask = userRepository.CountByStatusAsync(UserStatus.Disabled, cancellationToken);
-        var pendingTask = userRepository.CountPendingEmailVerificationAsync(cancellationToken);
-        var newLast30DaysTask = userRepository.CountCreatedAfterAsync(last30Days, cancellationToken);
-        var newLast7DaysTask = userRepository.CountCreatedAfterAsync(last7Days, cancellationToken);
-
-        await Task.WhenAll(totalTask, activeTask, disabledTask, pendingTask, newLast30DaysTask, newLast7DaysTask);
+        var statistics = await userRepository.GetStatisticsAsync(last30Days, last7Days, cancellationToken);
 
         var response = new UserStatisticsDto
         {
-            Total = await totalTask,
-            Active = await activeTask,
-            Disabled = await disabledTask,
-            Pending = await pendingTask,
-            NewLast30Days = await newLast30DaysTask,
-            NewLast7Days = await newLast7DaysTask
+            Total = statistics.Total,
+            Active = statistics.Active,
+            Disabled = statistics.Disabled,
+            Pending = statistics.Pending,
+            NewLast30Days = statistics.NewLast30Days,
+            NewLast7Days = statistics.NewLast7Days
         };
 
         return Result.Success(response);
