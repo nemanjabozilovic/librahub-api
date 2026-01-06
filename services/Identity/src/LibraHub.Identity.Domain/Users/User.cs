@@ -10,7 +10,7 @@ public class User
     public string DisplayName => $"{FirstName} {LastName}".Trim();
     public string? Phone { get; private set; }
     public string? Avatar { get; private set; }
-    public DateTime? DateOfBirth { get; private set; }
+    public DateTime DateOfBirth { get; private set; }
     public bool EmailVerified { get; private set; }
     public UserStatus Status { get; private set; }
     public DateTime CreatedAt { get; private set; }
@@ -24,7 +24,7 @@ public class User
     private User()
     { } // For EF Core
 
-    public User(Guid id, string email, string passwordHash, string firstName, string lastName, string? phone = null, DateTime? dateOfBirth = null)
+    public User(Guid id, string email, string passwordHash, string firstName, string lastName, string? phone = null, DateTime dateOfBirth = default)
     {
         Id = id;
         Email = email;
@@ -109,7 +109,7 @@ public class User
         PasswordHash = newPasswordHash;
     }
 
-    public void UpdateProfile(string firstName, string lastName, string? phone, DateTime? dateOfBirth)
+    public void UpdateProfile(string firstName, string lastName, string? phone, DateTime dateOfBirth)
     {
         FirstName = firstName;
         LastName = lastName;

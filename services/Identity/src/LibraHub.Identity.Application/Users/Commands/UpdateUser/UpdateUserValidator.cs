@@ -22,8 +22,8 @@ public class UpdateUserValidator : AbstractValidator<UpdateUserCommand>
             .When(x => !string.IsNullOrEmpty(x.Phone));
 
         RuleFor(x => x.DateOfBirth)
-            .LessThan(DateTime.UtcNow).WithMessage("Date of birth must be in the past")
-            .When(x => x.DateOfBirth.HasValue);
+            .NotEmpty().WithMessage("Date of birth is required")
+            .LessThan(DateTime.UtcNow).WithMessage("Date of birth must be in the past");
     }
 }
 

@@ -15,7 +15,8 @@ public record UpdateUserRequestDto
     [MaxLength(20, ErrorMessage = "Phone must not exceed 20 characters")]
     public string? Phone { get; init; }
 
-    public DateTime? DateOfBirth { get; init; }
+    [Required(ErrorMessage = "Date of birth is required")]
+    public DateTime DateOfBirth { get; init; }
 
     public bool? EmailVerified { get; init; }
 }

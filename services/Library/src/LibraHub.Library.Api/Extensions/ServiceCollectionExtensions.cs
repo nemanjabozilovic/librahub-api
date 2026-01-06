@@ -49,6 +49,7 @@ public static class ServiceCollectionExtensions
         services.AddHttpContextAccessor();
         services.AddScoped<BuildingBlocks.Abstractions.ICurrentUser, BuildingBlocks.CurrentUser.CurrentUser>();
         services.AddScoped<IIdempotencyStore, IdempotencyStore<LibraryDbContext, IdempotencyKey>>();
+        services.AddScoped<BuildingBlocks.Inbox.IInboxRepository, Infrastructure.Repositories.InboxRepository>();
 
         services.AddScoped<Application.Consumers.OrderPaidConsumer>();
         services.AddScoped<Application.Consumers.OrderRefundedConsumer>();

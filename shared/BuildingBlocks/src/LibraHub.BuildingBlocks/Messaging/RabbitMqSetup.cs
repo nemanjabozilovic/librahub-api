@@ -14,4 +14,27 @@ public static class RabbitMqSetup
 
         return factory.CreateConnection();
     }
+
+    public static void ConfigureDeadLetterQueue(IModel channel, string queueName, string dlqName)
+    {
+        var arguments = new Dictionary<string, object>
+        {
+            { "x-dead-letter-exchange", "" },
+            { "x-dead-letter-routing-key", dlqName }
+        };
+
+        channel.QueueDeclare(
+            queue: queueName,
+            durable: true,
+            exclusive: false,
+            autoDelete: false,
+            arguments: arguments);
+
+        channel.QueueDeclare(
+            queue: dlqName,
+            durable: true,
+            exclusive: false,
+            autoDelete: false,
+            arguments: null);
+    }
 }

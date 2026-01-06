@@ -119,8 +119,8 @@ public class UsersController(IMediator mediator) : ControllerBase
             id,
             request.FirstName,
             request.LastName,
-            request.Phone,
             request.DateOfBirth,
+            request.Phone,
             request.EmailVerified);
         var result = await mediator.Send(command, cancellationToken);
         return result.ToActionResult(this);
@@ -150,10 +150,12 @@ public class UsersController(IMediator mediator) : ControllerBase
         var decodedToken = Uri.UnescapeDataString(request.Token);
         var command = new CompleteRegistrationCommand(
             decodedToken,
+            request.Password,
+            request.ConfirmPassword,
             request.FirstName,
             request.LastName,
-            request.Phone,
-            request.DateOfBirth);
+            request.DateOfBirth,
+            request.Phone);
         var result = await mediator.Send(command, cancellationToken);
         return result.ToActionResult(this);
     }

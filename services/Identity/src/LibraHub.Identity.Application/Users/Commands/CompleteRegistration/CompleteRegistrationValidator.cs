@@ -1,4 +1,5 @@
 using FluentValidation;
+using LibraHub.Identity.Domain.Users;
 
 namespace LibraHub.Identity.Application.Users.Commands.CompleteRegistration;
 
@@ -8,6 +9,16 @@ public class CompleteRegistrationValidator : AbstractValidator<CompleteRegistrat
     {
         RuleFor(x => x.Token)
             .NotEmpty().WithMessage("Token is required");
+
+        RuleFor(x => x.Password)
+            .NotEmpty().WithMessage("Password is required")
+            .Must(PasswordPolicy.IsValid)
+            .WithMessage(PasswordPolicy.GetPolicyDescription());
+
+        RuleFor(x => x.ConfirmPassword)
+            .NotEmpty().WithMessage("Password confirmation is required")
+            .Equal(x => x.Password)
+            .WithMessage("Passwords do not match");
 
         RuleFor(x => x.FirstName)
             .NotEmpty().WithMessage("First name is required")
@@ -22,8 +33,8 @@ public class CompleteRegistrationValidator : AbstractValidator<CompleteRegistrat
             .When(x => !string.IsNullOrWhiteSpace(x.Phone));
 
         RuleFor(x => x.DateOfBirth)
-            .LessThan(DateTime.UtcNow).WithMessage("Date of birth must be in the past")
-            .When(x => x.DateOfBirth.HasValue);
+            .NotEmpty().WithMessage("Date of birth is required")
+            .LessThan(DateTime.UtcNow).WithMessage("Date of birth must be in the past");
     }
 }
 

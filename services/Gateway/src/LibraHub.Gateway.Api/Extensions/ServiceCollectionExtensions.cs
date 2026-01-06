@@ -21,6 +21,11 @@ public static class ServiceCollectionExtensions
 
         services.AddAuthorization(options =>
         {
+            options.AddPolicy("AllowAnonymous", policy =>
+            {
+                policy.RequireAssertion(_ => true);
+            });
+
             options.AddPolicy("RequireAuthenticated", policy =>
             {
                 policy.RequireAuthenticatedUser();

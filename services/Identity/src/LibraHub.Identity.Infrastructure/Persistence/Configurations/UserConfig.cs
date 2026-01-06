@@ -72,7 +72,8 @@ public class UserConfig : IEntityTypeConfiguration<User>
             .HasMaxLength(500);
 
         builder.Property(u => u.DateOfBirth)
-            .HasColumnName("date_of_birth");
+            .HasColumnName("date_of_birth")
+            .IsRequired();
 
         builder.HasMany(u => u.Roles)
             .WithOne()

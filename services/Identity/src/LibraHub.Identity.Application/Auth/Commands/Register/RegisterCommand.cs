@@ -8,5 +8,5 @@ public record RegisterCommand(
     string Password,
     string FirstName,
     string LastName,
-    string? Phone = null,
-    DateTime? DateOfBirth = null) : IRequest<Result>;
+    DateTime DateOfBirth,
+    string? Phone = null) : IRequest<Result>;

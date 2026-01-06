@@ -5,8 +5,10 @@ namespace LibraHub.Identity.Application.Users.Commands.CompleteRegistration;
 
 public record CompleteRegistrationCommand(
     string Token,
+    string Password,
+    string ConfirmPassword,
     string FirstName,
     string LastName,
-    string? Phone = null,
-    DateTime? DateOfBirth = null) : IRequest<Result>;
+    DateTime DateOfBirth,
+    string? Phone = null) : IRequest<Result>;
 

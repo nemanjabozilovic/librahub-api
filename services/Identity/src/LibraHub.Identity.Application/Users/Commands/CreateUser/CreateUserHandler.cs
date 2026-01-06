@@ -15,7 +15,6 @@ public class CreateUserHandler(
     IUserRepository userRepository,
     IRegistrationCompletionTokenRepository tokenRepository,
     IRegistrationCompletionTokenService tokenService,
-    IPasswordHasher passwordHasher,
     IEmailSender emailSender,
     IConfiguration configuration,
     IUnitOfWork unitOfWork,
@@ -40,17 +39,14 @@ public class CreateUserHandler(
 
     private User CreateUser(string email, Role role)
     {
-        var tempPassword = GenerateTemporaryPassword();
-        var passwordHash = passwordHasher.HashPassword(tempPassword);
-
         var user = new User(
             Guid.NewGuid(),
             email,
-            passwordHash,
+            string.Empty,
             string.Empty,
             string.Empty,
             null,
-            null);
+            default);
 
         user.AddRole(role);
 
@@ -119,14 +115,6 @@ public class CreateUserHandler(
         {
             logger.LogError(ex, "Failed to send registration completion email to {Email}", user.Email);
         }
-    }
-
-    private static string GenerateTemporaryPassword()
-    {
-        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
-        var random = new Random();
-        return new string(Enumerable.Repeat(chars, 16)
-            .Select(s => s[random.Next(s.Length)]).ToArray());
     }
 }
 

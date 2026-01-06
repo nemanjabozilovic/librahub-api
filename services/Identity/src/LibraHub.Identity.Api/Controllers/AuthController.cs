@@ -28,8 +28,8 @@ public class AuthController(IMediator mediator) : ControllerBase
             request.Password,
             request.FirstName,
             request.LastName,
-            request.Phone,
-            request.DateOfBirth);
+            request.DateOfBirth,
+            request.Phone);
         var result = await mediator.Send(command, cancellationToken);
         return result.ToActionResult(this);
     }

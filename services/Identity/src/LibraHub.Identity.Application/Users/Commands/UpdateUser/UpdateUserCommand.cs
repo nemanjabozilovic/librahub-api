@@ -8,7 +8,7 @@ public record UpdateUserCommand(
     Guid UserId,
     string FirstName,
     string LastName,
+    DateTime DateOfBirth,
     string? Phone = null,
-    DateTime? DateOfBirth = null,
     bool? EmailVerified = null) : IRequest<Result<UserDto>>;
 

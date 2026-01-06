@@ -1,4 +1,7 @@
+using LibraHub.BuildingBlocks.Abstractions;
 using LibraHub.BuildingBlocks.Results;
+using LibraHub.Contracts.Common;
+using LibraHub.Contracts.Identity.V1;
 using LibraHub.Identity.Application.Abstractions;
 using MediatR;
 using Error = LibraHub.BuildingBlocks.Results.Error;
@@ -7,7 +10,11 @@ namespace LibraHub.Identity.Application.Users.Commands.CompleteRegistration;
 
 public class CompleteRegistrationHandler(
     IRegistrationCompletionTokenRepository tokenRepository,
-    IUserRepository userRepository) : IRequestHandler<CompleteRegistrationCommand, Result>
+    IUserRepository userRepository,
+    IPasswordHasher passwordHasher,
+    IOutboxWriter outboxWriter,
+    IUnitOfWork unitOfWork,
+    IClock clock) : IRequestHandler<CompleteRegistrationCommand, Result>
 {
     public async Task<Result> Handle(CompleteRegistrationCommand request, CancellationToken cancellationToken)
     {
@@ -24,11 +31,35 @@ public class CompleteRegistrationHandler(
             return Result.Failure(Error.NotFound("User not found"));
         }
 
-        user.UpdateProfile(request.FirstName, request.LastName, request.Phone, request.DateOfBirth);
-        token.MarkAsUsed();
+        var passwordHash = passwordHasher.HashPassword(request.Password);
+        var shouldVerifyEmail = !user.EmailVerified;
 
-        await userRepository.UpdateAsync(user, cancellationToken);
-        await tokenRepository.UpdateAsync(token, cancellationToken);
+        await unitOfWork.ExecuteInTransactionAsync(async ct =>
+        {
+            user.UpdatePassword(passwordHash);
+            user.UpdateProfile(request.FirstName, request.LastName, request.Phone, request.DateOfBirth);
+
+            if (shouldVerifyEmail)
+            {
+                user.MarkEmailAsVerified();
+            }
+
+            token.MarkAsUsed();
+
+            await userRepository.UpdateAsync(user, ct);
+            await tokenRepository.UpdateAsync(token, ct);
+
+            if (shouldVerifyEmail)
+            {
+                var integrationEvent = new EmailVerifiedV1
+                {
+                    UserId = user.Id,
+                    OccurredAt = clock.UtcNow
+                };
+
+                await outboxWriter.WriteAsync(integrationEvent, EventTypes.EmailVerified, ct);
+            }
+        }, cancellationToken);
 
         return Result.Success();
     }

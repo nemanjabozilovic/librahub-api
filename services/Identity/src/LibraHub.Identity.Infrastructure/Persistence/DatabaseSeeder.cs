@@ -35,7 +35,9 @@ public class DatabaseSeeder(
             email: defaultAdminEmail,
             passwordHash: passwordHash,
             firstName: "Admin",
-            lastName: "User");
+            lastName: "User",
+            phone: null,
+            dateOfBirth: new DateTime(1990, 1, 1, 0, 0, 0, DateTimeKind.Utc));
 
         adminUser.MarkEmailAsVerified();
         adminUser.AddRole(Role.Admin);

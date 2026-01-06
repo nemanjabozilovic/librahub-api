@@ -2,6 +2,7 @@
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RootDir = Split-Path -Parent (Split-Path -Parent $ScriptDir)
+$OriginalLocation = Get-Location
 
 Write-Host "Initializing LibraHub local development environment..." -ForegroundColor Green
 
@@ -98,3 +99,4 @@ Write-Host "  docker-compose logs -f [service-name]" -ForegroundColor White
 Write-Host "`nTo stop all services, run:" -ForegroundColor Cyan
 Write-Host '  .\infra\scripts\stop-local.ps1' -ForegroundColor White
 
+Set-Location $OriginalLocation
