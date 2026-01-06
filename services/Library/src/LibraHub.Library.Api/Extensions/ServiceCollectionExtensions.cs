@@ -7,6 +7,7 @@ using LibraHub.BuildingBlocks.Messaging;
 using LibraHub.BuildingBlocks.Outbox;
 using LibraHub.Library.Application;
 using LibraHub.Library.Application.Abstractions;
+using LibraHub.Library.Infrastructure.Clients;
 using LibraHub.Library.Infrastructure.Idempotency;
 using LibraHub.Library.Infrastructure.Options;
 using LibraHub.Library.Infrastructure.Persistence;
@@ -56,6 +57,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<Application.Consumers.BookRemovedConsumer>();
 
         services.AddOptions<LibraryOptions>().Bind(configuration.GetSection(LibraryOptions.SectionName)).ValidateDataAnnotations().ValidateOnStart();
+
+        services.AddMemoryCache();
+        services.AddHttpClient<Application.Abstractions.IIdentityClient, IdentityClient>();
 
         services.AddRedisCache(configuration);
 

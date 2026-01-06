@@ -14,6 +14,10 @@ public interface IOrderRepository
 
     Task<int> CountAllAsync(CancellationToken cancellationToken = default);
 
+    Task<List<Order>> GetAllAsync(int skip, int take, DateTime? fromDate, CancellationToken cancellationToken = default);
+
+    Task<int> CountAllAsync(DateTime? fromDate, CancellationToken cancellationToken = default);
+
     Task<OrderStatisticsResult> GetStatisticsAsync(DateTime last30Days, DateTime last7Days, DateTime now, CancellationToken cancellationToken = default);
 
     Task AddAsync(Order order, CancellationToken cancellationToken = default);

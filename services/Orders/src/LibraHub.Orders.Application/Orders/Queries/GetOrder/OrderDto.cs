@@ -4,6 +4,8 @@ public class OrderDto
 {
     public Guid Id { get; init; }
     public Guid UserId { get; init; }
+    public string? UserDisplayName { get; init; }
+    public string? UserEmail { get; init; }
     public string Status { get; init; } = string.Empty;
     public decimal Subtotal { get; init; }
     public decimal VatTotal { get; init; }

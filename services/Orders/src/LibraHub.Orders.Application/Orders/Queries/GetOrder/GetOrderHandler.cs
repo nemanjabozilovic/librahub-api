@@ -2,6 +2,7 @@ using LibraHub.BuildingBlocks.Abstractions;
 using LibraHub.BuildingBlocks.Results;
 using LibraHub.Orders.Application.Abstractions;
 using LibraHub.Orders.Domain.Errors;
+using LibraHub.Orders.Domain.Orders;
 using MediatR;
 using Error = LibraHub.BuildingBlocks.Results.Error;
 
@@ -10,30 +11,48 @@ namespace LibraHub.Orders.Application.Orders.Queries.GetOrder;
 public class GetOrderHandler(
     IOrderRepository orderRepository,
     IPaymentRepository paymentRepository,
+    IIdentityClient identityClient,
     ICurrentUser currentUser) : IRequestHandler<GetOrderQuery, Result<OrderDto>>
 {
     public async Task<Result<OrderDto>> Handle(GetOrderQuery request, CancellationToken cancellationToken)
     {
-        var userIdResult = currentUser.RequireUserId(OrdersErrors.User.NotAuthenticated);
-        if (userIdResult.IsFailure)
+        if (!currentUser.IsAuthenticated)
         {
-            return Result.Failure<OrderDto>(userIdResult.Error!);
+            return Result.Failure<OrderDto>(Error.Unauthorized(OrdersErrors.User.NotAuthenticated));
         }
 
-        var userId = userIdResult.Value;
+        Order? order;
 
-        var order = await orderRepository.GetByIdAndUserIdAsync(request.OrderId, userId, cancellationToken);
+        if (currentUser.IsInRole("Admin"))
+        {
+            order = await orderRepository.GetByIdAsync(request.OrderId, cancellationToken);
+        }
+        else
+        {
+            var userIdResult = currentUser.RequireUserId(OrdersErrors.User.NotAuthenticated);
+            if (userIdResult.IsFailure)
+            {
+                return Result.Failure<OrderDto>(userIdResult.Error!);
+            }
+
+            var userId = userIdResult.Value;
+            order = await orderRepository.GetByIdAndUserIdAsync(request.OrderId, userId, cancellationToken);
+        }
+
         if (order == null)
         {
             return Result.Failure<OrderDto>(Error.NotFound(OrdersErrors.Order.NotFound));
         }
 
         var payment = await paymentRepository.GetByOrderIdAsync(order.Id, cancellationToken);
+        var userInfo = await identityClient.GetUserInfoAsync(order.UserId, cancellationToken);
 
         var dto = new OrderDto
         {
             Id = order.Id,
             UserId = order.UserId,
+            UserDisplayName = userInfo?.DisplayName,
+            UserEmail = userInfo?.Email,
             Status = order.Status.ToString(),
             Subtotal = order.Subtotal.Amount,
             VatTotal = order.VatTotal.Amount,

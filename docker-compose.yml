@@ -13,7 +13,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U librahub_admin"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -85,13 +85,30 @@ services:
     networks:
       - librahub-network
 
+  minio:
+    image: minio/minio:latest
+    container_name: librahub-minio
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - librahub-network
+
 volumes:
   postgres_data:
   rabbitmq_data:
   redis_data:
   pgadmin_data:
+  minio_data:
 
 networks:
   librahub-network:
+    name: librahub-network
     driver: bridge
 

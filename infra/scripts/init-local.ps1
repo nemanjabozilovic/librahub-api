@@ -16,7 +16,7 @@ try {
 }
 
 # Start infrastructure services
-Write-Host "`nStarting infrastructure services (PostgreSQL, RabbitMQ, Redis, pgAdmin)..." -ForegroundColor Yellow
+Write-Host "`nStarting infrastructure services (PostgreSQL, RabbitMQ, Redis, pgAdmin, MinIO, Papercut SMTP)..." -ForegroundColor Yellow
 Set-Location $RootDir
 docker-compose up -d
 
@@ -25,7 +25,7 @@ Start-Sleep -Seconds 15
 
 # Check service health
 Write-Host "`nChecking infrastructure service health..." -ForegroundColor Yellow
-$postgresHealthy = docker exec librahub-postgres pg_isready -U postgres 2>&1
+$postgresHealthy = docker exec librahub-postgres pg_isready -U librahub_admin 2>&1
 if ($LASTEXITCODE -eq 0) {
     Write-Host "PostgreSQL is ready" -ForegroundColor Green
 } else {
@@ -37,6 +37,13 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "RabbitMQ is ready" -ForegroundColor Green
 } else {
     Write-Host "RabbitMQ is not ready yet" -ForegroundColor Yellow
+}
+
+$redisHealthy = docker exec librahub-redis redis-cli ping 2>&1
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "Redis is ready" -ForegroundColor Green
+} else {
+    Write-Host "Redis is not ready yet" -ForegroundColor Yellow
 }
 
 # Start all service APIs
@@ -75,6 +82,9 @@ Write-Host "  - PostgreSQL: localhost:5432" -ForegroundColor White
 Write-Host '  - RabbitMQ Management: http://localhost:15672 (librahub_mq/R@bb1tMQ_L1br@Hub_2026!S3cur3_P@ss)' -ForegroundColor White
 Write-Host "  - Redis: localhost:6379" -ForegroundColor White
 Write-Host "  - pgAdmin: http://localhost:5050 (admin@librahub.com/admin)" -ForegroundColor White
+Write-Host "  - MinIO Console: http://localhost:9001 (minioadmin/minioadmin)" -ForegroundColor White
+Write-Host "  - MinIO API: http://localhost:9000" -ForegroundColor White
+Write-Host "  - Papercut SMTP: http://localhost:8082" -ForegroundColor White
 Write-Host "`nAPI Services:" -ForegroundColor Cyan
 Write-Host "  - Gateway: http://localhost:5000" -ForegroundColor White
 Write-Host "  - Identity: http://localhost:60950" -ForegroundColor White

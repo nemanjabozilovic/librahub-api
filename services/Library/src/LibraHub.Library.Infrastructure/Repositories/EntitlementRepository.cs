@@ -63,6 +63,88 @@ public class EntitlementRepository : IEntitlementRepository
         return await _context.Entitlements.CountAsync(cancellationToken);
     }
 
+    public async Task<List<Entitlement>> GetAllAsync(
+        int skip,
+        int take,
+        Guid? userId = null,
+        Guid? bookId = null,
+        EntitlementStatus? status = null,
+        EntitlementSource? source = null,
+        DateTime? fromDate = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _context.Entitlements.AsQueryable();
+
+        if (userId.HasValue)
+        {
+            query = query.Where(e => e.UserId == userId.Value);
+        }
+
+        if (bookId.HasValue)
+        {
+            query = query.Where(e => e.BookId == bookId.Value);
+        }
+
+        if (status.HasValue)
+        {
+            query = query.Where(e => e.Status == status.Value);
+        }
+
+        if (source.HasValue)
+        {
+            query = query.Where(e => e.Source == source.Value);
+        }
+
+        if (fromDate.HasValue)
+        {
+            query = query.Where(e => e.AcquiredAt >= fromDate.Value);
+        }
+
+        return await query
+            .OrderByDescending(e => e.AcquiredAt)
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<int> CountAllAsync(
+        Guid? userId = null,
+        Guid? bookId = null,
+        EntitlementStatus? status = null,
+        EntitlementSource? source = null,
+        DateTime? fromDate = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _context.Entitlements.AsQueryable();
+
+        if (userId.HasValue)
+        {
+            query = query.Where(e => e.UserId == userId.Value);
+        }
+
+        if (bookId.HasValue)
+        {
+            query = query.Where(e => e.BookId == bookId.Value);
+        }
+
+        if (status.HasValue)
+        {
+            query = query.Where(e => e.Status == status.Value);
+        }
+
+        if (source.HasValue)
+        {
+            query = query.Where(e => e.Source == source.Value);
+        }
+
+        if (fromDate.HasValue)
+        {
+            query = query.Where(e => e.AcquiredAt >= fromDate.Value);
+        }
+
+        return await query.CountAsync(cancellationToken);
+    }
+
     public async Task<EntitlementStatisticsResult> GetStatisticsAsync(DateTime last30Days, CancellationToken cancellationToken = default)
     {
         var total = await _context.Entitlements.CountAsync(cancellationToken);

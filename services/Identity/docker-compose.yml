@@ -9,12 +9,12 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__IdentityDb=Host=postgres;Port=5432;Database=librahub_identity;Username=librahub_admin;Password=L1br@Hub_DB_2026!S3cur3_P@ss
-      - ConnectionStrings__RabbitMQ=amqp://librahub_mq:R%40bb1tMQ_L1br%40Hub_2026%21S3cur3_P%40ss@rabbitmq:5672/
-      - ConnectionStrings__Redis=redis:6379
-      - EmailConfig__Host=localhost
-      - Storage__Endpoint=minio:9000
-      - Storage__ApiBaseUrl=http://identity-api:8081
+      - ConnectionStrings__IdentityDb=Host=librahub-postgres;Port=5432;Database=librahub_identity;Username=librahub_admin;Password=L1br@Hub_DB_2026!S3cur3_P@ss
+      - ConnectionStrings__RabbitMQ=amqp://librahub_mq:R%40bb1tMQ_L1br%40Hub_2026%21S3cur3_P%40ss@librahub-rabbitmq:5672/
+      - ConnectionStrings__Redis=librahub-redis:6379
+      - EmailConfig__Host=papercut-smtp
+      - Storage__Endpoint=librahub-minio:9000
+      - Storage__ApiBaseUrl=http://librahub-identity-api:8081
     ports:
       - "60950:8080"
       - "60951:8081"
@@ -25,5 +25,5 @@ services:
 networks:
   librahub-network:
     external: true
-    name: librahub_librahub-network
+    name: librahub-network
 

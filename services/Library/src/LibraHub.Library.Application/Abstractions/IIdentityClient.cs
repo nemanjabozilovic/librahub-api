@@ -1,4 +1,4 @@
-namespace LibraHub.Orders.Application.Abstractions;
+namespace LibraHub.Library.Application.Abstractions;
 
 public interface IIdentityClient
 {

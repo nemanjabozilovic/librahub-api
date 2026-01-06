@@ -18,6 +18,24 @@ public interface IEntitlementRepository
 
     Task<int> CountAllAsync(CancellationToken cancellationToken = default);
 
+    Task<List<Entitlement>> GetAllAsync(
+        int skip,
+        int take,
+        Guid? userId = null,
+        Guid? bookId = null,
+        EntitlementStatus? status = null,
+        EntitlementSource? source = null,
+        DateTime? fromDate = null,
+        CancellationToken cancellationToken = default);
+
+    Task<int> CountAllAsync(
+        Guid? userId = null,
+        Guid? bookId = null,
+        EntitlementStatus? status = null,
+        EntitlementSource? source = null,
+        DateTime? fromDate = null,
+        CancellationToken cancellationToken = default);
+
     Task<EntitlementStatisticsResult> GetStatisticsAsync(DateTime last30Days, CancellationToken cancellationToken = default);
 
     Task<bool> HasAccessAsync(Guid userId, Guid bookId, CancellationToken cancellationToken = default);

@@ -1,6 +1,7 @@
 using LibraHub.BuildingBlocks.Results;
 using LibraHub.Orders.Api.Dtos.Refunds;
 using LibraHub.Orders.Application.Orders.Commands.RefundOrder;
+using LibraHub.Orders.Application.Orders.Queries.GetAllOrders;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +14,27 @@ namespace LibraHub.Orders.Api.Controllers;
 [Authorize(Roles = "Admin")]
 public class AdminOrdersController(IMediator mediator) : ControllerBase
 {
+    [HttpGet]
+    [ProducesResponseType(typeof(GetAllOrdersResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> GetAllOrders(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] string? period = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetAllOrdersQuery
+        {
+            Page = page,
+            PageSize = pageSize,
+            Period = period
+        };
+
+        var result = await mediator.Send(query, cancellationToken);
+        return result.ToActionResult(this);
+    }
+
     [HttpPost("{orderId}/refund")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
@@ -34,4 +56,3 @@ public class AdminOrdersController(IMediator mediator) : ControllerBase
         return result.ToActionResult(this);
     }
 }
-

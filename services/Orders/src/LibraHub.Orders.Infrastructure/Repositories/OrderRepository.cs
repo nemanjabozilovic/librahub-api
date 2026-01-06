@@ -50,6 +50,36 @@ public class OrderRepository : IOrderRepository
         return await _context.Orders.CountAsync(cancellationToken);
     }
 
+    public async Task<List<Order>> GetAllAsync(int skip, int take, DateTime? fromDate, CancellationToken cancellationToken = default)
+    {
+        var query = _context.Orders
+            .Include(o => o.Items)
+            .AsQueryable();
+
+        if (fromDate.HasValue)
+        {
+            query = query.Where(o => o.CreatedAt >= fromDate.Value);
+        }
+
+        return await query
+            .OrderByDescending(o => o.CreatedAt)
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<int> CountAllAsync(DateTime? fromDate, CancellationToken cancellationToken = default)
+    {
+        var query = _context.Orders.AsQueryable();
+
+        if (fromDate.HasValue)
+        {
+            query = query.Where(o => o.CreatedAt >= fromDate.Value);
+        }
+
+        return await query.CountAsync(cancellationToken);
+    }
+
     public async Task<OrderStatisticsResult> GetStatisticsAsync(DateTime last30Days, DateTime last7Days, DateTime now, CancellationToken cancellationToken = default)
     {
         var total = await _context.Orders.CountAsync(cancellationToken);

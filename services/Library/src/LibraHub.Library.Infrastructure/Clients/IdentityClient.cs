@@ -1,22 +1,22 @@
-using LibraHub.Orders.Application.Abstractions;
-using LibraHub.Orders.Infrastructure.Options;
+using LibraHub.Library.Application.Abstractions;
+using LibraHub.Library.Infrastructure.Options;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 
-namespace LibraHub.Orders.Infrastructure.Clients;
+namespace LibraHub.Library.Infrastructure.Clients;
 
 public class IdentityClient : IIdentityClient
 {
     private readonly HttpClient _httpClient;
-    private readonly OrdersOptions _options;
+    private readonly LibraryOptions _options;
     private readonly IMemoryCache _cache;
     private readonly JsonSerializerOptions _jsonOptions;
     private static readonly TimeSpan CacheExpiration = TimeSpan.FromMinutes(5);
 
     public IdentityClient(
         HttpClient httpClient,
-        IOptions<OrdersOptions> options,
+        IOptions<LibraryOptions> options,
         IMemoryCache cache)
     {
         _httpClient = httpClient;

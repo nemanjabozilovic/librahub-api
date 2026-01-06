@@ -9,13 +9,13 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__OrdersDb=Host=postgres;Port=5432;Database=librahub_orders;Username=librahub_admin;Password=L1br@Hub_DB_2026!S3cur3_P@ss
-      - ConnectionStrings__RabbitMQ=amqp://librahub_mq:R%40bb1tMQ_L1br%40Hub_2026%21S3cur3_P%40ss@rabbitmq:5672/
-      - ConnectionStrings__Redis=redis:6379
-      - Orders__CatalogApiUrl=http://catalog-api:8080
-      - Orders__LibraryApiUrl=http://library-api:8080
-      - Orders__IdentityApiUrl=http://identity-api:8080
-      - EmailConfig__Host=localhost
+      - ConnectionStrings__OrdersDb=Host=librahub-postgres;Port=5432;Database=librahub_orders;Username=librahub_admin;Password=L1br@Hub_DB_2026!S3cur3_P@ss
+      - ConnectionStrings__RabbitMQ=amqp://librahub_mq:R%40bb1tMQ_L1br%40Hub_2026%21S3cur3_P%40ss@librahub-rabbitmq:5672/
+      - ConnectionStrings__Redis=librahub-redis:6379
+      - Orders__CatalogApiUrl=http://librahub-catalog-api:8080
+      - Orders__LibraryApiUrl=http://librahub-library-api:8080
+      - Orders__IdentityApiUrl=http://librahub-identity-api:8080
+      - EmailConfig__Host=papercut-smtp
     ports:
       - "60980:8080"
       - "60981:8081"
@@ -26,5 +26,5 @@ services:
 networks:
   librahub-network:
     external: true
-    name: librahub_librahub-network
+    name: librahub-network
 

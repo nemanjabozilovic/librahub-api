@@ -2,6 +2,7 @@ using LibraHub.BuildingBlocks.Results;
 using LibraHub.Library.Api.Dtos.Entitlements;
 using LibraHub.Library.Application.Entitlements.Commands.AdminGrantEntitlement;
 using LibraHub.Library.Application.Entitlements.Commands.RevokeEntitlement;
+using LibraHub.Library.Application.Entitlements.Queries.GetAllEntitlements;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +14,35 @@ namespace LibraHub.Library.Api.Controllers;
 [Authorize(Roles = "Admin")]
 public class AdminEntitlementsController(IMediator mediator) : ControllerBase
 {
+    [HttpGet]
+    [ProducesResponseType(typeof(GetAllEntitlementsResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> GetAllEntitlements(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] Guid? userId = null,
+        [FromQuery] Guid? bookId = null,
+        [FromQuery] string? status = null,
+        [FromQuery] string? source = null,
+        [FromQuery] string? period = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetAllEntitlementsQuery
+        {
+            Page = page,
+            PageSize = pageSize,
+            UserId = userId,
+            BookId = bookId,
+            Status = status,
+            Source = source,
+            Period = period
+        };
+
+        var result = await mediator.Send(query, cancellationToken);
+        return result.ToActionResult(this);
+    }
+
     [HttpPost("grant")]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]

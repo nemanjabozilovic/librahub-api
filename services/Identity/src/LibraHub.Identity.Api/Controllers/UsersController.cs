@@ -6,7 +6,9 @@ using LibraHub.Identity.Application.Users.Commands.CompleteRegistration;
 using LibraHub.Identity.Application.Users.Commands.CreateUser;
 using LibraHub.Identity.Application.Users.Commands.UpdateUser;
 using LibraHub.Identity.Application.Users.Commands.UploadAvatar;
+using LibraHub.Identity.Application.Users.Queries.GetUser;
 using LibraHub.Identity.Application.Users.Queries.GetUsers;
+using LibraHub.Identity.Application.Users.Queries.GetUsersByIds;
 using LibraHub.Identity.Domain.Users;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -27,6 +29,30 @@ public class UsersController(IMediator mediator) : ControllerBase
         CancellationToken cancellationToken = default)
     {
         var query = new GetUsersQuery(skip, take);
+        var result = await mediator.Send(query, cancellationToken);
+        return result.ToActionResult(this);
+    }
+
+    [HttpGet("{id}/info")]
+    [ProducesResponseType(typeof(GetUserResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetUserInfo(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetUserQuery(id);
+        var result = await mediator.Send(query, cancellationToken);
+        return result.ToActionResult(this);
+    }
+
+    [HttpPost("by-ids")]
+    [ProducesResponseType(typeof(GetUsersByIdsResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetUsersByIds(
+        [FromBody] GetUsersByIdsRequestDto request,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetUsersByIdsQuery(request.UserIds);
         var result = await mediator.Send(query, cancellationToken);
         return result.ToActionResult(this);
     }

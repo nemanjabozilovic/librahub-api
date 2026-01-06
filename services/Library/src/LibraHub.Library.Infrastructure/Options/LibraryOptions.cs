@@ -11,6 +11,9 @@ public class LibraryOptions
 
     [Required(ErrorMessage = "RabbitMq configuration is required")]
     public RabbitMqOptions RabbitMq { get; set; } = null!;
+
+    [Required(ErrorMessage = "IdentityApiUrl is required")]
+    public string IdentityApiUrl { get; set; } = string.Empty;
 }
 
 public class RabbitMqOptions
