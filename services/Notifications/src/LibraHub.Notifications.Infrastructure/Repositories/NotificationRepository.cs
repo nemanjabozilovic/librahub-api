@@ -59,4 +59,3 @@ public class NotificationRepository : INotificationRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 }
-

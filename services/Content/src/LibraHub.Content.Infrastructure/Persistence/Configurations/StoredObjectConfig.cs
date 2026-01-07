@@ -29,13 +29,13 @@ public class StoredObjectConfig : IEntityTypeConfiguration<StoredObject>
         builder.Property(x => x.SizeBytes)
             .IsRequired();
 
-        builder.OwnsOne(x => x.Checksum, checksum =>
-        {
-            checksum.Property(c => c.Value)
-                .HasColumnName("Checksum")
-                .IsRequired()
-                .HasMaxLength(64);
-        });
+        builder.Property(x => x.Checksum)
+            .HasConversion(
+                v => v.Value,
+                v => new Sha256(v))
+            .HasColumnName("Checksum")
+            .IsRequired()
+            .HasMaxLength(64);
 
         builder.Property(x => x.Status)
             .IsRequired()
@@ -53,4 +53,3 @@ public class StoredObjectConfig : IEntityTypeConfiguration<StoredObject>
         builder.HasIndex(x => new { x.BookId, x.ObjectKey });
     }
 }
-

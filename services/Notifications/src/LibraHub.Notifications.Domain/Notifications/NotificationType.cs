@@ -8,4 +8,3 @@ public enum NotificationType
     OrderRefunded = 4,
     EntitlementGranted = 5
 }
-

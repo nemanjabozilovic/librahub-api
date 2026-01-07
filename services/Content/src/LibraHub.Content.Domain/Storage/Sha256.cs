@@ -44,4 +44,3 @@ public class Sha256
 
     public override int GetHashCode() => Value.GetHashCode();
 }
-

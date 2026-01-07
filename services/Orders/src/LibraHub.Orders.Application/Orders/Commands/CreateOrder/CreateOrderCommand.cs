@@ -6,4 +6,3 @@ public class CreateOrderCommand : IRequest<LibraHub.BuildingBlocks.Results.Resul
 {
     public List<Guid> BookIds { get; init; } = new();
 }
-

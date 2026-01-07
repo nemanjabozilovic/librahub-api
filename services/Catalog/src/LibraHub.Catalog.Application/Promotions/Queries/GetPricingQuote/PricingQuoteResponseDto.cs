@@ -11,6 +11,7 @@ public record PricingQuoteItemDto
     public Guid BookId { get; init; }
     public decimal BasePrice { get; init; }
     public decimal FinalPrice { get; init; }
+    public decimal VatRate { get; init; }
     public AppliedPromotionDto? AppliedPromotion { get; init; }
 }
 

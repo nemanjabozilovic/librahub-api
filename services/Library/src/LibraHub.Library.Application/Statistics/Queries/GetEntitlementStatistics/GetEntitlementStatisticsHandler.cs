@@ -27,4 +27,3 @@ public class GetEntitlementStatisticsHandler(
         return Result.Success(response);
     }
 }
-

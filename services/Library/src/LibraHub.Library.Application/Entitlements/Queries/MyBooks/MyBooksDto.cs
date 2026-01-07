@@ -12,6 +12,5 @@ public class BookDto
     public string Title { get; init; } = string.Empty;
     public string Authors { get; init; } = string.Empty;
     public string? CoverRef { get; init; }
-    public DateTime AcquiredAt { get; init; }
+    public DateTimeOffset AcquiredAt { get; init; }
 }
-

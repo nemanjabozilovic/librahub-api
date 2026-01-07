@@ -53,4 +53,3 @@ public class NotificationConfig : IEntityTypeConfiguration<Notification>
         builder.HasIndex(x => new { x.UserId, x.Status });
     }
 }
-

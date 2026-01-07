@@ -49,4 +49,3 @@ public class NotificationPreferencesRepository : INotificationPreferencesReposit
         await _context.SaveChangesAsync(cancellationToken);
     }
 }
-

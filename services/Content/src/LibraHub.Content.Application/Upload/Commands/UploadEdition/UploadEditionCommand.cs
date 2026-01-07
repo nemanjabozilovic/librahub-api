@@ -7,6 +7,4 @@ namespace LibraHub.Content.Application.Upload.Commands.UploadEdition;
 public record UploadEditionCommand(
     Guid BookId,
     IFormFile File,
-    string Format,
-    int? Version = null) : IRequest<Result<Guid>>;
-
+    string Format) : IRequest<Result<Guid>>;

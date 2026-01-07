@@ -9,7 +9,7 @@ public class Cover
     public bool IsBlocked { get; private set; }
     public DateTime? BlockedAt { get; private set; }
 
-    private Cover()
+    protected Cover()
     { } // For EF Core
 
     public Cover(
@@ -37,4 +37,3 @@ public class Cover
 
     public bool IsAccessible => !IsBlocked;
 }
-

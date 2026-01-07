@@ -11,7 +11,6 @@ public record GetUserResponseDto
     public bool EmailVerified { get; init; }
     public bool IsActive { get; init; }
     public string Status { get; init; } = string.Empty;
-    public DateTime CreatedAt { get; init; }
-    public DateTime? LastLoginAt { get; init; }
+    public DateTimeOffset CreatedAt { get; init; }
+    public DateTimeOffset? LastLoginAt { get; init; }
 }
-

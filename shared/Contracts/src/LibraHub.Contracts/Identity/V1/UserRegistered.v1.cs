@@ -4,5 +4,5 @@ public record UserRegisteredV1
 {
     public Guid UserId { get; init; }
     public string Email { get; init; } = string.Empty;
-    public DateTime OccurredAt { get; init; }
+    public DateTimeOffset OccurredAt { get; init; }
 }

@@ -34,4 +34,3 @@ public class BookUpdatedConsumer(
         logger.LogInformation("Updated book snapshot for BookId: {BookId}", @event.BookId);
     }
 }
-

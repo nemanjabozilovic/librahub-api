@@ -8,4 +8,3 @@ public interface IRegistrationCompletionTokenService
 
     int GetExpirationHours();
 }
-

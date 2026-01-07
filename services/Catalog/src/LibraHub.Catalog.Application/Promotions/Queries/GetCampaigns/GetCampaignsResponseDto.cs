@@ -15,9 +15,9 @@ public record CampaignSummaryDto
     public string Name { get; init; } = string.Empty;
     public string? Description { get; init; }
     public string Status { get; init; } = string.Empty;
-    public DateTime StartsAtUtc { get; init; }
-    public DateTime EndsAtUtc { get; init; }
+    public DateTimeOffset StartsAtUtc { get; init; }
+    public DateTimeOffset EndsAtUtc { get; init; }
     public string StackingPolicy { get; init; } = string.Empty;
     public int Priority { get; init; }
-    public DateTime CreatedAt { get; init; }
+    public DateTimeOffset CreatedAt { get; init; }
 }

@@ -94,4 +94,3 @@ public class OrderConfig : IEntityTypeConfiguration<Order>
         builder.HasIndex(x => new { x.UserId, x.Status });
     }
 }
-

@@ -4,4 +4,3 @@ public class RevokeEntitlementRequestDto
 {
     public string? Reason { get; init; }
 }
-

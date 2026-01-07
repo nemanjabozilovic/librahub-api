@@ -25,7 +25,11 @@ public class ExceptionHandlingMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unhandled exception occurred");
+            _logger.LogError(ex,
+                "An unhandled exception occurred. RequestPath: {RequestPath}, Method: {Method}, StatusCode: {StatusCode}",
+                context.Request.Path,
+                context.Request.Method,
+                context.Response.StatusCode);
             await HandleExceptionAsync(context, ex);
         }
     }

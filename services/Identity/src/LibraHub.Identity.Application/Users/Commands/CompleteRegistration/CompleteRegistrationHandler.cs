@@ -37,7 +37,7 @@ public class CompleteRegistrationHandler(
         await unitOfWork.ExecuteInTransactionAsync(async ct =>
         {
             user.UpdatePassword(passwordHash);
-            user.UpdateProfile(request.FirstName, request.LastName, request.Phone, request.DateOfBirth);
+            user.UpdateProfile(request.FirstName, request.LastName, request.Phone, request.DateOfBirth.UtcDateTime);
 
             if (shouldVerifyEmail)
             {
@@ -54,7 +54,7 @@ public class CompleteRegistrationHandler(
                 var integrationEvent = new EmailVerifiedV1
                 {
                     UserId = user.Id,
-                    OccurredAt = clock.UtcNow
+                    OccurredAt = clock.UtcNowOffset
                 };
 
                 await outboxWriter.WriteAsync(integrationEvent, EventTypes.EmailVerified, ct);
@@ -64,4 +64,3 @@ public class CompleteRegistrationHandler(
         return Result.Success();
     }
 }
-

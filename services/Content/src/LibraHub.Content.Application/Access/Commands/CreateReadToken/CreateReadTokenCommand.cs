@@ -7,4 +7,3 @@ public record CreateReadTokenCommand(
     Guid BookId,
     string? Format = null,
     int? Version = null) : IRequest<Result<string>>;
-

@@ -33,4 +33,3 @@ public class RabbitMqOptions
     [Required(ErrorMessage = "RabbitMq ExchangeName is required")]
     public string ExchangeName { get; set; } = string.Empty;
 }
-

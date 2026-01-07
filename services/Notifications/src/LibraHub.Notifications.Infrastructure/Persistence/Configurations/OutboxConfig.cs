@@ -40,4 +40,3 @@ public class OutboxConfig : IEntityTypeConfiguration<OutboxMessage>
         builder.HasIndex(x => x.CreatedAt);
     }
 }
-

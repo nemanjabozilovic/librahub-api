@@ -35,4 +35,3 @@ public class HealthController : ControllerBase
             : StatusCode(503, health);
     }
 }
-

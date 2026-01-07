@@ -1,4 +1,5 @@
 using LibraHub.BuildingBlocks.Abstractions;
+using LibraHub.BuildingBlocks.Caching;
 using LibraHub.BuildingBlocks.Results;
 using LibraHub.Catalog.Application.Abstractions;
 using LibraHub.Catalog.Domain.Errors;
@@ -9,7 +10,8 @@ namespace LibraHub.Catalog.Application.Books.Commands.UnlistBook;
 
 public class UnlistBookHandler(
     IBookRepository bookRepository,
-    IOutboxWriter outboxWriter) : IRequestHandler<UnlistBookCommand, Result>
+    IOutboxWriter outboxWriter,
+    ICache cache) : IRequestHandler<UnlistBookCommand, Result>
 {
     public async Task<Result> Handle(UnlistBookCommand request, CancellationToken cancellationToken)
     {
@@ -35,10 +37,12 @@ public class UnlistBookHandler(
             {
                 BookId = book.Id,
                 Title = book.Title,
-                UnlistedAt = book.UpdatedAt
+                UnlistedAt = new DateTimeOffset(book.UpdatedAt, TimeSpan.Zero)
             },
             Contracts.Common.EventTypes.BookUnlisted,
             cancellationToken);
+
+        await CacheInvalidationHelper.InvalidateBookCacheAsync(cache, book.Id, cancellationToken);
 
         return Result.Success();
     }

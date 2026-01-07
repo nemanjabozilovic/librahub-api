@@ -12,7 +12,7 @@ public class Entitlement
     public string? RevocationReason { get; private set; }
     public Guid? OrderId { get; private set; }
 
-    private Entitlement()
+    protected Entitlement()
     {
     } // For EF Core
 
@@ -65,4 +65,3 @@ public class Entitlement
 
     public bool IsActive => Status == EntitlementStatus.Active;
 }
-

@@ -20,4 +20,3 @@ public record UpdateUserRequestDto
 
     public bool? EmailVerified { get; init; }
 }
-

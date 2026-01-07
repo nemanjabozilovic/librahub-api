@@ -13,5 +13,6 @@ public interface IStoredObjectRepository
     Task AddAsync(StoredObject storedObject, CancellationToken cancellationToken = default);
 
     Task UpdateAsync(StoredObject storedObject, CancellationToken cancellationToken = default);
-}
 
+    Task DeleteAsync(StoredObject storedObject, CancellationToken cancellationToken = default);
+}

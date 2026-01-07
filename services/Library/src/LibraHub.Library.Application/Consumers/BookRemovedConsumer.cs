@@ -26,4 +26,3 @@ public class BookRemovedConsumer(
         logger.LogInformation("Marked book snapshot as removed for BookId: {BookId}", @event.BookId);
     }
 }
-

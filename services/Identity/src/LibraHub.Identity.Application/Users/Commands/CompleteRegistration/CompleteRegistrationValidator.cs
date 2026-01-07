@@ -34,7 +34,6 @@ public class CompleteRegistrationValidator : AbstractValidator<CompleteRegistrat
 
         RuleFor(x => x.DateOfBirth)
             .NotEmpty().WithMessage("Date of birth is required")
-            .LessThan(DateTime.UtcNow).WithMessage("Date of birth must be in the past");
+            .LessThan(DateTimeOffset.UtcNow).WithMessage("Date of birth must be in the past");
     }
 }
-

@@ -7,4 +7,3 @@ public class MyBooksQuery : IRequest<LibraHub.BuildingBlocks.Results.Result<MyBo
     public int Skip { get; init; } = 0;
     public int Take { get; init; } = 20;
 }
-

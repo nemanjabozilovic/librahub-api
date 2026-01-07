@@ -12,4 +12,3 @@ public interface ILibraryOwnershipClient
         List<Guid> bookIds,
         CancellationToken cancellationToken = default);
 }
-

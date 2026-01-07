@@ -6,6 +6,6 @@ public record SetPricingRequestDto
     public string Currency { get; init; } = BuildingBlocks.Constants.Currency.USD;
     public decimal? VatRate { get; init; }
     public decimal? PromoPrice { get; init; }
-    public DateTime? PromoStartDate { get; init; }
-    public DateTime? PromoEndDate { get; init; }
+    public DateTimeOffset? PromoStartDate { get; init; }
+    public DateTimeOffset? PromoEndDate { get; init; }
 }

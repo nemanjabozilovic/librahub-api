@@ -16,7 +16,7 @@ public class PromotionCampaign
     private readonly List<PromotionRule> _rules = new();
     public virtual IReadOnlyCollection<PromotionRule> Rules => _rules.AsReadOnly();
 
-    private PromotionCampaign()
+    protected PromotionCampaign()
     { } // For EF Core
 
     public PromotionCampaign(

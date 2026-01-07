@@ -8,7 +8,7 @@ public class BookContentState
     public bool HasEdition { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
-    private BookContentState()
+    protected BookContentState()
     { } // For EF Core
 
     public BookContentState(Guid bookId)

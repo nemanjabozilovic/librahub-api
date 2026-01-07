@@ -18,4 +18,3 @@ public interface INotificationRepository
 
     Task UpdateAsync(Notification notification, CancellationToken cancellationToken = default);
 }
-

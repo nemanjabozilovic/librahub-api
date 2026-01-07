@@ -38,4 +38,3 @@ public static class OrdersErrors
         public const string EmailNotVerified = "User email is not verified";
     }
 }
-

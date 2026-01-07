@@ -67,7 +67,7 @@ public class RefundOrderHandler(
                         RefundId = refund.Id,
                         Reason = request.Reason,
                         RefundedBy = refundedBy,
-                        RefundedAt = clock.UtcNow
+                        RefundedAt = clock.UtcNowOffset
                     },
                     Contracts.Common.EventTypes.OrderRefunded,
                     ct);
@@ -81,4 +81,3 @@ public class RefundOrderHandler(
         }
     }
 }
-

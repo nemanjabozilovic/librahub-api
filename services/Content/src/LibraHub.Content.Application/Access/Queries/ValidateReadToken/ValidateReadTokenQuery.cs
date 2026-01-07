@@ -15,4 +15,3 @@ public record AccessGrantInfo
     public string ContentType { get; init; } = string.Empty;
     public long SizeBytes { get; init; }
 }
-

@@ -9,7 +9,7 @@ public class PromotionAudit
     public DateTime AtUtc { get; private set; }
     public string? MetadataJson { get; private set; }
 
-    private PromotionAudit()
+    protected PromotionAudit()
     { } // For EF Core
 
     public PromotionAudit(

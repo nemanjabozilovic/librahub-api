@@ -15,4 +15,3 @@ public class UserInfo
     public bool IsActive { get; init; }
     public bool IsEmailVerified { get; init; }
 }
-

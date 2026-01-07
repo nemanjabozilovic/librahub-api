@@ -16,7 +16,7 @@ public class AccessGrant
     public bool IsRevoked { get; private set; }
     public DateTime? RevokedAt { get; private set; }
 
-    private AccessGrant()
+    protected AccessGrant()
     { } // For EF Core
 
     public AccessGrant(
@@ -56,5 +56,30 @@ public class AccessGrant
     {
         return !IsRevoked && now >= IssuedAt && now <= ExpiresAt;
     }
-}
 
+    public bool IsNearExpiry(DateTime now, TimeSpan threshold)
+    {
+        if (IsRevoked || now > ExpiresAt)
+        {
+            return false;
+        }
+
+        var timeUntilExpiry = ExpiresAt - now;
+        return timeUntilExpiry <= threshold;
+    }
+
+    public void RefreshExpiry(DateTime newExpiresAt)
+    {
+        if (IsRevoked)
+        {
+            return;
+        }
+
+        if (newExpiresAt <= ExpiresAt)
+        {
+            return;
+        }
+
+        ExpiresAt = newExpiresAt;
+    }
+}

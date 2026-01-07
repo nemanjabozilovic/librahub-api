@@ -9,7 +9,7 @@ public class OrderCreatedV1
     public decimal VatTotal { get; set; }
     public decimal Total { get; set; }
     public string Currency { get; set; } = string.Empty;
-    public DateTime CreatedAt { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
 }
 
 public class OrderItemDto
@@ -24,4 +24,3 @@ public class OrderItemDto
     public string? PromotionName { get; set; }
     public decimal? DiscountAmount { get; set; }
 }
-

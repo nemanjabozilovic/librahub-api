@@ -68,4 +68,3 @@ public class StatisticsCacheHelper
 
     public static string GetDashboardSummaryKey() => "statistics:dashboard:summary";
 }
-

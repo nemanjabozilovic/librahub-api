@@ -7,4 +7,3 @@ public class AdminGrantEntitlementCommand : IRequest<LibraHub.BuildingBlocks.Res
     public Guid UserId { get; init; }
     public Guid BookId { get; init; }
 }
-

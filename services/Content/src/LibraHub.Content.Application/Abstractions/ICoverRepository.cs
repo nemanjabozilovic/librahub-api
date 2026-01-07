@@ -9,5 +9,6 @@ public interface ICoverRepository
     Task AddAsync(Cover cover, CancellationToken cancellationToken = default);
 
     Task UpdateAsync(Cover cover, CancellationToken cancellationToken = default);
-}
 
+    Task DeleteAsync(Cover cover, CancellationToken cancellationToken = default);
+}

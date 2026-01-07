@@ -44,4 +44,3 @@ public interface IEntitlementRepository
 
     Task UpdateAsync(Entitlement entitlement, CancellationToken cancellationToken = default);
 }
-

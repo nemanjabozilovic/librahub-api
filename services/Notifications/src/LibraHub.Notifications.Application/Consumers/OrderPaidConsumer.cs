@@ -125,4 +125,3 @@ public class OrderPaidConsumer(
         logger.LogInformation("OrderPaid notification created for UserId: {UserId}, OrderId: {OrderId}", userId, @event.OrderId);
     }
 }
-

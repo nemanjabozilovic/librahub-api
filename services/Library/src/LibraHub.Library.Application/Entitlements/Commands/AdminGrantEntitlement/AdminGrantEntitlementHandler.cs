@@ -36,7 +36,7 @@ public class AdminGrantEntitlementHandler(
                     UserId = existing.UserId,
                     BookId = existing.BookId,
                     Source = existing.Source.ToString(),
-                    AcquiredAtUtc = existing.AcquiredAt
+                    AcquiredAtUtc = new DateTimeOffset(existing.AcquiredAt, TimeSpan.Zero)
                 },
                 EventTypes.EntitlementGranted,
                 cancellationToken);
@@ -57,7 +57,7 @@ public class AdminGrantEntitlementHandler(
                 UserId = entitlement.UserId,
                 BookId = entitlement.BookId,
                 Source = entitlement.Source.ToString(),
-                AcquiredAtUtc = entitlement.AcquiredAt
+                AcquiredAtUtc = new DateTimeOffset(entitlement.AcquiredAt, TimeSpan.Zero)
             },
             EventTypes.EntitlementGranted,
             cancellationToken);
@@ -65,4 +65,3 @@ public class AdminGrantEntitlementHandler(
         return Result.Success(entitlement.Id);
     }
 }
-

@@ -208,8 +208,7 @@ public class CreateOrderHandler(
             VatTotal = order.VatTotal.Amount,
             Total = order.Total.Amount,
             Currency = order.Currency,
-            CreatedAt = clock.UtcNow
+            CreatedAt = new DateTimeOffset(clock.UtcNow, TimeSpan.Zero)
         };
     }
 }
-

@@ -23,9 +23,9 @@ public class BookRepository : IBookRepository
             .FirstOrDefaultAsync(b => b.Id == id, cancellationToken);
     }
 
-    public async Task<List<Book>> SearchAsync(string? searchTerm, int page, int pageSize, CancellationToken cancellationToken = default)
+    public async Task<List<Book>> SearchAsync(string? searchTerm, int page, int pageSize, bool includeAllStatuses = false, CancellationToken cancellationToken = default)
     {
-        var query = BuildSearchQuery(searchTerm);
+        var query = BuildSearchQuery(searchTerm, includeAllStatuses);
 
         return await query
             .OrderBy(b => b.Title)
@@ -34,9 +34,9 @@ public class BookRepository : IBookRepository
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<int> CountSearchAsync(string? searchTerm, CancellationToken cancellationToken = default)
+    public async Task<int> CountSearchAsync(string? searchTerm, bool includeAllStatuses = false, CancellationToken cancellationToken = default)
     {
-        var query = BuildSearchQuery(searchTerm);
+        var query = BuildSearchQuery(searchTerm, includeAllStatuses);
         return await query.CountAsync(cancellationToken);
     }
 
@@ -63,10 +63,12 @@ public class BookRepository : IBookRepository
         };
     }
 
-    private IQueryable<Book> BuildSearchQuery(string? searchTerm)
+    private IQueryable<Book> BuildSearchQuery(string? searchTerm, bool includeAllStatuses = false)
     {
         var query = _context.Books
             .Include(b => b.Authors)
+            .Include(b => b.Categories)
+            .Include(b => b.Tags)
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -78,8 +80,14 @@ public class BookRepository : IBookRepository
                 b.Authors.Any(a => EF.Functions.ILike(a.Name, term)));
         }
 
-        // Only show published books for public search
-        query = query.Where(b => b.Status == BookStatus.Published);
+        if (!includeAllStatuses)
+        {
+            query = query.Where(b => b.Status == BookStatus.Published);
+        }
+        else
+        {
+            query = query.Where(b => b.Status != BookStatus.Removed);
+        }
 
         return query;
     }

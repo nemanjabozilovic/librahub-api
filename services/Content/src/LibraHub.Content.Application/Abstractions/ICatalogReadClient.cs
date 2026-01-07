@@ -11,4 +11,3 @@ public record BookInfo
     public bool IsFree { get; init; }
     public bool IsBlocked { get; init; }
 }
-

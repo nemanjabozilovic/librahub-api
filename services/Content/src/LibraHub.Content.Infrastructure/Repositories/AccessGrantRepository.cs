@@ -32,4 +32,3 @@ public class AccessGrantRepository : IAccessGrantRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 }
-

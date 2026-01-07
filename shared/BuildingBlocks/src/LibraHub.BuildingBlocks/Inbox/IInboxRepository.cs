@@ -6,4 +6,3 @@ public interface IInboxRepository
 
     Task MarkAsProcessedAsync(string messageId, string eventType, CancellationToken cancellationToken = default);
 }
-

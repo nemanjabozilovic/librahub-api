@@ -23,4 +23,3 @@ public class EmailConfigOptions
 
     public bool EnableSsl { get; set; }
 }
-

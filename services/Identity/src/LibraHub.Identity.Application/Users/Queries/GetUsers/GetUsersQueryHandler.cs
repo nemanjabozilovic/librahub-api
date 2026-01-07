@@ -39,8 +39,8 @@ public class GetUsersQueryHandler : IRequestHandler<GetUsersQuery, Result<GetUse
             Roles = user.Roles.Select(r => r.Role.ToString()).ToList(),
             EmailVerified = user.EmailVerified,
             Status = user.Status.ToString(),
-            CreatedAt = user.CreatedAt,
-            LastLoginAt = user.LastLoginAt
+            CreatedAt = new DateTimeOffset(user.CreatedAt, TimeSpan.Zero),
+            LastLoginAt = user.LastLoginAt.HasValue ? new DateTimeOffset(user.LastLoginAt.Value, TimeSpan.Zero) : null
         }).ToList();
 
         var response = new GetUsersResponseDto
@@ -52,4 +52,3 @@ public class GetUsersQueryHandler : IRequestHandler<GetUsersQuery, Result<GetUse
         return Result.Success(response);
     }
 }
-

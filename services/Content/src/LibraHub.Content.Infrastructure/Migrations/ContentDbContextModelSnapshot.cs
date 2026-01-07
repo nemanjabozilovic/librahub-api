@@ -18,6 +18,9 @@ namespace LibraHub.Content.Infrastructure.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("Proxies:ChangeTracking", false)
+                .HasAnnotation("Proxies:CheckEquality", false)
+                .HasAnnotation("Proxies:LazyLoading", true)
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -218,6 +221,12 @@ namespace LibraHub.Content.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
+                    b.Property<string>("Checksum")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("Checksum");
+
                     b.Property<long>("SizeBytes")
                         .HasColumnType("bigint");
 
@@ -234,31 +243,6 @@ namespace LibraHub.Content.Infrastructure.Migrations
                     b.HasIndex("BookId", "ObjectKey");
 
                     b.ToTable("stored_objects", (string)null);
-                });
-
-            modelBuilder.Entity("LibraHub.Content.Domain.Storage.StoredObject", b =>
-                {
-                    b.OwnsOne("LibraHub.Content.Domain.Storage.Sha256", "Checksum", b1 =>
-                        {
-                            b1.Property<Guid>("StoredObjectId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<string>("Value")
-                                .IsRequired()
-                                .HasMaxLength(64)
-                                .HasColumnType("character varying(64)")
-                                .HasColumnName("Checksum");
-
-                            b1.HasKey("StoredObjectId");
-
-                            b1.ToTable("stored_objects");
-
-                            b1.WithOwner()
-                                .HasForeignKey("StoredObjectId");
-                        });
-
-                    b.Navigation("Checksum")
-                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

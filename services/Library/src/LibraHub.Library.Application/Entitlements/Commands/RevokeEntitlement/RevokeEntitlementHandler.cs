@@ -35,7 +35,7 @@ public class RevokeEntitlementHandler(
                 UserId = entitlement.UserId,
                 BookId = entitlement.BookId,
                 Reason = request.Reason ?? "Manual revocation",
-                RevokedAtUtc = entitlement.RevokedAt!.Value
+                RevokedAtUtc = new DateTimeOffset(entitlement.RevokedAt!.Value, TimeSpan.Zero)
             },
             EventTypes.EntitlementRevoked,
             cancellationToken);
@@ -43,4 +43,3 @@ public class RevokeEntitlementHandler(
         return Result.Success();
     }
 }
-

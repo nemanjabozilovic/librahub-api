@@ -5,4 +5,3 @@ public enum EntitlementStatus
     Active = 1,
     Revoked = 2
 }
-

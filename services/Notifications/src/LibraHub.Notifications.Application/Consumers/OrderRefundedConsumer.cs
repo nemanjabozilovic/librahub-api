@@ -124,4 +124,3 @@ public class OrderRefundedConsumer(
         logger.LogInformation("OrderRefunded notification created for UserId: {UserId}, OrderId: {OrderId}", userId, @event.OrderId);
     }
 }
-

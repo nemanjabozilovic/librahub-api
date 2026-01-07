@@ -7,4 +7,3 @@ public record EntitlementStatisticsResult
     public int Revoked { get; init; }
     public int GrantedLast30Days { get; init; }
 }
-

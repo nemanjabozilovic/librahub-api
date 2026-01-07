@@ -34,4 +34,3 @@ public class OutboxEventPublisher<TDbContext> : IOutboxWriter where TDbContext :
         await _context.SaveChangesAsync(cancellationToken);
     }
 }
-

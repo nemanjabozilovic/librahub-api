@@ -49,4 +49,3 @@ public class LibraryAccessClient : ILibraryAccessClient
         public bool Owns { get; init; }
     }
 }
-

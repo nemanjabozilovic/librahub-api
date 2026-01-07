@@ -16,7 +16,7 @@ public class PromotionRule
 
     private const string SupportedCurrency = "USD";
 
-    private PromotionRule()
+    protected PromotionRule()
     { } // For EF Core
 
     public PromotionRule(

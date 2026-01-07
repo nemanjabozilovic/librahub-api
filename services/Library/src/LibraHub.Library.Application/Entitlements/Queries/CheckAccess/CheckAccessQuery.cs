@@ -7,4 +7,3 @@ public class CheckAccessQuery : IRequest<LibraHub.BuildingBlocks.Results.Result<
     public Guid UserId { get; init; }
     public Guid BookId { get; init; }
 }
-

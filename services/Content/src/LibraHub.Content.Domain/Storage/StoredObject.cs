@@ -13,7 +13,7 @@ public class StoredObject
     public DateTime? BlockedAt { get; private set; }
     public string? BlockReason { get; private set; }
 
-    private StoredObject()
+    protected StoredObject()
     { } // For EF Core
 
     public StoredObject(
@@ -48,4 +48,3 @@ public class StoredObject
 
     public bool IsAccessible => Status == ObjectStatus.Active;
 }
-

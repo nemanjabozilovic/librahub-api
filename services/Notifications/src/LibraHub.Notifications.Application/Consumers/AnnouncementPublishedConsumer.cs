@@ -40,7 +40,6 @@ public class AnnouncementPublishedConsumer(
             allUserIds.Count, @event.AnnouncementId);
 
         var notificationsToCreate = new List<Notification>();
-        var emailTasks = new List<Task>();
 
         try
         {
@@ -90,14 +89,14 @@ public class AnnouncementPublishedConsumer(
                                     PublishedAt = @event.PublishedAt
                                 };
 
-                                emailTasks.Add(SendEmailNotificationAsync(
+                                await SendEmailNotificationAsync(
                                     notificationSender,
                                     userInfo.Email,
                                     emailSubject,
                                     emailModel,
                                     userId,
                                     @event.AnnouncementId,
-                                    ct));
+                                    ct);
                             }
                             else
                             {
@@ -142,11 +141,6 @@ public class AnnouncementPublishedConsumer(
                 @event.AnnouncementId, messageId);
             throw;
         }
-
-        if (emailTasks.Count > 0)
-        {
-            await Task.WhenAll(emailTasks);
-        }
     }
 
     private static async Task SendEmailNotificationAsync(
@@ -174,4 +168,3 @@ public class AnnouncementPublishedConsumer(
         }
     }
 }
-

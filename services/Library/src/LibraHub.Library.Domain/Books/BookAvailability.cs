@@ -5,4 +5,3 @@ public enum BookAvailability
     Available = 1,
     Removed = 2
 }
-

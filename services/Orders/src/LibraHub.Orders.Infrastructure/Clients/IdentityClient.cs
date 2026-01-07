@@ -145,4 +145,3 @@ public class IdentityClient : IIdentityClient
         public List<UserInfo> Users { get; set; } = new();
     }
 }
-

@@ -17,4 +17,3 @@ public class StartPaymentValidator : AbstractValidator<StartPaymentCommand>
             .WithMessage("Invalid payment provider");
     }
 }
-

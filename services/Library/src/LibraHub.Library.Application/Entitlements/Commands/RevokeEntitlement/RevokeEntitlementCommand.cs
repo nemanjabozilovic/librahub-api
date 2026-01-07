@@ -7,4 +7,3 @@ public class RevokeEntitlementCommand : IRequest<LibraHub.BuildingBlocks.Results
     public Guid EntitlementId { get; init; }
     public string? Reason { get; init; }
 }
-

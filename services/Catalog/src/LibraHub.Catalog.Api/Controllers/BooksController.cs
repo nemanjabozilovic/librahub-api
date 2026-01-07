@@ -2,11 +2,13 @@ using LibraHub.BuildingBlocks.Results;
 using LibraHub.Catalog.Api.Dtos.Books;
 using LibraHub.Catalog.Application.Books.Commands.CreateBook;
 using LibraHub.Catalog.Application.Books.Commands.PublishBook;
+using LibraHub.Catalog.Application.Books.Commands.RelistBook;
 using LibraHub.Catalog.Application.Books.Commands.RemoveBook;
 using LibraHub.Catalog.Application.Books.Commands.SetPricing;
 using LibraHub.Catalog.Application.Books.Commands.UnlistBook;
 using LibraHub.Catalog.Application.Books.Commands.UpdateBook;
 using LibraHub.Catalog.Application.Books.Queries.GetBook;
+using LibraHub.Catalog.Application.Books.Queries.GetBookInfo;
 using LibraHub.Catalog.Application.Books.Queries.SearchBooks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -38,6 +40,16 @@ public class BooksController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetBook(Guid id, CancellationToken cancellationToken)
     {
         var query = new GetBookQuery(id);
+        var result = await mediator.Send(query, cancellationToken);
+        return result.ToActionResult(this);
+    }
+
+    [HttpGet("{id}/info")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(GetBookInfoResponseDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetBookInfo(Guid id, CancellationToken cancellationToken)
+    {
+        var query = new GetBookInfoQuery(id);
         var result = await mediator.Send(query, cancellationToken);
         return result.ToActionResult(this);
     }
@@ -124,6 +136,16 @@ public class BooksController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> UnlistBook(Guid id, CancellationToken cancellationToken)
     {
         var command = new UnlistBookCommand(id);
+        var result = await mediator.Send(command, cancellationToken);
+        return result.ToNoContentActionResult(this);
+    }
+
+    [HttpPost("{id}/relist")]
+    [Authorize(Roles = "Librarian,Admin")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> RelistBook(Guid id, CancellationToken cancellationToken)
+    {
+        var command = new RelistBookCommand(id);
         var result = await mediator.Send(command, cancellationToken);
         return result.ToNoContentActionResult(this);
     }

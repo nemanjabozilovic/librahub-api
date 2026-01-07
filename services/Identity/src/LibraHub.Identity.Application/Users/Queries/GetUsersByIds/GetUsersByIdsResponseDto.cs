@@ -6,4 +6,3 @@ public record GetUsersByIdsResponseDto
 {
     public List<GetUserResponseDto> Users { get; init; } = new();
 }
-

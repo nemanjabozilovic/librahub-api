@@ -26,4 +26,3 @@ public class ContentDbContext : DbContext
         base.OnModelCreating(modelBuilder);
     }
 }
-

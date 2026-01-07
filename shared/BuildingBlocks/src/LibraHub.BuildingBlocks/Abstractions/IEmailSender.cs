@@ -32,4 +32,3 @@ public interface IEmailSender
         object model,
         CancellationToken cancellationToken = default);
 }
-

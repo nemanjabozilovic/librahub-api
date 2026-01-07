@@ -41,4 +41,3 @@ public class BookEditionConfig : IEntityTypeConfiguration<BookEdition>
             .IsUnique();
     }
 }
-

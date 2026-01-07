@@ -1,4 +1,5 @@
 using LibraHub.BuildingBlocks.Abstractions;
+using LibraHub.BuildingBlocks.Caching;
 using LibraHub.BuildingBlocks.Results;
 using LibraHub.Catalog.Application.Abstractions;
 using LibraHub.Catalog.Domain.Books;
@@ -11,7 +12,8 @@ namespace LibraHub.Catalog.Application.Books.Commands.SetPricing;
 public class SetPricingHandler(
     IBookRepository bookRepository,
     IPricingRepository pricingRepository,
-    IOutboxWriter outboxWriter) : IRequestHandler<SetPricingCommand, Result>
+    IOutboxWriter outboxWriter,
+    ICache cache) : IRequestHandler<SetPricingCommand, Result>
 {
     public async Task<Result> Handle(SetPricingCommand request, CancellationToken cancellationToken)
     {
@@ -38,7 +40,7 @@ public class SetPricingHandler(
         if (request.PromoPrice.HasValue && request.PromoStartDate.HasValue && request.PromoEndDate.HasValue)
         {
             var promoMoney = new Money(request.PromoPrice.Value, request.Currency);
-            existingPricing.SetPromo(promoMoney, request.PromoStartDate.Value, request.PromoEndDate.Value);
+            existingPricing.SetPromo(promoMoney, request.PromoStartDate.Value.UtcDateTime, request.PromoEndDate.Value.UtcDateTime);
             await pricingRepository.UpdateAsync(existingPricing, cancellationToken);
         }
         else if (existingPricing.PromoPrice != null)
@@ -54,10 +56,12 @@ public class SetPricingHandler(
                 Price = existingPricing.Price.Amount,
                 Currency = existingPricing.Price.Currency,
                 VatRate = existingPricing.VatRate,
-                UpdatedAt = existingPricing.UpdatedAt
+                UpdatedAt = new DateTimeOffset(existingPricing.UpdatedAt, TimeSpan.Zero)
             },
             Contracts.Common.EventTypes.BookPricingChanged,
             cancellationToken);
+
+        await CacheInvalidationHelper.InvalidateBookCacheAsync(cache, book.Id, cancellationToken);
 
         return Result.Success();
     }

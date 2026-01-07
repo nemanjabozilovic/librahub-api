@@ -15,4 +15,3 @@ public class TokenOptions
     [Range(1, int.MaxValue, ErrorMessage = "EmailVerificationExpirationDays must be greater than 0")]
     public int EmailVerificationExpirationDays { get; set; }
 }
-

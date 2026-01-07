@@ -37,4 +37,3 @@ public static class StorageExtensions
         return services;
     }
 }
-

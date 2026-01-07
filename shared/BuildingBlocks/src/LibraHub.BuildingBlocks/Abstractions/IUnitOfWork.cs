@@ -10,4 +10,3 @@ public interface IUnitOfWork
 public interface IUnitOfWork<TDbContext> : IUnitOfWork where TDbContext : DbContext
 {
 }
-

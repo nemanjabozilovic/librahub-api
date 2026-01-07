@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace LibraHub.BuildingBlocks.Results;
 
@@ -11,14 +12,7 @@ public static class ResultExtensions
             return controller.Ok(result.Value);
         }
 
-        return result.Error!.Code switch
-        {
-            "NOT_FOUND" => controller.NotFound(new { code = result.Error.Code, message = result.Error.Message }),
-            "UNAUTHORIZED" => controller.Unauthorized(new { code = result.Error.Code, message = result.Error.Message }),
-            "FORBIDDEN" => controller.StatusCode(403, new { code = result.Error.Code, message = result.Error.Message }),
-            "CONFLICT" => controller.Conflict(new { code = result.Error.Code, message = result.Error.Message }),
-            _ => controller.BadRequest(new { code = result.Error.Code, message = result.Error.Message })
-        };
+        return HandleError(result.Error!, controller);
     }
 
     public static IActionResult ToActionResult(this Result result, ControllerBase controller)
@@ -28,14 +22,7 @@ public static class ResultExtensions
             return controller.Ok();
         }
 
-        return result.Error!.Code switch
-        {
-            "NOT_FOUND" => controller.NotFound(new { code = result.Error.Code, message = result.Error.Message }),
-            "UNAUTHORIZED" => controller.Unauthorized(new { code = result.Error.Code, message = result.Error.Message }),
-            "FORBIDDEN" => controller.StatusCode(403, new { code = result.Error.Code, message = result.Error.Message }),
-            "CONFLICT" => controller.Conflict(new { code = result.Error.Code, message = result.Error.Message }),
-            _ => controller.BadRequest(new { code = result.Error.Code, message = result.Error.Message })
-        };
+        return HandleError(result.Error!, controller);
     }
 
     public static IActionResult ToCreatedActionResult<T>(this Result<T> result, ControllerBase controller, string actionName, object? routeValues = null)
@@ -45,14 +32,7 @@ public static class ResultExtensions
             return controller.CreatedAtAction(actionName, routeValues, result.Value);
         }
 
-        return result.Error!.Code switch
-        {
-            "NOT_FOUND" => controller.NotFound(new { code = result.Error.Code, message = result.Error.Message }),
-            "UNAUTHORIZED" => controller.Unauthorized(new { code = result.Error.Code, message = result.Error.Message }),
-            "FORBIDDEN" => controller.StatusCode(403, new { code = result.Error.Code, message = result.Error.Message }),
-            "CONFLICT" => controller.Conflict(new { code = result.Error.Code, message = result.Error.Message }),
-            _ => controller.BadRequest(new { code = result.Error.Code, message = result.Error.Message })
-        };
+        return HandleError(result.Error!, controller);
     }
 
     public static IActionResult ToNoContentActionResult(this Result result, ControllerBase controller)
@@ -62,13 +42,43 @@ public static class ResultExtensions
             return controller.NoContent();
         }
 
-        return result.Error!.Code switch
+        return HandleError(result.Error!, controller);
+    }
+
+    private static IActionResult HandleError(Error error, ControllerBase controller)
+    {
+        var logger = controller.HttpContext.RequestServices.GetService(typeof(ILogger<ControllerBase>)) as ILogger<ControllerBase>;
+        var statusCode = GetStatusCode(error.Code);
+
+        logger?.LogWarning(
+            "Request failed. ErrorCode: {ErrorCode}, ErrorMessage: {ErrorMessage}, StatusCode: {StatusCode}, RequestPath: {RequestPath}, Method: {Method}",
+            error.Code,
+            error.Message,
+            statusCode,
+            controller.HttpContext.Request.Path,
+            controller.HttpContext.Request.Method);
+
+        var errorResponse = new { code = error.Code, message = error.Message };
+
+        return error.Code switch
         {
-            "NOT_FOUND" => controller.NotFound(new { code = result.Error.Code, message = result.Error.Message }),
-            "UNAUTHORIZED" => controller.Unauthorized(new { code = result.Error.Code, message = result.Error.Message }),
-            "FORBIDDEN" => controller.StatusCode(403, new { code = result.Error.Code, message = result.Error.Message }),
-            "CONFLICT" => controller.Conflict(new { code = result.Error.Code, message = result.Error.Message }),
-            _ => controller.BadRequest(new { code = result.Error.Code, message = result.Error.Message })
+            "NOT_FOUND" => controller.NotFound(errorResponse),
+            "UNAUTHORIZED" => controller.Unauthorized(errorResponse),
+            "FORBIDDEN" => controller.StatusCode(403, errorResponse),
+            "CONFLICT" => controller.Conflict(errorResponse),
+            _ => controller.BadRequest(errorResponse)
+        };
+    }
+
+    private static int GetStatusCode(string errorCode)
+    {
+        return errorCode switch
+        {
+            "NOT_FOUND" => 404,
+            "UNAUTHORIZED" => 401,
+            "FORBIDDEN" => 403,
+            "CONFLICT" => 409,
+            _ => 400
         };
     }
 }

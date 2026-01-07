@@ -1,4 +1,5 @@
 using LibraHub.BuildingBlocks.Abstractions;
+using LibraHub.BuildingBlocks.Caching;
 using LibraHub.BuildingBlocks.Results;
 using LibraHub.Catalog.Application.Abstractions;
 using LibraHub.Catalog.Domain.Errors;
@@ -12,7 +13,8 @@ public class PublishBookHandler(
     IPricingRepository pricingRepository,
     IBookContentStateRepository contentStateRepository,
     IOutboxWriter outboxWriter,
-    IUnitOfWork unitOfWork) : IRequestHandler<PublishBookCommand, Result>
+    IUnitOfWork unitOfWork,
+    ICache cache) : IRequestHandler<PublishBookCommand, Result>
 {
     public async Task<Result> Handle(PublishBookCommand request, CancellationToken cancellationToken)
     {
@@ -53,11 +55,13 @@ public class PublishBookHandler(
                         BookId = book.Id,
                         Title = book.Title,
                         Authors = authors,
-                        PublishedAt = book.UpdatedAt
+                        PublishedAt = new DateTimeOffset(book.UpdatedAt, TimeSpan.Zero)
                     },
                     Contracts.Common.EventTypes.BookPublished,
                     ct);
             }, cancellationToken);
+
+            await CacheInvalidationHelper.InvalidateBookCacheAsync(cache, book.Id, cancellationToken);
 
             return Result.Success();
         }

@@ -24,6 +24,13 @@ public class ReadingProgressConfig : IEntityTypeConfiguration<ReadingProgress>
             .HasColumnName("book_id")
             .IsRequired();
 
+        builder.Property(x => x.Format)
+            .HasColumnName("format")
+            .HasMaxLength(10);
+
+        builder.Property(x => x.Version)
+            .HasColumnName("version");
+
         builder.Property(x => x.ProgressPercentage)
             .HasColumnName("progress_percentage")
             .HasPrecision(5, 2)
@@ -36,12 +43,11 @@ public class ReadingProgressConfig : IEntityTypeConfiguration<ReadingProgress>
             .HasColumnName("last_updated_at")
             .IsRequired();
 
-        // Unique constraint on (UserId, BookId)
-        builder.HasIndex(x => new { x.UserId, x.BookId })
-            .IsUnique();
+        builder.HasIndex(x => new { x.UserId, x.BookId, x.Format, x.Version })
+            .IsUnique()
+            .HasFilter(null);
 
         builder.HasIndex(x => x.UserId);
         builder.HasIndex(x => x.BookId);
     }
 }
-

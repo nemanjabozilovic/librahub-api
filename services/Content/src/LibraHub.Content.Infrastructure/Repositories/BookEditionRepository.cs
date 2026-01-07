@@ -41,6 +41,18 @@ public class BookEditionRepository : IBookEditionRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<BookEdition>> GetByBookIdsAsync(List<Guid> bookIds, CancellationToken cancellationToken = default)
+    {
+        if (bookIds == null || bookIds.Count == 0)
+        {
+            return new List<BookEdition>();
+        }
+
+        return await _context.BookEditions
+            .Where(x => bookIds.Contains(x.BookId))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task AddAsync(BookEdition edition, CancellationToken cancellationToken = default)
     {
         await _context.BookEditions.AddAsync(edition, cancellationToken);
@@ -53,4 +65,3 @@ public class BookEditionRepository : IBookEditionRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 }
-

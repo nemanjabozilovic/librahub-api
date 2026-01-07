@@ -30,7 +30,7 @@ public class GetAnnouncementsHandler(
             Title = a.Title,
             Content = a.Content,
             Status = a.Status.ToString(),
-            PublishedAt = a.PublishedAt
+            PublishedAt = a.PublishedAt.HasValue ? new DateTimeOffset(a.PublishedAt.Value, TimeSpan.Zero) : null
         }).ToList();
 
         var totalPages = (int)Math.Ceiling(totalCount / (double)request.PageSize);

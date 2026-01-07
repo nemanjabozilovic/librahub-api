@@ -9,5 +9,5 @@ public record SetPricingCommand(
     string Currency,
     decimal? VatRate,
     decimal? PromoPrice,
-    DateTime? PromoStartDate,
-    DateTime? PromoEndDate) : IRequest<Result>;
+    DateTimeOffset? PromoStartDate,
+    DateTimeOffset? PromoEndDate) : IRequest<Result>;

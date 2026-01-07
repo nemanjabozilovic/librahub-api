@@ -8,4 +8,3 @@ public enum OrderStatus
     Cancelled = 3,
     Refunded = 4
 }
-

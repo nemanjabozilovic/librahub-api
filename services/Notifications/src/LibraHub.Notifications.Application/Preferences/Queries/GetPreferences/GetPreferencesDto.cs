@@ -11,4 +11,3 @@ public record PreferenceDto
     public bool EmailEnabled { get; init; }
     public bool InAppEnabled { get; init; }
 }
-

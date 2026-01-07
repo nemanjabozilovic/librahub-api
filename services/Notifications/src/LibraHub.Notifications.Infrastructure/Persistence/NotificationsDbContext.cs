@@ -25,4 +25,3 @@ public class NotificationsDbContext : DbContext
         base.OnModelCreating(modelBuilder);
     }
 }
-

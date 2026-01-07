@@ -13,7 +13,6 @@ public record NotificationDto
     public string Title { get; init; } = string.Empty;
     public string Message { get; init; } = string.Empty;
     public string Status { get; init; } = string.Empty;
-    public DateTime CreatedAt { get; init; }
-    public DateTime? ReadAt { get; init; }
+    public DateTimeOffset CreatedAt { get; init; }
+    public DateTimeOffset? ReadAt { get; init; }
 }
-

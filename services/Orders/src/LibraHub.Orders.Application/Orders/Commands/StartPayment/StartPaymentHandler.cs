@@ -74,7 +74,7 @@ public class StartPaymentHandler(
                 Provider = provider.ToString(),
                 Amount = order.Total.Amount,
                 Currency = order.Currency,
-                InitiatedAt = clock.UtcNow
+                InitiatedAt = clock.UtcNowOffset
             },
             Contracts.Common.EventTypes.PaymentInitiated,
             cancellationToken);
@@ -82,4 +82,3 @@ public class StartPaymentHandler(
         return Result.Success(payment.Id);
     }
 }
-

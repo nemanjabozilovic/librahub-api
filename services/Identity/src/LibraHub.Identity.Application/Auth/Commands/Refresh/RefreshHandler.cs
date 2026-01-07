@@ -54,7 +54,7 @@ public class RefreshHandler : IRequestHandler<RefreshCommand, Result<AuthTokensD
             Guid.NewGuid(),
             user.Id,
             newRefreshTokenValue,
-            refreshTokenExpiresAt);
+            refreshTokenExpiresAt.UtcDateTime);
 
         await _refreshTokenRepository.AddAsync(newRefreshToken, cancellationToken);
 

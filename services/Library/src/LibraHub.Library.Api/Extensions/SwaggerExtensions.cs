@@ -17,4 +17,3 @@ public static class SwaggerExtensions
         return app.UseLibraHubSwagger("LibraHub Library API");
     }
 }
-

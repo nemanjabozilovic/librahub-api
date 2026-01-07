@@ -37,7 +37,24 @@ public class UploadCoverHandler(
         var existingCover = await coverRepository.GetByBookIdAsync(request.BookId, cancellationToken);
         if (existingCover != null)
         {
-            return Result.Failure<Guid>(Error.Validation(ContentErrors.Cover.AlreadyExists));
+            var existingStoredObject = await storedObjectRepository.GetByIdAsync(existingCover.StoredObjectId, cancellationToken);
+            if (existingStoredObject != null)
+            {
+                try
+                {
+                    await objectStorage.DeleteAsync(
+                        uploadOptions.Value.CoversBucketName,
+                        existingStoredObject.ObjectKey,
+                        cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    return Result.Failure<Guid>(new Error("INTERNAL_ERROR", $"Failed to delete existing cover from storage: {ex.Message}"));
+                }
+
+                await coverRepository.DeleteAsync(existingCover, cancellationToken);
+                await storedObjectRepository.DeleteAsync(existingStoredObject, cancellationToken);
+            }
         }
 
         string sha256;
@@ -86,7 +103,7 @@ public class UploadCoverHandler(
                 Sha256 = sha256,
                 Size = request.File.Length,
                 ContentType = request.File.ContentType,
-                UploadedAt = clock.UtcNow
+                UploadedAt = clock.UtcNowOffset
             },
             Contracts.Common.EventTypes.CoverUploaded,
             cancellationToken);
@@ -105,4 +122,3 @@ public class UploadCoverHandler(
         };
     }
 }
-

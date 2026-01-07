@@ -46,4 +46,3 @@ public class BookSnapshotConfig : IEntityTypeConfiguration<BookSnapshot>
         builder.HasIndex(x => x.Availability);
     }
 }
-

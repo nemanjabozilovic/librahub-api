@@ -1,4 +1,5 @@
 using LibraHub.BuildingBlocks.Abstractions;
+using LibraHub.BuildingBlocks.Caching;
 using LibraHub.BuildingBlocks.Results;
 using LibraHub.Catalog.Application.Abstractions;
 using LibraHub.Catalog.Domain.Books;
@@ -10,7 +11,8 @@ namespace LibraHub.Catalog.Application.Books.Commands.UpdateBook;
 
 public class UpdateBookHandler(
     IBookRepository bookRepository,
-    IOutboxWriter outboxWriter) : IRequestHandler<UpdateBookCommand, Result>
+    IOutboxWriter outboxWriter,
+    ICache cache) : IRequestHandler<UpdateBookCommand, Result>
 {
     public async Task<Result> Handle(UpdateBookCommand request, CancellationToken cancellationToken)
     {
@@ -37,7 +39,7 @@ public class UpdateBookHandler(
             request.Description,
             request.Language,
             request.Publisher,
-            request.PublicationDate,
+            request.PublicationDate?.UtcDateTime,
             isbn);
 
         if (request.Authors != null)
@@ -107,10 +109,12 @@ public class UpdateBookHandler(
                 BookId = book.Id,
                 Title = book.Title,
                 Authors = authors,
-                UpdatedAt = book.UpdatedAt
+                UpdatedAt = new DateTimeOffset(book.UpdatedAt, TimeSpan.Zero)
             },
             Contracts.Common.EventTypes.BookUpdated,
             cancellationToken);
+
+        await CacheInvalidationHelper.InvalidateBookCacheAsync(cache, book.Id, cancellationToken);
 
         return Result.Success();
     }

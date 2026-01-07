@@ -9,4 +9,3 @@ public static class ApplicationBuilderExtensions
         return app.UseLibraHubSwagger("LibraHub Gateway API", "v1");
     }
 }
-

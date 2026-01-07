@@ -7,4 +7,3 @@ public class StartPaymentCommand : IRequest<LibraHub.BuildingBlocks.Results.Resu
     public Guid OrderId { get; init; }
     public string Provider { get; init; } = string.Empty;
 }
-

@@ -57,8 +57,8 @@ public class TokenService : ITokenService
         return Convert.ToBase64String(randomNumber);
     }
 
-    public DateTime GetRefreshTokenExpiration()
+    public DateTimeOffset GetRefreshTokenExpiration()
     {
-        return DateTime.UtcNow.AddDays(_options.RefreshTokenExpirationDays);
+        return DateTimeOffset.UtcNow.AddDays(_options.RefreshTokenExpirationDays);
     }
 }

@@ -1,4 +1,5 @@
 using LibraHub.BuildingBlocks.Abstractions;
+using LibraHub.BuildingBlocks.Caching;
 using LibraHub.BuildingBlocks.Results;
 using LibraHub.Catalog.Application.Abstractions;
 using LibraHub.Catalog.Domain.Errors;
@@ -10,7 +11,8 @@ namespace LibraHub.Catalog.Application.Books.Commands.RemoveBook;
 public class RemoveBookHandler(
     IBookRepository bookRepository,
     ICurrentUser currentUser,
-    IOutboxWriter outboxWriter) : IRequestHandler<RemoveBookCommand, Result>
+    IOutboxWriter outboxWriter,
+    ICache cache) : IRequestHandler<RemoveBookCommand, Result>
 {
     public async Task<Result> Handle(RemoveBookCommand request, CancellationToken cancellationToken)
     {
@@ -43,10 +45,12 @@ public class RemoveBookHandler(
                 Title = book.Title,
                 RemovedBy = currentUser.UserId.Value,
                 Reason = request.Reason,
-                RemovedAt = book.RemovedAt!.Value
+                RemovedAt = new DateTimeOffset(book.RemovedAt!.Value, TimeSpan.Zero)
             },
             Contracts.Common.EventTypes.BookRemoved,
             cancellationToken);
+
+        await CacheInvalidationHelper.InvalidateBookCacheAsync(cache, book.Id, cancellationToken);
 
         return Result.Success();
     }

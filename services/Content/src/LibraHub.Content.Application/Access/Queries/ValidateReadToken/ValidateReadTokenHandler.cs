@@ -1,10 +1,12 @@
 using LibraHub.BuildingBlocks.Abstractions;
 using LibraHub.BuildingBlocks.Results;
 using LibraHub.Content.Application.Abstractions;
+using LibraHub.Content.Application.Options;
 using LibraHub.Content.Domain.Access;
 using LibraHub.Content.Domain.Errors;
 using LibraHub.Content.Domain.Storage;
 using MediatR;
+using Microsoft.Extensions.Options;
 using Error = LibraHub.BuildingBlocks.Results.Error;
 
 namespace LibraHub.Content.Application.Access.Queries.ValidateReadToken;
@@ -14,7 +16,8 @@ public class ValidateReadTokenHandler(
     IStoredObjectRepository storedObjectRepository,
     IBookEditionRepository editionRepository,
     ICoverRepository coverRepository,
-    IClock clock) : IRequestHandler<ValidateReadTokenQuery, Result<AccessGrantInfo>>
+    IClock clock,
+    IOptions<ReadAccessOptions> readAccessOptions) : IRequestHandler<ValidateReadTokenQuery, Result<AccessGrantInfo>>
 {
     public async Task<Result<AccessGrantInfo>> Handle(ValidateReadTokenQuery request, CancellationToken cancellationToken)
     {
@@ -31,6 +34,14 @@ public class ValidateReadTokenHandler(
                 return Result.Failure<AccessGrantInfo>(Error.Validation(ContentErrors.Access.TokenRevoked));
             }
             return Result.Failure<AccessGrantInfo>(Error.Validation(ContentErrors.Access.TokenExpired));
+        }
+
+        var refreshThreshold = TimeSpan.FromMinutes(readAccessOptions.Value.TokenRefreshThresholdMinutes);
+        if (grant.IsNearExpiry(clock.UtcNow, refreshThreshold))
+        {
+            var newExpiresAt = clock.UtcNow.AddMinutes(readAccessOptions.Value.TokenExpirationMinutes);
+            grant.RefreshExpiry(newExpiresAt);
+            await accessGrantRepository.UpdateAsync(grant, cancellationToken);
         }
 
         StoredObject? storedObject = null;
@@ -84,4 +95,3 @@ public class ValidateReadTokenHandler(
         });
     }
 }
-

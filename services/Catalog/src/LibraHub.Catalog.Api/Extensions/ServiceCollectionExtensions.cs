@@ -4,6 +4,7 @@ using LibraHub.BuildingBlocks.Caching;
 using LibraHub.BuildingBlocks.Health;
 using LibraHub.BuildingBlocks.Messaging;
 using LibraHub.BuildingBlocks.Outbox;
+using LibraHub.Catalog.Api.Workers;
 using LibraHub.Catalog.Application;
 using LibraHub.Catalog.Application.Abstractions;
 using LibraHub.Catalog.Infrastructure.Persistence;
@@ -46,6 +47,17 @@ public static class ServiceCollectionExtensions
         services.AddHttpContextAccessor();
         services.AddScoped<BuildingBlocks.Abstractions.ICurrentUser, BuildingBlocks.CurrentUser.CurrentUser>();
 
+        // Register consumers
+        services.AddScoped<Application.Consumers.CoverUploadedConsumer>();
+        services.AddScoped<Application.Consumers.EditionUploadedConsumer>();
+
+        services.AddOptions<Application.Options.CatalogOptions>()
+            .Bind(configuration.GetSection(Application.Options.CatalogOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddHttpClient<Application.Abstractions.IContentReadClient, Infrastructure.Clients.ContentReadClient>();
+
         services.AddRedisCache(configuration);
 
         return services;
@@ -58,7 +70,9 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddCatalogRabbitMq(this IServiceCollection services, IConfiguration configuration)
     {
-        return services.AddLibraHubRabbitMq<OutboxPublisherWorkerHelper<CatalogDbContext>>(configuration);
+        services.AddLibraHubRabbitMq<OutboxPublisherWorkerHelper<CatalogDbContext>>(configuration);
+        services.AddHostedService<CatalogEventConsumerWorker>();
+        return services;
     }
 
     public static IServiceCollection AddCatalogHealthChecks(this IServiceCollection services, IConfiguration configuration)

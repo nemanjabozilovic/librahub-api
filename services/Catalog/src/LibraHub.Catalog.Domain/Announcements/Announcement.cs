@@ -11,7 +11,7 @@ public class Announcement
     public DateTime? PublishedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
-    private Announcement()
+    protected Announcement()
     { } // For EF Core
 
     public Announcement(Guid id, Guid bookId, string title, string content)

@@ -15,4 +15,3 @@ public interface INotificationPreferencesRepository
 
     Task UpdateAsync(NotificationPreference preference, CancellationToken cancellationToken = default);
 }
-

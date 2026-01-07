@@ -23,17 +23,29 @@ public class UpdateProgressHandler(
 
         var userId = userIdResult.Value;
 
-        var hasAccess = await entitlementRepository.HasAccessAsync(userId, request.BookId, cancellationToken);
+        bool hasAccess = currentUser.IsInRole("Admin") || currentUser.IsInRole("Librarian");
+        if (!hasAccess)
+        {
+            hasAccess = await entitlementRepository.HasAccessAsync(userId, request.BookId, cancellationToken);
+        }
+
         if (!hasAccess)
         {
             return Result.Failure(Error.Validation("User does not have access to this book"));
         }
 
-        var progress = await progressRepository.GetByUserAndBookAsync(userId, request.BookId, cancellationToken);
+        var normalizedFormat = request.Format?.ToUpperInvariant();
+        var progress = await progressRepository.GetByUserBookFormatAndVersionAsync(
+            userId, request.BookId, normalizedFormat, request.Version, cancellationToken);
 
         if (progress == null)
         {
-            progress = new ReadingProgress(Guid.NewGuid(), userId, request.BookId);
+            progress = new ReadingProgress(
+                Guid.NewGuid(),
+                userId,
+                request.BookId,
+                normalizedFormat,
+                request.Version);
             progress.UpdateProgress(request.Percentage, request.LastPage);
             await progressRepository.AddAsync(progress, cancellationToken);
         }
@@ -46,4 +58,3 @@ public class UpdateProgressHandler(
         return Result.Success();
     }
 }
-

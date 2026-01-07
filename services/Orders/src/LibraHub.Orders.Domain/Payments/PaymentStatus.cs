@@ -7,4 +7,3 @@ public enum PaymentStatus
     Failed = 2,
     Cancelled = 3
 }
-

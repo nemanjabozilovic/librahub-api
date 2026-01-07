@@ -22,7 +22,7 @@ public class BookRemovedConsumer(
         var editions = await editionRepository.GetByBookIdAsync(@event.BookId, cancellationToken);
         var cover = await coverRepository.GetByBookIdAsync(@event.BookId, cancellationToken);
 
-        await unitOfWork.ExecuteInTransactionAsync(async ct =>
+        await unitOfWork.ExecuteInTransactionAsync(ct =>
         {
             foreach (var obj in storedObjects)
             {
@@ -38,9 +38,10 @@ public class BookRemovedConsumer(
             {
                 cover.Block();
             }
+
+            return Task.CompletedTask;
         }, cancellationToken);
 
         logger.LogInformation("All content blocked for BookId: {BookId}", @event.BookId);
     }
 }
-

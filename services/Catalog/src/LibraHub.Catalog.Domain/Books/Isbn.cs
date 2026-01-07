@@ -4,7 +4,7 @@ public class Isbn
 {
     public string Value { get; private set; } = string.Empty;
 
-    private Isbn()
+    protected Isbn()
     { } // For EF Core
 
     public Isbn(string value)

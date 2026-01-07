@@ -29,4 +29,3 @@ public class PasswordResetToken
         UsedAt = DateTime.UtcNow;
     }
 }
-

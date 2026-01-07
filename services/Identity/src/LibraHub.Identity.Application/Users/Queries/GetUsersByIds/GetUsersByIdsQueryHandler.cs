@@ -59,4 +59,3 @@ public class GetUsersByIdsQueryHandler : IRequestHandler<GetUsersByIdsQuery, Res
         return Result.Success(response);
     }
 }
-

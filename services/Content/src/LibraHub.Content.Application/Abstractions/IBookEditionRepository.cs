@@ -12,8 +12,9 @@ public interface IBookEditionRepository
 
     Task<List<BookEdition>> GetByBookIdAsync(Guid bookId, CancellationToken cancellationToken = default);
 
+    Task<List<BookEdition>> GetByBookIdsAsync(List<Guid> bookIds, CancellationToken cancellationToken = default);
+
     Task AddAsync(BookEdition edition, CancellationToken cancellationToken = default);
 
     Task UpdateAsync(BookEdition edition, CancellationToken cancellationToken = default);
 }
-

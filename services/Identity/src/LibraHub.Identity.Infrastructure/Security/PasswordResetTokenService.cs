@@ -32,4 +32,3 @@ public class PasswordResetTokenService : IPasswordResetTokenService
         return _options.PasswordResetExpirationHours;
     }
 }
-

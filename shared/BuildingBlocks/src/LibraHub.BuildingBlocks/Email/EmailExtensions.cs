@@ -46,4 +46,3 @@ public static class EmailExtensions
         return services;
     }
 }
-

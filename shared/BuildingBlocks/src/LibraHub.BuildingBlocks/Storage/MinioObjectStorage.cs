@@ -23,7 +23,6 @@ public class MinioObjectStorage : IObjectStorage
         string contentType,
         CancellationToken cancellationToken = default)
     {
-        // Ensure bucket exists
         var found = await _minioClient.BucketExistsAsync(
             new BucketExistsArgs().WithBucket(bucketName),
             cancellationToken);
@@ -34,7 +33,6 @@ public class MinioObjectStorage : IObjectStorage
                 cancellationToken);
         }
 
-        // Upload object
         await _minioClient.PutObjectAsync(
             new PutObjectArgs()
                 .WithBucket(bucketName)
@@ -52,20 +50,28 @@ public class MinioObjectStorage : IObjectStorage
         string objectKey,
         CancellationToken cancellationToken = default)
     {
-        var stream = new MemoryStream();
+        var memoryStream = new MemoryStream();
 
-        await _minioClient.GetObjectAsync(
-            new GetObjectArgs()
-                .WithBucket(bucketName)
-                .WithObject(objectKey)
-                .WithCallbackStream(async (s) =>
-                {
-                    await s.CopyToAsync(stream, cancellationToken);
-                    stream.Position = 0;
-                }),
-            cancellationToken);
+        try
+        {
+            await _minioClient.GetObjectAsync(
+                new GetObjectArgs()
+                    .WithBucket(bucketName)
+                    .WithObject(objectKey)
+                    .WithCallbackStream(sourceStream =>
+                    {
+                        sourceStream.CopyTo(memoryStream);
+                    }),
+                cancellationToken);
 
-        return stream;
+            memoryStream.Position = 0;
+            return memoryStream;
+        }
+        catch
+        {
+            memoryStream.Dispose();
+            throw;
+        }
     }
 
     public async Task<bool> ExistsAsync(
@@ -100,4 +106,3 @@ public class MinioObjectStorage : IObjectStorage
             cancellationToken);
     }
 }
-

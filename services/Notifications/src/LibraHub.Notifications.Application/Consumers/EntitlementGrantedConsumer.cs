@@ -123,4 +123,3 @@ public class EntitlementGrantedConsumer(
         logger.LogInformation("EntitlementGranted notification created for UserId: {UserId}, BookId: {BookId}", userId, @event.BookId);
     }
 }
-

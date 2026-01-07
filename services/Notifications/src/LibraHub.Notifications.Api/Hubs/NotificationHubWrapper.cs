@@ -17,4 +17,3 @@ public class NotificationHubWrapper : INotificationHub
         return _hubContext.Clients.Group($"user-{userId}").SendAsync(method, notification, cancellationToken);
     }
 }
-

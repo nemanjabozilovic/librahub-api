@@ -24,4 +24,3 @@ public class HealthController(
             : StatusCode(503, health);
     }
 }
-

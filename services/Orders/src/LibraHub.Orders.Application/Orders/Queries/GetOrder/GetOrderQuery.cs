@@ -6,4 +6,3 @@ public class GetOrderQuery : IRequest<LibraHub.BuildingBlocks.Results.Result<Ord
 {
     public Guid OrderId { get; init; }
 }
-

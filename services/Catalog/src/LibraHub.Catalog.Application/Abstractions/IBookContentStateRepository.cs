@@ -6,6 +6,8 @@ public interface IBookContentStateRepository
 {
     Task<BookContentState?> GetByBookIdAsync(Guid bookId, CancellationToken cancellationToken = default);
 
+    Task<Dictionary<Guid, BookContentState>> GetByBookIdsAsync(IEnumerable<Guid> bookIds, CancellationToken cancellationToken = default);
+
     Task AddAsync(BookContentState state, CancellationToken cancellationToken = default);
 
     Task UpdateAsync(BookContentState state, CancellationToken cancellationToken = default);

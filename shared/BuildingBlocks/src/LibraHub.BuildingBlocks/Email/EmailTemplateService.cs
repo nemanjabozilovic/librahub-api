@@ -37,4 +37,3 @@ public class EmailTemplateService(
         return templateContent;
     }
 }
-

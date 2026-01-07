@@ -8,7 +8,7 @@ public record UpdateBookCommand(
     string? Description,
     string? Language,
     string? Publisher,
-    DateTime? PublicationDate,
+    DateTimeOffset? PublicationDate,
     string? Isbn,
     List<string>? Authors,
     List<string>? Categories,

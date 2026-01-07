@@ -11,4 +11,3 @@ public static class HashHelper
         return Convert.ToHexString(hashBytes).ToLowerInvariant();
     }
 }
-

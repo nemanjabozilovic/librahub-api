@@ -9,4 +9,3 @@ public class GetUsersByIdsRequestDto
     [MaxLength(100, ErrorMessage = "Maximum 100 UserIds allowed")]
     public List<Guid> UserIds { get; set; } = new();
 }
-

@@ -32,4 +32,3 @@ public class PasswordResetTokenRepository : IPasswordResetTokenRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 }
-

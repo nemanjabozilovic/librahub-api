@@ -49,4 +49,3 @@ public class NotificationsController(IMediator mediator) : ControllerBase
         return Ok(count);
     }
 }
-

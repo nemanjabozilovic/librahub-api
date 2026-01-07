@@ -47,4 +47,3 @@ public class UpdateUserHandler(
         return Result.Success(userDto);
     }
 }
-

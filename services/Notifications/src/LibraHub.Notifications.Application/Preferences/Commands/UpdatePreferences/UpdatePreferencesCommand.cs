@@ -7,4 +7,3 @@ public record UpdatePreferencesCommand(
     NotificationType Type,
     bool EmailEnabled,
     bool InAppEnabled) : IRequest;
-

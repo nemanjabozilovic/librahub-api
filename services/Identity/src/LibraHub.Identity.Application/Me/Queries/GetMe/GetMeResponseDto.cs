@@ -9,11 +9,10 @@ public record GetMeResponseDto
     public string DisplayName { get; init; } = string.Empty;
     public string? Phone { get; init; }
     public string? Avatar { get; init; }
-    public DateTime? DateOfBirth { get; init; }
+    public DateTimeOffset? DateOfBirth { get; init; }
     public List<string> Roles { get; init; } = new();
     public bool EmailVerified { get; init; }
     public string Status { get; init; } = string.Empty;
-    public DateTime CreatedAt { get; init; }
-    public DateTime? LastLoginAt { get; init; }
+    public DateTimeOffset CreatedAt { get; init; }
+    public DateTimeOffset? LastLoginAt { get; init; }
 }
-

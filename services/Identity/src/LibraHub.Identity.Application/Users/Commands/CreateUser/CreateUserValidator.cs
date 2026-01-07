@@ -14,4 +14,3 @@ public class CreateUserValidator : AbstractValidator<CreateUserCommand>
             .IsInEnum().WithMessage("Invalid role");
     }
 }
-

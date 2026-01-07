@@ -32,4 +32,3 @@ public class RegistrationCompletionTokenRepository : IRegistrationCompletionToke
         await _context.SaveChangesAsync(cancellationToken);
     }
 }
-

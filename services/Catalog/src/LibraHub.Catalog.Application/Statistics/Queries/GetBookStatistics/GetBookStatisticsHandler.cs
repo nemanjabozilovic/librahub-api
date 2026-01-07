@@ -28,4 +28,3 @@ public class GetBookStatisticsHandler(
         return Result.Success(response);
     }
 }
-

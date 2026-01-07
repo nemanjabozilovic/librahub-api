@@ -29,4 +29,3 @@ public class RegistrationCompletionToken
         UsedAt = DateTime.UtcNow;
     }
 }
-

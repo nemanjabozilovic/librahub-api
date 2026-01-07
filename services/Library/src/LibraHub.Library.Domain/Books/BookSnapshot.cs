@@ -10,7 +10,7 @@ public class BookSnapshot
     public string? PriceLabel { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
-    private BookSnapshot()
+    protected BookSnapshot()
     {
     } // For EF Core
 
@@ -61,4 +61,3 @@ public class BookSnapshot
         UpdatedAt = DateTime.UtcNow;
     }
 }
-

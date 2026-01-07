@@ -10,4 +10,3 @@ public class FrontendOptions
     [Url(ErrorMessage = "Frontend BaseUrl must be a valid URL")]
     public string BaseUrl { get; set; } = string.Empty;
 }
-

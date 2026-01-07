@@ -10,4 +10,3 @@ public interface IAccessGrantRepository
 
     Task UpdateAsync(AccessGrant grant, CancellationToken cancellationToken = default);
 }
-

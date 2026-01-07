@@ -18,4 +18,3 @@ public class UploadAvatarValidator : AbstractValidator<UploadAvatarCommand>
             .WithMessage("Allowed file extensions: .jpg, .jpeg, .png, .gif, .webp");
     }
 }
-

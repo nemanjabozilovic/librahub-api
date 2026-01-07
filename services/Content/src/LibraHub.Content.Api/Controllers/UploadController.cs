@@ -35,13 +35,11 @@ public class UploadController(IMediator mediator) : ControllerBase
         Guid bookId,
         IFormFile file,
         [FromForm] string format,
-        [FromForm] int? version = null,
         CancellationToken cancellationToken = default)
     {
-        var command = new UploadEditionCommand(bookId, file, format, version);
+        var command = new UploadEditionCommand(bookId, file, format);
         var result = await mediator.Send(command, cancellationToken);
 
         return result.ToActionResult(this);
     }
 }
-

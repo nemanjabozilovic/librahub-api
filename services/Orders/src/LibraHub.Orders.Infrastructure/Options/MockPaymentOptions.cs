@@ -30,4 +30,3 @@ public class MockPaymentOptions
     [MinLength(1, ErrorMessage = "At least one failure reason must be provided")]
     public List<string> FailureReasons { get; set; } = null!;
 }
-

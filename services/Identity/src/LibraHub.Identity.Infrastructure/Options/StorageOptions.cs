@@ -24,4 +24,3 @@ public class StorageOptions
     [Url(ErrorMessage = "ApiBaseUrl must be a valid URL")]
     public string ApiBaseUrl { get; set; } = string.Empty;
 }
-

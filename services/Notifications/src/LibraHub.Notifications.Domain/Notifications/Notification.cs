@@ -51,4 +51,3 @@ public class Notification
         ReadAt = DateTime.UtcNow;
     }
 }
-

@@ -41,4 +41,3 @@ public class RefundConfig : IEntityTypeConfiguration<Refund>
         builder.HasIndex(x => x.PaymentId);
     }
 }
-

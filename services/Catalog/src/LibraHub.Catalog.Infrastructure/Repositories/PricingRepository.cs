@@ -20,6 +20,21 @@ public class PricingRepository : IPricingRepository
             .FirstOrDefaultAsync(p => p.BookId == bookId, cancellationToken);
     }
 
+    public async Task<Dictionary<Guid, PricingPolicy>> GetByBookIdsAsync(IEnumerable<Guid> bookIds, CancellationToken cancellationToken = default)
+    {
+        var bookIdsList = bookIds.ToList();
+        if (bookIdsList.Count == 0)
+        {
+            return new Dictionary<Guid, PricingPolicy>();
+        }
+
+        var policies = await _context.PricingPolicies
+            .Where(p => bookIdsList.Contains(p.BookId))
+            .ToListAsync(cancellationToken);
+
+        return policies.ToDictionary(p => p.BookId);
+    }
+
     public async Task AddAsync(PricingPolicy pricingPolicy, CancellationToken cancellationToken = default)
     {
         await _context.PricingPolicies.AddAsync(pricingPolicy, cancellationToken);

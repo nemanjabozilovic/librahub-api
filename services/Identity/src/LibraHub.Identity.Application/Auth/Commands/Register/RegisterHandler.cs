@@ -52,7 +52,7 @@ public class RegisterHandler(
             request.FirstName ?? string.Empty,
             request.LastName ?? string.Empty,
             request.Phone,
-            request.DateOfBirth);
+            request.DateOfBirth.UtcDateTime);
 
         user.AddRole(Role.User);
         return user;
@@ -81,7 +81,7 @@ public class RegisterHandler(
                 {
                     UserId = user.Id,
                     Email = user.Email,
-                    OccurredAt = clock.UtcNow
+                    OccurredAt = clock.UtcNowOffset
                 };
 
                 await outboxWriter.WriteAsync(integrationEvent, EventTypes.UserRegistered, ct);

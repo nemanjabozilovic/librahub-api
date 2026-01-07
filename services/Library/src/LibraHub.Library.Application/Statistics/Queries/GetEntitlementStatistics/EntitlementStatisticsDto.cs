@@ -7,4 +7,3 @@ public class EntitlementStatisticsDto
     public int Revoked { get; init; }
     public int GrantedLast30Days { get; init; }
 }
-

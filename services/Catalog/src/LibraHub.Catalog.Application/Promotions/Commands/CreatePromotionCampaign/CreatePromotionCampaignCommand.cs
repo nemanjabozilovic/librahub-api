@@ -7,8 +7,8 @@ namespace LibraHub.Catalog.Application.Promotions.Commands.CreatePromotionCampai
 public record CreatePromotionCampaignCommand(
     string Name,
     string? Description,
-    DateTime StartsAtUtc,
-    DateTime EndsAtUtc,
+    DateTimeOffset StartsAtUtc,
+    DateTimeOffset EndsAtUtc,
     StackingPolicy StackingPolicy,
     int Priority,
     Guid CreatedBy) : IRequest<Result<Guid>>;

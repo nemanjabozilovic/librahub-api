@@ -12,4 +12,3 @@ public interface IPaymentRepository
 
     Task UpdateAsync(Payment payment, CancellationToken cancellationToken = default);
 }
-

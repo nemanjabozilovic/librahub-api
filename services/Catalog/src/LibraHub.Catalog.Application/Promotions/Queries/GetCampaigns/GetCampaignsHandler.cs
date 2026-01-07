@@ -18,11 +18,11 @@ public class GetCampaignsHandler(
             Name = c.Name,
             Description = c.Description,
             Status = c.Status.ToString(),
-            StartsAtUtc = c.StartsAtUtc,
-            EndsAtUtc = c.EndsAtUtc,
+            StartsAtUtc = new DateTimeOffset(c.StartsAtUtc, TimeSpan.Zero),
+            EndsAtUtc = new DateTimeOffset(c.EndsAtUtc, TimeSpan.Zero),
             StackingPolicy = c.StackingPolicy.ToString(),
             Priority = c.Priority,
-            CreatedAt = c.CreatedAt
+            CreatedAt = new DateTimeOffset(c.CreatedAt, TimeSpan.Zero)
         }).ToList();
 
         var totalPages = (int)Math.Ceiling(totalCount / (double)request.PageSize);

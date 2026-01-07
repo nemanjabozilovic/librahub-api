@@ -37,4 +37,3 @@ public class IdempotencyKeyConfig : IEntityTypeConfiguration<IdempotencyKey>
         builder.HasIndex(x => x.CreatedAt);
     }
 }
-

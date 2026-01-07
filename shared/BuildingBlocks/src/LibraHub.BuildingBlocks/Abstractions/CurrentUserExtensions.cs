@@ -15,4 +15,3 @@ public static class CurrentUserExtensions
         return Result.Success(currentUser.UserId.Value);
     }
 }
-

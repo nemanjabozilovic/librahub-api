@@ -31,5 +31,10 @@ public class CoverRepository : ICoverRepository
         _context.Covers.Update(cover);
         await _context.SaveChangesAsync(cancellationToken);
     }
-}
 
+    public async Task DeleteAsync(Cover cover, CancellationToken cancellationToken = default)
+    {
+        _context.Covers.Remove(cover);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+}

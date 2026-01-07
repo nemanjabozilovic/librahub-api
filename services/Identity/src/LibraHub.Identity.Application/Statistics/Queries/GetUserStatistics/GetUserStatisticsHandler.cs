@@ -30,4 +30,3 @@ public class GetUserStatisticsHandler(
         return Result.Success(response);
     }
 }
-

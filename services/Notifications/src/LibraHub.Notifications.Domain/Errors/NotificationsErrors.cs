@@ -18,4 +18,3 @@ public static class NotificationsErrors
         public const string NotAuthenticated = "USER_NOT_AUTHENTICATED";
     }
 }
-

@@ -9,4 +9,3 @@ public record UserStatisticsResult
     public int NewLast30Days { get; init; }
     public int NewLast7Days { get; init; }
 }
-

@@ -10,4 +10,3 @@ public interface IEmailTemplateService
     /// <returns>The template content as a string</returns>
     Task<string> GetTemplateByNameAsync(string templateName, CancellationToken cancellationToken = default);
 }
-

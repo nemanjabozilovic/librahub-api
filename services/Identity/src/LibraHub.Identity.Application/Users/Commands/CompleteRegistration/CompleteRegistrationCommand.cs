@@ -9,6 +9,5 @@ public record CompleteRegistrationCommand(
     string ConfirmPassword,
     string FirstName,
     string LastName,
-    DateTime DateOfBirth,
+    DateTimeOffset DateOfBirth,
     string? Phone = null) : IRequest<Result>;
-

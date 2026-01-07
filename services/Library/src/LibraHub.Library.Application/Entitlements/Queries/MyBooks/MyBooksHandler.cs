@@ -51,7 +51,7 @@ public class MyBooksHandler(
                 Title = snapshot?.Title ?? "Unknown Book",
                 Authors = snapshot?.Authors ?? "Unknown Author",
                 CoverRef = snapshot?.CoverRef,
-                AcquiredAt = entitlement.AcquiredAt
+                AcquiredAt = new DateTimeOffset(entitlement.AcquiredAt, TimeSpan.Zero)
             };
         }).ToList();
 

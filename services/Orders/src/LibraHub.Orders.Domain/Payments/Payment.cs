@@ -67,4 +67,3 @@ public class Payment
         FailedAt = DateTime.UtcNow;
     }
 }
-

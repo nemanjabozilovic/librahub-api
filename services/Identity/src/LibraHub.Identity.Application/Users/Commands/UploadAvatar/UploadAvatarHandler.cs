@@ -108,4 +108,3 @@ public class UploadAvatarHandler(
         return null;
     }
 }
-

@@ -52,7 +52,7 @@ public class CancelOrderHandler(
                 OrderId = order.Id,
                 UserId = order.UserId,
                 Reason = request.Reason,
-                CancelledAt = clock.UtcNow
+                CancelledAt = clock.UtcNowOffset
             },
             Contracts.Common.EventTypes.OrderCancelled,
             cancellationToken);
@@ -60,4 +60,3 @@ public class CancelOrderHandler(
         return Result.Success();
     }
 }
-

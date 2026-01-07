@@ -43,10 +43,14 @@ public class CreateReadTokenHandler(
             return Result.Failure<string>(Error.Validation(ContentErrors.Book.Blocked));
         }
 
-        bool hasAccess = bookInfo.IsFree;
+        bool hasAccess = currentUser.IsInRole("Admin") || currentUser.IsInRole("Librarian");
         if (!hasAccess)
         {
-            hasAccess = await libraryClient.UserOwnsBookAsync(userId, request.BookId, cancellationToken);
+            hasAccess = bookInfo.IsFree;
+            if (!hasAccess)
+            {
+                hasAccess = await libraryClient.UserOwnsBookAsync(userId, request.BookId, cancellationToken);
+            }
         }
 
         if (!hasAccess)
@@ -125,4 +129,3 @@ public class CreateReadTokenHandler(
         return Convert.ToBase64String(bytes).Replace("+", "-").Replace("/", "_").Replace("=", "");
     }
 }
-

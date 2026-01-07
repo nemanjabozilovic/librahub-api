@@ -7,4 +7,3 @@ namespace LibraHub.Content.Application.Upload.Commands.UploadCover;
 public record UploadCoverCommand(
     Guid BookId,
     IFormFile File) : IRequest<Result<Guid>>;
-

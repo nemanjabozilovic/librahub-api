@@ -11,4 +11,3 @@ public class ResendVerificationEmailValidator : AbstractValidator<ResendVerifica
             .EmailAddress().WithMessage("Invalid email format");
     }
 }
-

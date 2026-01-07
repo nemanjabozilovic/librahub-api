@@ -24,4 +24,3 @@ public interface IObjectStorage
         string objectKey,
         CancellationToken cancellationToken = default);
 }
-

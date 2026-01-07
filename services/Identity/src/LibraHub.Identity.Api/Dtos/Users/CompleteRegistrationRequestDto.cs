@@ -8,6 +8,5 @@ public record CompleteRegistrationRequestDto
     public string FirstName { get; init; } = string.Empty;
     public string LastName { get; init; } = string.Empty;
     public string? Phone { get; init; }
-    public DateTime DateOfBirth { get; init; }
+    public DateTimeOffset DateOfBirth { get; init; }
 }
-

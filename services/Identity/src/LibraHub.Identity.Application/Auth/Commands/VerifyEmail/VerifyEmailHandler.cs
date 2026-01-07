@@ -57,7 +57,7 @@ public class VerifyEmailHandler : IRequestHandler<VerifyEmailCommand, Result>
         var integrationEvent = new EmailVerifiedV1
         {
             UserId = user.Id,
-            OccurredAt = _clock.UtcNow
+            OccurredAt = _clock.UtcNowOffset
         };
 
         await _outboxWriter.WriteAsync(integrationEvent, EventTypes.EmailVerified, cancellationToken);

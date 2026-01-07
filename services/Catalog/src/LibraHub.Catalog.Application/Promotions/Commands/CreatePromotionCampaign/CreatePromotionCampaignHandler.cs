@@ -16,8 +16,8 @@ public class CreatePromotionCampaignHandler(
                 Guid.NewGuid(),
                 request.Name,
                 request.Description,
-                request.StartsAtUtc,
-                request.EndsAtUtc,
+                request.StartsAtUtc.UtcDateTime,
+                request.EndsAtUtc.UtcDateTime,
                 request.StackingPolicy,
                 request.Priority,
                 request.CreatedBy);

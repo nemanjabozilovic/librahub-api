@@ -47,4 +47,3 @@ public class IdempotencyStore<TDbContext, TIdempotencyKey> : IIdempotencyStore
         await _context.SaveChangesAsync(cancellationToken);
     }
 }
-

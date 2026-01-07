@@ -6,4 +6,3 @@ public enum EntitlementSource
     AdminGrant = 2,
     Promotion = 3
 }
-

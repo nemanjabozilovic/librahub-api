@@ -27,7 +27,7 @@ public class Book
     private readonly List<BookTag> _tags = new();
     public virtual IReadOnlyCollection<BookTag> Tags => _tags.AsReadOnly();
 
-    private Book()
+    protected Book()
     { } // For EF Core
 
     public Book(Guid id, string title)
@@ -273,7 +273,7 @@ public class BookAuthor
     public Guid BookId { get; private set; }
     public string Name { get; private set; } = string.Empty;
 
-    private BookAuthor()
+    protected BookAuthor()
     { } // For EF Core
 
     public BookAuthor(Guid bookId, string name)
@@ -288,7 +288,7 @@ public class BookCategory
     public Guid BookId { get; private set; }
     public string Name { get; private set; } = string.Empty;
 
-    private BookCategory()
+    protected BookCategory()
     { } // For EF Core
 
     public BookCategory(Guid bookId, string name)
@@ -303,7 +303,7 @@ public class BookTag
     public Guid BookId { get; private set; }
     public string Name { get; private set; } = string.Empty;
 
-    private BookTag()
+    protected BookTag()
     { } // For EF Core
 
     public BookTag(Guid bookId, string name)

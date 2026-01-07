@@ -5,5 +5,5 @@ public record BookUpdatedV1
     public Guid BookId { get; init; }
     public string Title { get; init; } = string.Empty;
     public string Authors { get; init; } = string.Empty;
-    public DateTime UpdatedAt { get; init; }
+    public DateTimeOffset UpdatedAt { get; init; }
 }

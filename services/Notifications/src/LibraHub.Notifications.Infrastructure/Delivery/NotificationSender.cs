@@ -38,4 +38,3 @@ public class NotificationSender(
         return emailSender.SendEmailWithTemplateAsync(email, subject, templateName, model, cancellationToken);
     }
 }
-

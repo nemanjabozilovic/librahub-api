@@ -12,7 +12,7 @@ public class PricingPolicy
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
-    private PricingPolicy()
+    protected PricingPolicy()
     { } // For EF Core
 
     public PricingPolicy(Guid id, Guid bookId, Money price, decimal? vatRate = null)

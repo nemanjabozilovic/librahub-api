@@ -15,7 +15,6 @@ public class OrderSummaryDto
     public string Status { get; init; } = string.Empty;
     public decimal Total { get; init; }
     public string Currency { get; init; } = string.Empty;
-    public DateTime CreatedAt { get; init; }
+    public DateTimeOffset CreatedAt { get; init; }
     public int ItemCount { get; init; }
 }
-

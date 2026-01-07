@@ -32,4 +32,3 @@ public class OrdersDbContext : DbContext
         base.OnModelCreating(modelBuilder);
     }
 }
-

@@ -27,8 +27,8 @@ public class GetMyNotificationsHandler(
             Title = n.Title,
             Message = n.Message,
             Status = n.Status.ToString(),
-            CreatedAt = n.CreatedAt,
-            ReadAt = n.ReadAt
+            CreatedAt = new DateTimeOffset(n.CreatedAt, TimeSpan.Zero),
+            ReadAt = n.ReadAt.HasValue ? new DateTimeOffset(n.ReadAt.Value, TimeSpan.Zero) : null
         }).ToList();
 
         return new GetMyNotificationsDto
@@ -38,4 +38,3 @@ public class GetMyNotificationsHandler(
         };
     }
 }
-

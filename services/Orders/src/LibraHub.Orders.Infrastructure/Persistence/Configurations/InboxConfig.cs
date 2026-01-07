@@ -29,4 +29,3 @@ public class InboxConfig : IEntityTypeConfiguration<ProcessedMessage>
             .IsUnique();
     }
 }
-

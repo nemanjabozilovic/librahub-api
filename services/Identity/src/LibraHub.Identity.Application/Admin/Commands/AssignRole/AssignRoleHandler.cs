@@ -59,7 +59,7 @@ public class AssignRoleHandler : IRequestHandler<AssignRoleCommand, Result>
         {
             UserId = user.Id,
             Role = request.Role.ToString(),
-            OccurredAt = _clock.UtcNow
+            OccurredAt = _clock.UtcNowOffset
         };
 
         await _outboxWriter.WriteAsync(integrationEvent, EventTypes.RoleAssigned, cancellationToken);

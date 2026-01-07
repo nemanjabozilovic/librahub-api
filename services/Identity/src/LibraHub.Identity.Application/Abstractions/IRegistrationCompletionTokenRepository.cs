@@ -10,4 +10,3 @@ public interface IRegistrationCompletionTokenRepository
 
     Task UpdateAsync(RegistrationCompletionToken token, CancellationToken cancellationToken = default);
 }
-

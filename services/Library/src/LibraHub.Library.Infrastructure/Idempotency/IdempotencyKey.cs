@@ -8,4 +8,3 @@ public class IdempotencyKey
     public byte[] ResponseBody { get; set; } = Array.Empty<byte>();
     public DateTime CreatedAt { get; set; }
 }
-

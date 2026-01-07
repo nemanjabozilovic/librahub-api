@@ -7,6 +7,5 @@ public class OrderRefundedV1
     public Guid RefundId { get; set; }
     public string Reason { get; set; } = string.Empty;
     public Guid RefundedBy { get; set; }
-    public DateTime RefundedAt { get; set; }
+    public DateTimeOffset RefundedAt { get; set; }
 }
-

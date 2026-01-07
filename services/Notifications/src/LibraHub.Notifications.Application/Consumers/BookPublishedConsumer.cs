@@ -40,7 +40,6 @@ public class BookPublishedConsumer(
             allUserIds.Count, @event.BookId);
 
         var notificationsToCreate = new List<Notification>();
-        var emailTasks = new List<Task>();
 
         try
         {
@@ -90,14 +89,14 @@ public class BookPublishedConsumer(
                                     PublishedAt = @event.PublishedAt
                                 };
 
-                                emailTasks.Add(SendEmailNotificationAsync(
+                                await SendEmailNotificationAsync(
                                     notificationSender,
                                     userInfo.Email,
                                     emailSubject,
                                     emailModel,
                                     userId,
                                     @event.BookId,
-                                    ct));
+                                    ct);
                             }
                             else
                             {
@@ -142,11 +141,6 @@ public class BookPublishedConsumer(
                 @event.BookId, messageId);
             throw;
         }
-
-        if (emailTasks.Count > 0)
-        {
-            await Task.WhenAll(emailTasks);
-        }
     }
 
     private static async Task SendEmailNotificationAsync(
@@ -169,9 +163,7 @@ public class BookPublishedConsumer(
         }
         catch (Exception)
         {
-            // Logging will be handled by the caller if needed
             throw;
         }
     }
 }
-

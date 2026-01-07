@@ -104,7 +104,7 @@ public class CapturePaymentHandler(
                         VatTotal = order.VatTotal.Amount,
                         Total = order.Total.Amount,
                         Currency = order.Currency,
-                        PaidAt = clock.UtcNow
+                        PaidAt = clock.UtcNowOffset
                     },
                     Contracts.Common.EventTypes.OrderPaid,
                     ct);
@@ -118,4 +118,3 @@ public class CapturePaymentHandler(
         }
     }
 }
-

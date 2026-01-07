@@ -44,5 +44,10 @@ public class StoredObjectRepository : IStoredObjectRepository
         _context.StoredObjects.Update(storedObject);
         await _context.SaveChangesAsync(cancellationToken);
     }
-}
 
+    public async Task DeleteAsync(StoredObject storedObject, CancellationToken cancellationToken = default)
+    {
+        _context.StoredObjects.Remove(storedObject);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+}

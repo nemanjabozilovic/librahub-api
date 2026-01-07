@@ -20,6 +20,22 @@ public class ReadingProgressRepository : IReadingProgressRepository
             .FirstOrDefaultAsync(p => p.UserId == userId && p.BookId == bookId, cancellationToken);
     }
 
+    public async Task<ReadingProgress?> GetByUserBookFormatAndVersionAsync(
+        Guid userId,
+        Guid bookId,
+        string? format,
+        int? version,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.ReadingProgress
+            .FirstOrDefaultAsync(p =>
+                p.UserId == userId &&
+                p.BookId == bookId &&
+                p.Format == format &&
+                p.Version == version,
+                cancellationToken);
+    }
+
     public async Task AddAsync(ReadingProgress progress, CancellationToken cancellationToken = default)
     {
         await _context.ReadingProgress.AddAsync(progress, cancellationToken);
@@ -32,4 +48,3 @@ public class ReadingProgressRepository : IReadingProgressRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 }
-

@@ -11,4 +11,3 @@ public class ForgotPasswordValidator : AbstractValidator<ForgotPasswordCommand>
             .EmailAddress().WithMessage("Invalid email format");
     }
 }
-

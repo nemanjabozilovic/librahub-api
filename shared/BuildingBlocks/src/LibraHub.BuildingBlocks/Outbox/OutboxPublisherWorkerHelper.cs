@@ -70,4 +70,3 @@ public class OutboxPublisherWorkerHelper<TDbContext> : OutboxPublisherWorker whe
         }
     }
 }
-

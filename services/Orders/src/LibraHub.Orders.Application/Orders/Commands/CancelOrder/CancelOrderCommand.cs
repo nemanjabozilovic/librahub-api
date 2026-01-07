@@ -7,4 +7,3 @@ public class CancelOrderCommand : IRequest<LibraHub.BuildingBlocks.Results.Resul
     public Guid OrderId { get; init; }
     public string? Reason { get; init; }
 }
-

@@ -108,8 +108,8 @@ public class GetAllEntitlementsHandler(
                     BookTitle = bookSnapshot?.Title,
                     Status = e.Status.ToString(),
                     Source = e.Source.ToString(),
-                    AcquiredAt = e.AcquiredAt,
-                    RevokedAt = e.RevokedAt,
+                    AcquiredAt = new DateTimeOffset(e.AcquiredAt, TimeSpan.Zero),
+                    RevokedAt = e.RevokedAt.HasValue ? new DateTimeOffset(e.RevokedAt.Value, TimeSpan.Zero) : null,
                     RevocationReason = e.RevocationReason,
                     OrderId = e.OrderId
                 };
@@ -122,4 +122,3 @@ public class GetAllEntitlementsHandler(
         return Result.Success(response);
     }
 }
-

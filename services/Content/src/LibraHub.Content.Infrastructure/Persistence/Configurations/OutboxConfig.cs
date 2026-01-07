@@ -33,4 +33,3 @@ public class OutboxConfig : IEntityTypeConfiguration<OutboxMessage>
         builder.HasIndex(x => new { x.ProcessedAt, x.CreatedAt });
     }
 }
-

@@ -33,4 +33,3 @@ public class InboxRepository : ApplicationAbstractions.IInboxRepository
         await _context.ProcessedMessages.AddAsync(processedMessage, cancellationToken);
     }
 }
-

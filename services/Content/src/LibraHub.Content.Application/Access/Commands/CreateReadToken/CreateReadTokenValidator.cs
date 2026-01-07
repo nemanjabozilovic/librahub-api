@@ -23,4 +23,3 @@ public class CreateReadTokenValidator : AbstractValidator<CreateReadTokenCommand
             .WithMessage("Version must be greater than 0");
     }
 }
-

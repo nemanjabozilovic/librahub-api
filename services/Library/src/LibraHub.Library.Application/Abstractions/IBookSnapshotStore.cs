@@ -10,4 +10,3 @@ public interface IBookSnapshotStore
 
     Task MarkAsRemovedAsync(Guid bookId, CancellationToken cancellationToken = default);
 }
-

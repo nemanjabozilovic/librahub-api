@@ -16,5 +16,5 @@ public record AnnouncementDto
     public string Title { get; init; } = string.Empty;
     public string Content { get; init; } = string.Empty;
     public string Status { get; init; } = string.Empty;
-    public DateTime? PublishedAt { get; init; }
+    public DateTimeOffset? PublishedAt { get; init; }
 }

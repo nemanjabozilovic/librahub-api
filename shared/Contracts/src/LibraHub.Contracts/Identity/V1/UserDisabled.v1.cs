@@ -4,5 +4,5 @@ public record UserDisabledV1
 {
     public Guid UserId { get; init; }
     public string Reason { get; init; } = string.Empty;
-    public DateTime OccurredAt { get; init; }
+    public DateTimeOffset OccurredAt { get; init; }
 }

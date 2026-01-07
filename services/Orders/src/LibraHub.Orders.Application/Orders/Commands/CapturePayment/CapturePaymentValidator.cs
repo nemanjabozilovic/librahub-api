@@ -19,4 +19,3 @@ public class CapturePaymentValidator : AbstractValidator<CapturePaymentCommand>
             .WithMessage("ProviderReference is required");
     }
 }
-

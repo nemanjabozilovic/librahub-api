@@ -26,4 +26,3 @@ public class UpdateUserValidator : AbstractValidator<UpdateUserCommand>
             .LessThan(DateTime.UtcNow).WithMessage("Date of birth must be in the past");
     }
 }
-

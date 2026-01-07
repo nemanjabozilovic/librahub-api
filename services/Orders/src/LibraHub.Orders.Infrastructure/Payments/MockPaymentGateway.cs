@@ -87,4 +87,3 @@ public class MockPaymentGateway : IPaymentGateway
         return _options.FailureReasons[index];
     }
 }
-

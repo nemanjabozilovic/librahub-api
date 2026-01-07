@@ -67,4 +67,3 @@ public class PaymentConfig : IEntityTypeConfiguration<Payment>
         builder.HasIndex(x => x.Status);
     }
 }
-

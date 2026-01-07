@@ -40,7 +40,7 @@ public class CatalogReadClient : ICatalogReadClient
         try
         {
             var response = await _httpClient.GetAsync(
-                $"{_options.CatalogApiUrl}/api/books/{bookId}/info",
+                $"{_options.CatalogApiUrl}/books/{bookId}/info",
                 cancellationToken);
 
             if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
@@ -66,4 +66,3 @@ public class CatalogReadClient : ICatalogReadClient
         }
     }
 }
-

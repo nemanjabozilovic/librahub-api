@@ -4,5 +4,5 @@ public record RoleAssignedV1
 {
     public Guid UserId { get; init; }
     public string Role { get; init; } = string.Empty;
-    public DateTime OccurredAt { get; init; }
+    public DateTimeOffset OccurredAt { get; init; }
 }

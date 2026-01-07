@@ -103,4 +103,3 @@ public class Order
     public bool CanBeCancelled => Status == OrderStatus.Created || Status == OrderStatus.PaymentPending;
     public bool CanBeRefunded => Status == OrderStatus.Paid;
 }
-

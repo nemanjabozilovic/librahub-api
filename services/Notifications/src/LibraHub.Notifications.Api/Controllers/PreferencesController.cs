@@ -52,4 +52,3 @@ public record UpdatePreferencesRequestDto
     public bool EmailEnabled { get; init; }
     public bool InAppEnabled { get; init; }
 }
-

@@ -19,9 +19,8 @@ public class EntitlementSummaryDto
     public string? BookTitle { get; init; }
     public string Status { get; init; } = string.Empty;
     public string Source { get; init; } = string.Empty;
-    public DateTime AcquiredAt { get; init; }
-    public DateTime? RevokedAt { get; init; }
+    public DateTimeOffset AcquiredAt { get; init; }
+    public DateTimeOffset? RevokedAt { get; init; }
     public string? RevocationReason { get; init; }
     public Guid? OrderId { get; init; }
 }
-

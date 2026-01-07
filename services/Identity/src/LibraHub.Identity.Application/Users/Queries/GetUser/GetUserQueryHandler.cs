@@ -34,11 +34,10 @@ public class GetUserQueryHandler : IRequestHandler<GetUserQuery, Result<GetUserR
             EmailVerified = user.EmailVerified,
             Status = user.Status.ToString(),
             IsActive = user.Status == Domain.Users.UserStatus.Active,
-            CreatedAt = user.CreatedAt,
-            LastLoginAt = user.LastLoginAt
+            CreatedAt = new DateTimeOffset(user.CreatedAt, TimeSpan.Zero),
+            LastLoginAt = user.LastLoginAt.HasValue ? new DateTimeOffset(user.LastLoginAt.Value, TimeSpan.Zero) : null
         };
 
         return Result.Success(response);
     }
 }
-

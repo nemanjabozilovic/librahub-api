@@ -30,4 +30,3 @@ public static class LibraryErrors
         public const string NotAuthorized = "User is not authorized to perform this action";
     }
 }
-

@@ -32,4 +32,3 @@ public class RegistrationCompletionTokenService : IRegistrationCompletionTokenSe
         return _options.RegistrationCompletionExpirationHours;
     }
 }
-

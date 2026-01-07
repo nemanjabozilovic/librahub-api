@@ -58,15 +58,14 @@ public class GetMeQueryHandler : IRequestHandler<GetMeQuery, Result<GetMeRespons
             DisplayName = user.DisplayName,
             Phone = user.Phone,
             Avatar = user.Avatar,
-            DateOfBirth = user.DateOfBirth,
+            DateOfBirth = user.DateOfBirth != default ? new DateTimeOffset(user.DateOfBirth, TimeSpan.Zero) : null,
             Roles = roles,
             EmailVerified = user.EmailVerified,
             Status = user.Status.ToString(),
-            CreatedAt = user.CreatedAt,
-            LastLoginAt = user.LastLoginAt
+            CreatedAt = new DateTimeOffset(user.CreatedAt, TimeSpan.Zero),
+            LastLoginAt = user.LastLoginAt.HasValue ? new DateTimeOffset(user.LastLoginAt.Value, TimeSpan.Zero) : null
         };
 
         return Result.Success(response);
     }
 }
-

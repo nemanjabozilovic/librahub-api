@@ -36,7 +36,7 @@ public class PublishAnnouncementHandler(
                 AnnouncementId = announcement.Id,
                 BookId = announcement.BookId,
                 Title = announcement.Title,
-                PublishedAt = announcement.PublishedAt!.Value
+                PublishedAt = new DateTimeOffset(announcement.PublishedAt!.Value, TimeSpan.Zero)
             },
             Contracts.Common.EventTypes.AnnouncementPublished,
             cancellationToken);

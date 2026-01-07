@@ -58,4 +58,3 @@ public class EntitlementConfig : IEntityTypeConfiguration<Entitlement>
         builder.HasIndex(x => x.AcquiredAt);
     }
 }
-

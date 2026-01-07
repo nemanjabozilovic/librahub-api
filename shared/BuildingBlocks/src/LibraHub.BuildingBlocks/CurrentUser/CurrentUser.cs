@@ -47,4 +47,3 @@ public class CurrentUser(IHttpContextAccessor httpContextAccessor) : ICurrentUse
         }
     }
 }
-

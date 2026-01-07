@@ -32,7 +32,7 @@ public class MyLibraryController(IMediator mediator) : ControllerBase
         return result.ToActionResult(this);
     }
 
-    [HttpPost("books/{bookId}/progress")]
+    [HttpPut("books/{bookId}/progress")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status401Unauthorized)]
@@ -44,6 +44,8 @@ public class MyLibraryController(IMediator mediator) : ControllerBase
         var command = new UpdateProgressCommand
         {
             BookId = bookId,
+            Format = request.Format,
+            Version = request.Version,
             Percentage = request.Percentage,
             LastPage = request.LastPage
         };
@@ -57,15 +59,18 @@ public class MyLibraryController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(Error), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetProgress(
         Guid bookId,
+        [FromQuery] string? format = null,
+        [FromQuery] int? version = null,
         CancellationToken cancellationToken = default)
     {
         var query = new GetProgressQuery
         {
-            BookId = bookId
+            BookId = bookId,
+            Format = format,
+            Version = version
         };
 
         var result = await mediator.Send(query, cancellationToken);
         return result.ToActionResult(this);
     }
 }
-

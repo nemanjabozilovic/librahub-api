@@ -42,4 +42,3 @@ public class IdempotencyKeyConfig : IEntityTypeConfiguration<IdempotencyKey>
             .IsUnique();
     }
 }
-

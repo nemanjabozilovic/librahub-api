@@ -11,4 +11,3 @@ public record UpdateUserCommand(
     DateTime DateOfBirth,
     string? Phone = null,
     bool? EmailVerified = null) : IRequest<Result<UserDto>>;
-

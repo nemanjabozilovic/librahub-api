@@ -10,4 +10,3 @@ public class NotificationsOptions
     [Url(ErrorMessage = "IdentityApiUrl must be a valid URL")]
     public string IdentityApiUrl { get; set; } = string.Empty;
 }
-

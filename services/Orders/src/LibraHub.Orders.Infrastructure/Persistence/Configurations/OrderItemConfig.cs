@@ -88,4 +88,3 @@ public class OrderItemConfig : IEntityTypeConfiguration<OrderItem>
         builder.HasIndex(x => x.BookId);
     }
 }
-

@@ -11,9 +11,9 @@ public class OrderDto
     public decimal VatTotal { get; init; }
     public decimal Total { get; init; }
     public string Currency { get; init; } = string.Empty;
-    public DateTime CreatedAt { get; init; }
-    public DateTime? UpdatedAt { get; init; }
-    public DateTime? CancelledAt { get; init; }
+    public DateTimeOffset CreatedAt { get; init; }
+    public DateTimeOffset? UpdatedAt { get; init; }
+    public DateTimeOffset? CancelledAt { get; init; }
     public string? CancellationReason { get; init; }
     public List<OrderItemDto> Items { get; init; } = new();
     public PaymentDto? Payment { get; init; }
@@ -40,7 +40,6 @@ public class PaymentDto
     public string Status { get; init; } = string.Empty;
     public decimal Amount { get; init; }
     public string? ProviderReference { get; init; }
-    public DateTime CreatedAt { get; init; }
-    public DateTime? CompletedAt { get; init; }
+    public DateTimeOffset CreatedAt { get; init; }
+    public DateTimeOffset? CompletedAt { get; init; }
 }
-

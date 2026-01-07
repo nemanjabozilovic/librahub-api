@@ -6,4 +6,3 @@ public class OrderPeriodStatistics
     public decimal Revenue { get; init; }
     public string Currency { get; init; } = string.Empty;
 }
-

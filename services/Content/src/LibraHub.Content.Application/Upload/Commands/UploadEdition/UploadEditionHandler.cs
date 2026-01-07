@@ -39,22 +39,8 @@ public class UploadEditionHandler(
             return Result.Failure<Guid>(Error.Validation(ContentErrors.Edition.InvalidFormat));
         }
 
-        int version;
-        if (request.Version.HasValue)
-        {
-            version = request.Version.Value;
-        }
-        else
-        {
-            var latest = await editionRepository.GetLatestByBookIdAndFormatAsync(request.BookId, format, cancellationToken);
-            version = latest != null ? latest.Version + 1 : 1;
-        }
-
-        var existing = await editionRepository.GetByBookIdFormatAndVersionAsync(request.BookId, format, version, cancellationToken);
-        if (existing != null)
-        {
-            return Result.Failure<Guid>(Error.Validation(ContentErrors.Edition.InvalidVersion));
-        }
+        var latest = await editionRepository.GetLatestByBookIdAndFormatAsync(request.BookId, format, cancellationToken);
+        var version = latest != null ? latest.Version + 1 : 1;
 
         string sha256;
         using (var stream = request.File.OpenReadStream())
@@ -107,7 +93,7 @@ public class UploadEditionHandler(
                 Sha256 = sha256,
                 Size = request.File.Length,
                 ContentType = request.File.ContentType,
-                UploadedAt = clock.UtcNow
+                UploadedAt = clock.UtcNowOffset
             },
             Contracts.Common.EventTypes.EditionUploaded,
             cancellationToken);
@@ -115,4 +101,3 @@ public class UploadEditionHandler(
         return Result.Success(edition.Id);
     }
 }
-

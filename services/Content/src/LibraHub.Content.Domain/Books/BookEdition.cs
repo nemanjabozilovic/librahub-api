@@ -11,7 +11,7 @@ public class BookEdition
     public bool IsBlocked { get; private set; }
     public DateTime? BlockedAt { get; private set; }
 
-    private BookEdition()
+    protected BookEdition()
     { } // For EF Core
 
     public BookEdition(
@@ -43,4 +43,3 @@ public class BookEdition
 
     public bool IsAccessible => !IsBlocked;
 }
-

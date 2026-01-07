@@ -19,4 +19,3 @@ public class ResetPasswordValidator : AbstractValidator<ResetPasswordCommand>
             .Equal(x => x.NewPassword).WithMessage("Passwords do not match");
     }
 }
-

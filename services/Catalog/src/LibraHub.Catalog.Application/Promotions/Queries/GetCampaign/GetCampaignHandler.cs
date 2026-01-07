@@ -28,7 +28,7 @@ public class GetCampaignHandler(
             AppliesToScope = r.AppliesToScope.ToString(),
             ScopeValues = r.ScopeValues,
             Exclusions = r.Exclusions,
-            CreatedAt = r.CreatedAt
+            CreatedAt = new DateTimeOffset(r.CreatedAt, TimeSpan.Zero)
         }).ToList();
 
         var response = new GetCampaignResponseDto
@@ -37,12 +37,12 @@ public class GetCampaignHandler(
             Name = campaign.Name,
             Description = campaign.Description,
             Status = campaign.Status.ToString(),
-            StartsAtUtc = campaign.StartsAtUtc,
-            EndsAtUtc = campaign.EndsAtUtc,
+            StartsAtUtc = new DateTimeOffset(campaign.StartsAtUtc, TimeSpan.Zero),
+            EndsAtUtc = new DateTimeOffset(campaign.EndsAtUtc, TimeSpan.Zero),
             StackingPolicy = campaign.StackingPolicy.ToString(),
             Priority = campaign.Priority,
             CreatedBy = campaign.CreatedBy,
-            CreatedAt = campaign.CreatedAt,
+            CreatedAt = new DateTimeOffset(campaign.CreatedAt, TimeSpan.Zero),
             Rules = rules
         };
 

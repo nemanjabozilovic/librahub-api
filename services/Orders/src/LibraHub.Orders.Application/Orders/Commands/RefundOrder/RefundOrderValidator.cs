@@ -17,4 +17,3 @@ public class RefundOrderValidator : AbstractValidator<RefundOrderCommand>
             .WithMessage("Refund reason cannot exceed 500 characters");
     }
 }
-

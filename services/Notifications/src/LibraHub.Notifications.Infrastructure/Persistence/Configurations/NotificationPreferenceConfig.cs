@@ -48,4 +48,3 @@ public class NotificationPreferenceConfig : IEntityTypeConfiguration<Notificatio
         builder.HasIndex(x => x.UserId);
     }
 }
-

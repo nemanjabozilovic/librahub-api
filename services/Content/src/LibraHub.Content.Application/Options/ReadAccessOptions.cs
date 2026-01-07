@@ -16,5 +16,7 @@ public class ReadAccessOptions
 
     [Range(1, int.MaxValue, ErrorMessage = "TokenExpirationMinutes must be greater than 0")]
     public int TokenExpirationMinutes { get; set; }
-}
 
+    [Range(1, int.MaxValue, ErrorMessage = "TokenRefreshThresholdMinutes must be greater than 0")]
+    public int TokenRefreshThresholdMinutes { get; set; } = 5;
+}

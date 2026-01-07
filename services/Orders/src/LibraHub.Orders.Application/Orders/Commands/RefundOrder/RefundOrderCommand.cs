@@ -7,4 +7,3 @@ public class RefundOrderCommand : IRequest<LibraHub.BuildingBlocks.Results.Resul
     public Guid OrderId { get; init; }
     public string Reason { get; init; } = string.Empty;
 }
-

@@ -7,6 +7,5 @@ public class PaymentInitiatedV1
     public string Provider { get; set; } = string.Empty;
     public decimal Amount { get; set; }
     public string Currency { get; set; } = string.Empty;
-    public DateTime InitiatedAt { get; set; }
+    public DateTimeOffset InitiatedAt { get; set; }
 }
-

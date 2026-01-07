@@ -11,4 +11,4 @@ public record PricingQuoteItemRequest
 public record GetPricingQuoteQuery(
     string Currency,
     List<PricingQuoteItemRequest> Items,
-    DateTime? AtUtc = null) : IRequest<Result<PricingQuoteResponseDto>>;
+    DateTimeOffset? AtUtc = null) : IRequest<Result<PricingQuoteResponseDto>>;

@@ -41,4 +41,3 @@ public class Money
         return new Money(Amount * factor, Currency);
     }
 }
-

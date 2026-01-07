@@ -5,6 +5,5 @@ public class EntitlementGrantedV1
     public Guid UserId { get; set; }
     public Guid BookId { get; set; }
     public string Source { get; set; } = string.Empty;
-    public DateTime AcquiredAtUtc { get; set; }
+    public DateTimeOffset AcquiredAtUtc { get; set; }
 }
-

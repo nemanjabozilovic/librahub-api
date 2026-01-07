@@ -24,7 +24,7 @@ public class GetPricingQuoteHandler(
             return Result.Failure<PricingQuoteResponseDto>(Error.Validation($"Only {Currency.USD} currency is supported"));
         }
 
-        var utcNow = request.AtUtc ?? clock.UtcNow;
+        var utcNow = request.AtUtc?.UtcDateTime ?? clock.UtcNow;
         var activeCampaigns = await promotionRepository.GetActiveAsync(utcNow, cancellationToken);
         var evaluator = new PromotionEvaluator();
 
@@ -72,6 +72,7 @@ public class GetPricingQuoteHandler(
                 BookId = itemRequest.BookId,
                 BasePrice = basePrice,
                 FinalPrice = promotionResult?.FinalPrice ?? basePrice,
+                VatRate = pricing.VatRate ?? 0m,
                 AppliedPromotion = appliedPromotion
             });
         }

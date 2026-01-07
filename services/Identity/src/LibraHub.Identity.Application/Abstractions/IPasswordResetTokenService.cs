@@ -8,4 +8,3 @@ public interface IPasswordResetTokenService
 
     int GetExpirationHours();
 }
-

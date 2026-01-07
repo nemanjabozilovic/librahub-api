@@ -27,4 +27,3 @@ public class UploadCoverValidator : AbstractValidator<UploadCoverCommand>
             .WithMessage($"Content type must be one of: {string.Join(", ", AllowedContentTypes)}");
     }
 }
-

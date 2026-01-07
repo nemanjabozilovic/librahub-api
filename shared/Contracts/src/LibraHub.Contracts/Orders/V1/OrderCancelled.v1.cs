@@ -5,6 +5,5 @@ public class OrderCancelledV1
     public Guid OrderId { get; set; }
     public Guid UserId { get; set; }
     public string? Reason { get; set; }
-    public DateTime CancelledAt { get; set; }
+    public DateTimeOffset CancelledAt { get; set; }
 }
-

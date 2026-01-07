@@ -8,4 +8,3 @@ public static class EventTypes
     public const string OrderPaidV1 = "OrderPaidV1";
     public const string OrderRefundedV1 = "OrderRefundedV1";
 }
-

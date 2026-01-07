@@ -8,4 +8,3 @@ public interface INotificationSender
 
     Task SendEmailWithTemplateAsync(string email, string subject, string templateName, object model, CancellationToken cancellationToken = default);
 }
-

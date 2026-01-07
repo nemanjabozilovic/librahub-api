@@ -7,5 +7,5 @@ public record CoverUploadedV1
     public string Sha256 { get; init; } = string.Empty;
     public long Size { get; init; }
     public string ContentType { get; init; } = string.Empty;
-    public DateTime UploadedAt { get; init; }
+    public DateTimeOffset UploadedAt { get; init; }
 }

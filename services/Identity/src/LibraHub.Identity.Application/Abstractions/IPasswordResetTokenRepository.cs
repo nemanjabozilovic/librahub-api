@@ -10,4 +10,3 @@ public interface IPasswordResetTokenRepository
 
     Task UpdateAsync(PasswordResetToken token, CancellationToken cancellationToken = default);
 }
-

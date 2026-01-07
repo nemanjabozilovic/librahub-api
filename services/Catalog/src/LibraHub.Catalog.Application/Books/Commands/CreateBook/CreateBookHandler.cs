@@ -29,7 +29,7 @@ public class CreateBookHandler(
             request.Description,
             request.Language,
             request.Publisher,
-            request.PublicationDate,
+            request.PublicationDate.UtcDateTime,
             isbn);
 
         foreach (var author in request.Authors)
@@ -57,7 +57,7 @@ public class CreateBookHandler(
             {
                 BookId = book.Id,
                 Title = book.Title,
-                CreatedAt = book.CreatedAt
+                CreatedAt = new DateTimeOffset(book.CreatedAt, TimeSpan.Zero)
             },
             Contracts.Common.EventTypes.BookCreated,
             cancellationToken);

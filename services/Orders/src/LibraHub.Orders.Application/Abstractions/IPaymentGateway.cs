@@ -34,4 +34,3 @@ public class PaymentResult
         FailureReason = reason
     };
 }
-

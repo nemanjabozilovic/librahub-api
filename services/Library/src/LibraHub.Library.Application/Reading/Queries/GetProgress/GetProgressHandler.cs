@@ -20,26 +20,31 @@ public class GetProgressHandler(
 
         var userId = currentUser.UserId.Value;
 
-        var progress = await progressRepository.GetByUserAndBookAsync(userId, request.BookId, cancellationToken);
+        var normalizedFormat = request.Format?.ToUpperInvariant();
+        var progress = await progressRepository.GetByUserBookFormatAndVersionAsync(
+            userId, request.BookId, normalizedFormat, request.Version, cancellationToken);
 
         if (progress == null)
         {
             return Result.Success(new ReadingProgressDto
             {
                 BookId = request.BookId,
+                Format = normalizedFormat,
+                Version = request.Version,
                 Percentage = 0,
                 LastPage = null,
-                LastUpdatedAt = DateTime.UtcNow
+                LastUpdatedAt = DateTimeOffset.UtcNow
             });
         }
 
         return Result.Success(new ReadingProgressDto
         {
             BookId = progress.BookId,
+            Format = progress.Format,
+            Version = progress.Version,
             Percentage = progress.ProgressPercentage,
             LastPage = progress.LastPage,
-            LastUpdatedAt = progress.LastUpdatedAt
+            LastUpdatedAt = new DateTimeOffset(progress.LastUpdatedAt, TimeSpan.Zero)
         });
     }
 }
-

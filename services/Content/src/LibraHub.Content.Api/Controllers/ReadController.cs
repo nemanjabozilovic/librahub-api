@@ -2,6 +2,8 @@ using LibraHub.BuildingBlocks.Abstractions;
 using LibraHub.BuildingBlocks.Results;
 using LibraHub.Content.Application.Access.Commands.CreateReadToken;
 using LibraHub.Content.Application.Access.Queries.ValidateReadToken;
+using LibraHub.Content.Application.Editions.Queries.GetBookEditions;
+using LibraHub.Content.Application.Editions.Queries.GetBookEditionsBatch;
 using LibraHub.Content.Application.Options;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -17,6 +19,38 @@ public class ReadController(
     IObjectStorage objectStorage,
     IOptions<UploadOptions> uploadOptions) : ControllerBase
 {
+    [HttpGet("books/{bookId}/editions")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(List<BookEditionDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetBookEditions(
+        Guid bookId,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetBookEditionsQuery(bookId);
+        var result = await mediator.Send(query, cancellationToken);
+
+        return result.ToActionResult(this);
+    }
+
+    [HttpPost("books/editions/batch")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(Dictionary<Guid, List<BookEditionDto>>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetBookEditionsBatch(
+        [FromBody] GetBookEditionsBatchRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetBookEditionsBatchQuery(request.BookIds ?? new List<Guid>());
+        var result = await mediator.Send(query, cancellationToken);
+
+        return result.ToActionResult(this);
+    }
+
+    public record GetBookEditionsBatchRequest
+    {
+        public List<Guid>? BookIds { get; init; }
+    }
+
     [HttpPost("books/{bookId}/read-token")]
     [Authorize]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
@@ -63,19 +97,25 @@ public class ReadController(
             ? uploadOptions.Value.CoversBucketName
             : uploadOptions.Value.EditionsBucketName;
 
+        Stream? stream = null;
         try
         {
-            var stream = await objectStorage.DownloadAsync(
+            stream = await objectStorage.DownloadAsync(
                 bucketName,
                 grantInfo.ObjectKey,
                 cancellationToken);
 
             return File(stream, grantInfo.ContentType, enableRangeProcessing: true);
         }
+        catch (ObjectDisposedException)
+        {
+            stream?.Dispose();
+            return StatusCode(500, new Error("STORAGE_ERROR", "Stream was disposed unexpectedly"));
+        }
         catch
         {
+            stream?.Dispose();
             return StatusCode(500, new Error("STORAGE_ERROR", "Failed to download content"));
         }
     }
 }
-

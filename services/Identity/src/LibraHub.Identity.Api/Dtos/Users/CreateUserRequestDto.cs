@@ -11,4 +11,3 @@ public record CreateUserRequestDto
     [Required(ErrorMessage = "Role is required")]
     public string Role { get; init; } = string.Empty;
 }
-

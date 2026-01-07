@@ -58,7 +58,7 @@ public class DisableUserHandler : IRequestHandler<DisableUserCommand, Result>
             {
                 UserId = user.Id,
                 Reason = request.Reason,
-                OccurredAt = _clock.UtcNow
+                OccurredAt = _clock.UtcNowOffset
             };
 
             await _outboxWriter.WriteAsync(integrationEvent, EventTypes.UserDisabled, cancellationToken);

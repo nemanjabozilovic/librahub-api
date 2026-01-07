@@ -26,11 +26,6 @@ public class UploadEditionValidator : AbstractValidator<UploadEditionCommand>
             .Must(format => AllowedFormats.ContainsKey(format.ToLowerInvariant()))
             .WithMessage($"Format must be one of: {string.Join(", ", AllowedFormats.Keys)}");
 
-        RuleFor(x => x.Version)
-            .GreaterThan(0)
-            .When(x => x.Version.HasValue)
-            .WithMessage("Version must be greater than 0");
-
         RuleFor(x => x.File)
             .NotNull()
             .WithMessage("File is required")
@@ -52,4 +47,3 @@ public class UploadEditionValidator : AbstractValidator<UploadEditionCommand>
         return allowedTypes.Contains(contentType.ToLowerInvariant());
     }
 }
-

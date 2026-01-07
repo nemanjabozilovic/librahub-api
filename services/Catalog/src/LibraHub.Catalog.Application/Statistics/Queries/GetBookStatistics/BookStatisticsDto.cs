@@ -8,4 +8,3 @@ public class BookStatisticsDto
     public int Unlisted { get; init; }
     public int NewLast30Days { get; init; }
 }
-

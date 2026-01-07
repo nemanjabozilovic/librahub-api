@@ -10,6 +10,5 @@ public class OrderPaidV1
     public decimal VatTotal { get; set; }
     public decimal Total { get; set; }
     public string Currency { get; set; } = string.Empty;
-    public DateTime PaidAt { get; set; }
+    public DateTimeOffset PaidAt { get; set; }
 }
-

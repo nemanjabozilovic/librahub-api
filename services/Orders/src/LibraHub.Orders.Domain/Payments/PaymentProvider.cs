@@ -6,4 +6,3 @@ public enum PaymentProvider
     Stripe = 1,
     PayPal = 2
 }
-

@@ -18,4 +18,3 @@ public class PeriodStatistics
     public int Count { get; init; }
     public decimal Revenue { get; init; }
 }
-

@@ -6,9 +6,9 @@ public interface IBookRepository
 {
     Task<Book?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
-    Task<List<Book>> SearchAsync(string? searchTerm, int page, int pageSize, CancellationToken cancellationToken = default);
+    Task<List<Book>> SearchAsync(string? searchTerm, int page, int pageSize, bool includeAllStatuses = false, CancellationToken cancellationToken = default);
 
-    Task<int> CountSearchAsync(string? searchTerm, CancellationToken cancellationToken = default);
+    Task<int> CountSearchAsync(string? searchTerm, bool includeAllStatuses = false, CancellationToken cancellationToken = default);
 
     Task<int> CountAllAsync(CancellationToken cancellationToken = default);
 

@@ -58,9 +58,9 @@ public class GetOrderHandler(
             VatTotal = order.VatTotal.Amount,
             Total = order.Total.Amount,
             Currency = order.Currency,
-            CreatedAt = order.CreatedAt,
-            UpdatedAt = order.UpdatedAt,
-            CancelledAt = order.CancelledAt,
+            CreatedAt = new DateTimeOffset(order.CreatedAt, TimeSpan.Zero),
+            UpdatedAt = order.UpdatedAt.HasValue ? new DateTimeOffset(order.UpdatedAt.Value, TimeSpan.Zero) : null,
+            CancelledAt = order.CancelledAt.HasValue ? new DateTimeOffset(order.CancelledAt.Value, TimeSpan.Zero) : null,
             CancellationReason = order.CancellationReason,
             Items = order.Items.Select(i => new OrderItemDto
             {
@@ -82,12 +82,11 @@ public class GetOrderHandler(
                 Status = payment.Status.ToString(),
                 Amount = payment.Amount.Amount,
                 ProviderReference = payment.ProviderReference,
-                CreatedAt = payment.CreatedAt,
-                CompletedAt = payment.CompletedAt
+                CreatedAt = new DateTimeOffset(payment.CreatedAt, TimeSpan.Zero),
+                CompletedAt = payment.CompletedAt.HasValue ? new DateTimeOffset(payment.CompletedAt.Value, TimeSpan.Zero) : null
             } : null
         };
 
         return Result.Success(dto);
     }
 }
-

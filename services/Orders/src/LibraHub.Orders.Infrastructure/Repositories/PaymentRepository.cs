@@ -38,4 +38,3 @@ public class PaymentRepository : IPaymentRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 }
-

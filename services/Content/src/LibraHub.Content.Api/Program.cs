@@ -35,4 +35,3 @@ app.MapControllers();
 app.UseContentDatabaseMigrations();
 
 app.Run();
-

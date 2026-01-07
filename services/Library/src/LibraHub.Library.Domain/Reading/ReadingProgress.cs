@@ -5,18 +5,22 @@ public class ReadingProgress
     public Guid Id { get; private set; }
     public Guid UserId { get; private set; }
     public Guid BookId { get; private set; }
+    public string? Format { get; private set; }
+    public int? Version { get; private set; }
     public decimal ProgressPercentage { get; private set; }
     public int? LastPage { get; private set; }
     public DateTime LastUpdatedAt { get; private set; }
 
-    private ReadingProgress()
+    protected ReadingProgress()
     {
     } // For EF Core
 
     public ReadingProgress(
         Guid id,
         Guid userId,
-        Guid bookId)
+        Guid bookId,
+        string? format = null,
+        int? version = null)
     {
         if (id == Guid.Empty)
             throw new ArgumentException("Id cannot be empty", nameof(id));
@@ -28,6 +32,8 @@ public class ReadingProgress
         Id = id;
         UserId = userId;
         BookId = bookId;
+        Format = format;
+        Version = version;
         ProgressPercentage = 0;
         LastUpdatedAt = DateTime.UtcNow;
     }
@@ -42,4 +48,3 @@ public class ReadingProgress
         LastUpdatedAt = DateTime.UtcNow;
     }
 }
-

@@ -58,7 +58,7 @@ public class LoginHandler(
             Guid.NewGuid(),
             user.Id,
             refreshTokenValue,
-            refreshTokenExpiresAt);
+            refreshTokenExpiresAt.UtcDateTime);
 
         await refreshTokenRepository.AddAsync(refreshToken, cancellationToken);
 

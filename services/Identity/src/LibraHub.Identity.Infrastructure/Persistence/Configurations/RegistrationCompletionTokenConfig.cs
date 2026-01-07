@@ -37,4 +37,3 @@ public class RegistrationCompletionTokenConfig : IEntityTypeConfiguration<Regist
         builder.HasIndex(rct => rct.UserId);
     }
 }
-

@@ -16,6 +16,7 @@ public static class EventTypes
     public const string BookPricingChanged = "Catalog.BookPricingChanged.v1";
     public const string BookPublished = "Catalog.BookPublished.v1";
     public const string BookUnlisted = "Catalog.BookUnlisted.v1";
+    public const string BookRelisted = "Catalog.BookRelisted.v1";
     public const string BookRemoved = "Catalog.BookRemoved.v1";
     public const string AnnouncementPublished = "Catalog.AnnouncementPublished.v1";
 

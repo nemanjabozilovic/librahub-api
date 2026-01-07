@@ -6,5 +6,5 @@ public record BookPricingChangedV1
     public decimal Price { get; init; }
     public string Currency { get; init; } = string.Empty;
     public decimal? VatRate { get; init; }
-    public DateTime UpdatedAt { get; init; }
+    public DateTimeOffset UpdatedAt { get; init; }
 }

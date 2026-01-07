@@ -100,4 +100,3 @@ public class LibraryOwnershipClient : ILibraryOwnershipClient
         public List<Guid> OwnedBookIds { get; init; } = new();
     }
 }
-

@@ -5,4 +5,3 @@ public enum AccessScope
     Cover = 0,
     Edition = 1
 }
-

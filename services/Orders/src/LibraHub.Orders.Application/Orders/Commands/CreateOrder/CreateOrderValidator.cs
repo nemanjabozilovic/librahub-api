@@ -15,4 +15,3 @@ public class CreateOrderValidator : AbstractValidator<CreateOrderCommand>
             .WithMessage("Duplicate book IDs are not allowed");
     }
 }
-

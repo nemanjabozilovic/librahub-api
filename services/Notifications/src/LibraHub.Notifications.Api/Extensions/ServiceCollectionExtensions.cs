@@ -89,4 +89,3 @@ public static class ServiceCollectionExtensions
         return services.AddLibraHubHealthChecks(configuration, "NotificationsDb");
     }
 }
-

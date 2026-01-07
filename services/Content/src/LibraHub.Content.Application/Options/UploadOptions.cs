@@ -18,4 +18,3 @@ public class UploadOptions
     [Required(ErrorMessage = "EditionsBucketName is required")]
     public string EditionsBucketName { get; set; } = string.Empty;
 }
-

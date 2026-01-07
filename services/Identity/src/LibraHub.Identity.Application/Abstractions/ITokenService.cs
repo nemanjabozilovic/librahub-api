@@ -8,5 +8,5 @@ public interface ITokenService
 
     string GenerateRefreshToken();
 
-    DateTime GetRefreshTokenExpiration();
+    DateTimeOffset GetRefreshTokenExpiration();
 }

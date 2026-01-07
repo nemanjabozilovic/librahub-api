@@ -6,5 +6,5 @@ public record BookRemovedV1
     public string Title { get; init; } = string.Empty;
     public Guid RemovedBy { get; init; }
     public string Reason { get; init; } = string.Empty;
-    public DateTime RemovedAt { get; init; }
+    public DateTimeOffset RemovedAt { get; init; }
 }

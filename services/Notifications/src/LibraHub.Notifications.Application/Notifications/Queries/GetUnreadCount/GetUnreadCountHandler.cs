@@ -20,4 +20,3 @@ public class GetUnreadCountHandler(
         return await notificationRepository.GetUnreadCountByUserIdAsync(userId, cancellationToken);
     }
 }
-

@@ -55,4 +55,3 @@ public class AccessGrantConfig : IEntityTypeConfiguration<AccessGrant>
         builder.HasIndex(x => x.ExpiresAt);
     }
 }
-

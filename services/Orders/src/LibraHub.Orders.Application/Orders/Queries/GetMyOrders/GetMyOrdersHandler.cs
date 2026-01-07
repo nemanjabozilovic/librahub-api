@@ -42,7 +42,7 @@ public class GetMyOrdersHandler(
                 Status = o.Status.ToString(),
                 Total = o.Total.Amount,
                 Currency = o.Currency,
-                CreatedAt = o.CreatedAt,
+                CreatedAt = new DateTimeOffset(o.CreatedAt, TimeSpan.Zero),
                 ItemCount = o.Items.Count
             }).ToList(),
             TotalCount = totalCount,
@@ -53,4 +53,3 @@ public class GetMyOrdersHandler(
         return Result.Success(response);
     }
 }
-

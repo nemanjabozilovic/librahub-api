@@ -29,4 +29,3 @@ public class InternalAccessController(IMediator mediator) : ControllerBase
         return result.ToActionResult(this);
     }
 }
-

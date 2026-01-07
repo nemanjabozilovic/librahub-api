@@ -4,6 +4,5 @@ public record ContentBlockedV1
 {
     public Guid BookId { get; init; }
     public string Reason { get; init; } = string.Empty;
-    public DateTime BlockedAt { get; init; }
+    public DateTimeOffset BlockedAt { get; init; }
 }
-

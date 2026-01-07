@@ -24,4 +24,3 @@ public interface IOrderRepository
 
     Task UpdateAsync(Order order, CancellationToken cancellationToken = default);
 }
-

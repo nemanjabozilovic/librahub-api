@@ -27,4 +27,3 @@ public class PricingQuoteItem
     public string? PromotionName { get; init; }
     public decimal? DiscountAmount { get; init; }
 }
-

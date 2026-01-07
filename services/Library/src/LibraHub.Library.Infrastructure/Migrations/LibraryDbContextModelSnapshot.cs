@@ -18,6 +18,9 @@ namespace LibraHub.Library.Infrastructure.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("Proxies:ChangeTracking", false)
+                .HasAnnotation("Proxies:CheckEquality", false)
+                .HasAnnotation("Proxies:LazyLoading", true)
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -201,6 +204,11 @@ namespace LibraHub.Library.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("book_id");
 
+                    b.Property<string>("Format")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("format");
+
                     b.Property<int?>("LastPage")
                         .HasColumnType("integer")
                         .HasColumnName("last_page");
@@ -218,13 +226,17 @@ namespace LibraHub.Library.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("user_id");
 
+                    b.Property<int?>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
                     b.HasKey("Id");
 
                     b.HasIndex("BookId");
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("UserId", "BookId")
+                    b.HasIndex("UserId", "BookId", "Format", "Version")
                         .IsUnique();
 
                     b.ToTable("reading_progress", (string)null);

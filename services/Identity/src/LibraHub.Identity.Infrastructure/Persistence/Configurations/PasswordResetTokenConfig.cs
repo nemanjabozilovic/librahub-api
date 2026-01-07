@@ -37,4 +37,3 @@ public class PasswordResetTokenConfig : IEntityTypeConfiguration<PasswordResetTo
         builder.HasIndex(prt => prt.UserId);
     }
 }
-
