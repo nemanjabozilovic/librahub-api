@@ -86,6 +86,7 @@ public class BooksController(IMediator mediator) : ControllerBase
     {
         var command = new UpdateBookCommand(
             id,
+            request.Title,
             request.Description,
             request.Language,
             request.Publisher,

@@ -34,6 +34,14 @@ public class EntitlementRepository : IEntitlementRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<Entitlement>> GetByBookIdAsync(Guid bookId, CancellationToken cancellationToken = default)
+    {
+        return await _context.Entitlements
+            .Where(e => e.BookId == bookId)
+            .OrderByDescending(e => e.AcquiredAt)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<List<Entitlement>> GetActiveByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         return await _context.Entitlements

@@ -13,7 +13,13 @@ public interface IReadingProgressRepository
         int? version,
         CancellationToken cancellationToken = default);
 
+    Task<List<ReadingProgress>> GetByBookIdAsync(Guid bookId, CancellationToken cancellationToken = default);
+
+    Task<List<ReadingProgress>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+
     Task AddAsync(ReadingProgress progress, CancellationToken cancellationToken = default);
 
     Task UpdateAsync(ReadingProgress progress, CancellationToken cancellationToken = default);
+
+    Task DeleteAsync(ReadingProgress progress, CancellationToken cancellationToken = default);
 }

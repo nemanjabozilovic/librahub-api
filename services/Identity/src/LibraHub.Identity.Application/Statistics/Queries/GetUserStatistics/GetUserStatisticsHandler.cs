@@ -21,7 +21,7 @@ public class GetUserStatisticsHandler(
         {
             Total = statistics.Total,
             Active = statistics.Active,
-            Disabled = statistics.Disabled,
+            Removed = statistics.Removed,
             Pending = statistics.Pending,
             NewLast30Days = statistics.NewLast30Days,
             NewLast7Days = statistics.NewLast7Days

@@ -84,8 +84,10 @@ public class AnnouncementPublishedConsumer(
                                 {
                                     FullName = fullName,
                                     AnnouncementTitle = @event.Title,
+                                    AnnouncementContent = @event.Content,
                                     BookId = @event.BookId,
                                     AnnouncementId = @event.AnnouncementId,
+                                    ImageUrl = @event.ImageUrl,
                                     PublishedAt = @event.PublishedAt
                                 };
 
@@ -126,7 +128,15 @@ public class AnnouncementPublishedConsumer(
             {
                 try
                 {
-                    await notificationSender.SendInAppAsync(notification.UserId, notification.Title, notification.Message, cancellationToken);
+                    await notificationSender.SendAnnouncementPublishedAsync(
+                        notification.UserId,
+                        @event.AnnouncementId,
+                        @event.BookId,
+                        @event.Title,
+                        @event.Content,
+                        @event.ImageUrl,
+                        @event.PublishedAt,
+                        cancellationToken);
                 }
                 catch (Exception ex)
                 {
@@ -163,7 +173,6 @@ public class AnnouncementPublishedConsumer(
         }
         catch (Exception)
         {
-            // Logging will be handled by the caller if needed
             throw;
         }
     }

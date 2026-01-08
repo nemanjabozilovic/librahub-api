@@ -25,13 +25,14 @@ public class UserRepository : IUserRepository
     {
         return await _context.Users
             .Include(u => u.Roles)
-            .FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+            .Where(u => u.Email == email && u.Status != UserStatus.Removed)
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
     public async Task<bool> ExistsByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
         return await _context.Users
-            .AnyAsync(u => u.Email == email, cancellationToken);
+            .AnyAsync(u => u.Email == email && u.Status != UserStatus.Removed, cancellationToken);
     }
 
     public async Task<int> CountAdminsAsync(CancellationToken cancellationToken = default)
@@ -42,33 +43,50 @@ public class UserRepository : IUserRepository
 
     public async Task<int> CountAllAsync(CancellationToken cancellationToken = default)
     {
-        return await _context.Users.CountAsync(cancellationToken);
+        return await _context.Users.CountAsync(u => u.Status != UserStatus.Removed, cancellationToken);
     }
 
     public async Task<IReadOnlyList<User>> GetUsersPagedAsync(int skip, int take, CancellationToken cancellationToken = default)
     {
         return await _context.Users
             .Include(u => u.Roles)
+            .Where(u => u.Status != UserStatus.Removed)
             .OrderBy(u => u.CreatedAt)
             .Skip(skip)
             .Take(take)
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<User>> GetRemovedUsersPagedAsync(int skip, int take, CancellationToken cancellationToken = default)
+    {
+        return await _context.Users
+            .Include(u => u.Roles)
+            .Where(u => u.Status == UserStatus.Removed)
+            .OrderByDescending(u => u.CreatedAt)
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<int> CountRemovedAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.Users.CountAsync(u => u.Status == UserStatus.Removed, cancellationToken);
+    }
+
     public async Task<UserStatisticsResult> GetStatisticsAsync(DateTime last30Days, DateTime last7Days, CancellationToken cancellationToken = default)
     {
-        var total = await _context.Users.CountAsync(cancellationToken);
+        var total = await _context.Users.CountAsync(u => u.Status != UserStatus.Removed, cancellationToken);
         var active = await _context.Users.CountAsync(u => u.Status == UserStatus.Active, cancellationToken);
-        var disabled = await _context.Users.CountAsync(u => u.Status == UserStatus.Disabled, cancellationToken);
+        var removed = await _context.Users.CountAsync(u => u.Status == UserStatus.Removed, cancellationToken);
         var pending = await _context.Users.CountAsync(u => !u.EmailVerified && u.Status == UserStatus.Active, cancellationToken);
-        var newLast30Days = await _context.Users.CountAsync(u => u.CreatedAt >= last30Days, cancellationToken);
-        var newLast7Days = await _context.Users.CountAsync(u => u.CreatedAt >= last7Days, cancellationToken);
+        var newLast30Days = await _context.Users.CountAsync(u => u.CreatedAt >= last30Days && u.Status != UserStatus.Removed, cancellationToken);
+        var newLast7Days = await _context.Users.CountAsync(u => u.CreatedAt >= last7Days && u.Status != UserStatus.Removed, cancellationToken);
 
         return new UserStatisticsResult
         {
             Total = total,
             Active = active,
-            Disabled = disabled,
+            Removed = removed,
             Pending = pending,
             NewLast30Days = newLast30Days,
             NewLast7Days = newLast7Days

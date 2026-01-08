@@ -71,7 +71,7 @@ public abstract class EventConsumerWorker : BackgroundService
             var body = ea.Body.ToArray();
             var payload = Encoding.UTF8.GetString(body);
 
-            _logger.LogDebug("Received event {EventType} with MessageId {MessageId}", eventType, ea.BasicProperties.MessageId);
+            _logger.LogInformation("Received event {EventType} with MessageId {MessageId}", eventType, ea.BasicProperties.MessageId);
 
             try
             {
@@ -79,13 +79,12 @@ public abstract class EventConsumerWorker : BackgroundService
                 await HandleEventAsync(eventType, payload, scope, stoppingToken);
 
                 _channel.BasicAck(ea.DeliveryTag, multiple: false);
-                _logger.LogDebug("Successfully processed event {EventType} with MessageId {MessageId}", eventType, ea.BasicProperties.MessageId);
+                _logger.LogInformation("Successfully processed event {EventType} with MessageId {MessageId}", eventType, ea.BasicProperties.MessageId);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error processing event {EventType} with MessageId {MessageId}", eventType, ea.BasicProperties.MessageId);
 
-                // Requeue the message for retry (you might want to implement dead-letter queue for repeated failures)
                 _channel.BasicNack(ea.DeliveryTag, multiple: false, requeue: true);
             }
         };

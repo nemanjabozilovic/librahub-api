@@ -17,7 +17,7 @@ public class AnnouncementConfig : IEntityTypeConfiguration<Announcement>
 
         builder.Property(a => a.BookId)
             .HasColumnName("book_id")
-            .IsRequired();
+            .IsRequired(false);
 
         builder.Property(a => a.Title)
             .HasColumnName("title")
@@ -28,6 +28,11 @@ public class AnnouncementConfig : IEntityTypeConfiguration<Announcement>
             .HasColumnName("content")
             .HasMaxLength(10000)
             .IsRequired();
+
+        builder.Property(a => a.ImageRef)
+            .HasColumnName("image_ref")
+            .HasMaxLength(500)
+            .IsRequired(false);
 
         builder.Property(a => a.Status)
             .HasColumnName("status")
@@ -47,5 +52,8 @@ public class AnnouncementConfig : IEntityTypeConfiguration<Announcement>
 
         builder.HasIndex(a => a.BookId);
         builder.HasIndex(a => a.Status);
+
+        builder.HasIndex(a => new { a.Status, a.PublishedAt })
+            .HasFilter("\"status\" = 1");
     }
 }

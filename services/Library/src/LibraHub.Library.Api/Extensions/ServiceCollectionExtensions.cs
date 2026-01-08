@@ -5,6 +5,7 @@ using LibraHub.BuildingBlocks.Health;
 using LibraHub.BuildingBlocks.Idempotency;
 using LibraHub.BuildingBlocks.Messaging;
 using LibraHub.BuildingBlocks.Outbox;
+using LibraHub.Library.Api.Workers;
 using LibraHub.Library.Application;
 using LibraHub.Library.Application.Abstractions;
 using LibraHub.Library.Infrastructure.Clients;
@@ -56,6 +57,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<Application.Consumers.BookPublishedConsumer>();
         services.AddScoped<Application.Consumers.BookUpdatedConsumer>();
         services.AddScoped<Application.Consumers.BookRemovedConsumer>();
+        services.AddScoped<Application.Consumers.UserRemovedConsumer>();
 
         services.AddOptions<LibraryOptions>().Bind(configuration.GetSection(LibraryOptions.SectionName)).ValidateDataAnnotations().ValidateOnStart();
 
@@ -69,12 +71,24 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddLibraryJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
-        return services.AddLibraHubJwtAuthentication(configuration);
+        services.AddLibraHubJwtAuthentication(configuration);
+
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("InternalAccess", policy =>
+            {
+                policy.RequireAssertion(_ => true);
+            });
+        });
+
+        return services;
     }
 
     public static IServiceCollection AddLibraryRabbitMq(this IServiceCollection services, IConfiguration configuration)
     {
-        return services.AddLibraHubRabbitMq<OutboxPublisherWorkerHelper<LibraryDbContext>>(configuration);
+        services.AddLibraHubRabbitMq<OutboxPublisherWorkerHelper<LibraryDbContext>>(configuration);
+        services.AddHostedService<LibraryEventConsumerWorker>();
+        return services;
     }
 
     public static IServiceCollection AddLibraryHealthChecks(this IServiceCollection services, IConfiguration configuration)

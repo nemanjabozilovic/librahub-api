@@ -36,9 +36,9 @@ public class RefreshHandler : IRequestHandler<RefreshCommand, Result<AuthTokensD
         }
 
         var user = await _userRepository.GetByIdAsync(refreshToken.UserId, cancellationToken);
-        if (user == null || user.Status == Domain.Users.UserStatus.Disabled)
+        if (user == null || user.Status == Domain.Users.UserStatus.Removed)
         {
-            return Result.Failure<AuthTokensDto>(Error.Forbidden("User account is disabled"));
+            return Result.Failure<AuthTokensDto>(Error.Forbidden("User account is removed"));
         }
 
         // Revoke old token (rotation)

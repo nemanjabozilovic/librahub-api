@@ -17,4 +17,6 @@ public interface IBookEditionRepository
     Task AddAsync(BookEdition edition, CancellationToken cancellationToken = default);
 
     Task UpdateAsync(BookEdition edition, CancellationToken cancellationToken = default);
+
+    Task DeleteAsync(BookEdition edition, CancellationToken cancellationToken = default);
 }

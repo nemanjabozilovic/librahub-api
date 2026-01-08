@@ -4,6 +4,7 @@ using LibraHub.BuildingBlocks.Caching;
 using LibraHub.BuildingBlocks.Health;
 using LibraHub.BuildingBlocks.Messaging;
 using LibraHub.BuildingBlocks.Outbox;
+using LibraHub.BuildingBlocks.Storage;
 using LibraHub.Catalog.Api.Workers;
 using LibraHub.Catalog.Application;
 using LibraHub.Catalog.Application.Abstractions;
@@ -55,6 +56,14 @@ public static class ServiceCollectionExtensions
             .Bind(configuration.GetSection(Application.Options.CatalogOptions.SectionName))
             .ValidateDataAnnotations()
             .ValidateOnStart();
+
+        services.AddOptions<Application.Options.UploadOptions>()
+            .Bind(configuration.GetSection(Application.Options.UploadOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        // Register storage infrastructure for announcement images
+        services.AddLibraHubMinioStorage(configuration);
 
         services.AddHttpClient<Application.Abstractions.IContentReadClient, Infrastructure.Clients.ContentReadClient>();
 

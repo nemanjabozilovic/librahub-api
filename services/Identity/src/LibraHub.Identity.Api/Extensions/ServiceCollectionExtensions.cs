@@ -73,6 +73,14 @@ public static class ServiceCollectionExtensions
 
         services.AddLibraHubJwtAuthentication(configuration);
 
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("InternalAccess", policy =>
+            {
+                policy.RequireAssertion(_ => true);
+            });
+        });
+
         return services;
     }
 

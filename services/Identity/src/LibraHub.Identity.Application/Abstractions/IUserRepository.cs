@@ -16,6 +16,10 @@ public interface IUserRepository
 
     Task<IReadOnlyList<User>> GetUsersPagedAsync(int skip, int take, CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<User>> GetRemovedUsersPagedAsync(int skip, int take, CancellationToken cancellationToken = default);
+
+    Task<int> CountRemovedAsync(CancellationToken cancellationToken = default);
+
     Task<UserStatisticsResult> GetStatisticsAsync(DateTime last30Days, DateTime last7Days, CancellationToken cancellationToken = default);
 
     Task AddAsync(User user, CancellationToken cancellationToken = default);

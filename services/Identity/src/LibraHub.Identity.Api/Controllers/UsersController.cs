@@ -6,6 +6,7 @@ using LibraHub.Identity.Application.Users.Commands.CompleteRegistration;
 using LibraHub.Identity.Application.Users.Commands.CreateUser;
 using LibraHub.Identity.Application.Users.Commands.UpdateUser;
 using LibraHub.Identity.Application.Users.Commands.UploadAvatar;
+using LibraHub.Identity.Application.Users.Queries.GetRemovedUsers;
 using LibraHub.Identity.Application.Users.Queries.GetUser;
 using LibraHub.Identity.Application.Users.Queries.GetUsers;
 using LibraHub.Identity.Application.Users.Queries.GetUsersByIds;
@@ -33,6 +34,18 @@ public class UsersController(IMediator mediator) : ControllerBase
         return result.ToActionResult(this);
     }
 
+    [HttpGet("removed")]
+    [ProducesResponseType(typeof(GetRemovedUsersResponseDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetRemovedUsers(
+        [FromQuery] int skip = 0,
+        [FromQuery] int take = 50,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetRemovedUsersQuery(skip, take);
+        var result = await mediator.Send(query, cancellationToken);
+        return result.ToActionResult(this);
+    }
+
     [HttpGet("{id}/info")]
     [ProducesResponseType(typeof(GetUserResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status404NotFound)]
@@ -46,6 +59,7 @@ public class UsersController(IMediator mediator) : ControllerBase
     }
 
     [HttpPost("by-ids")]
+    [Authorize(Policy = "InternalAccess")]
     [ProducesResponseType(typeof(GetUsersByIdsResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetUsersByIds(
@@ -83,27 +97,18 @@ public class UsersController(IMediator mediator) : ControllerBase
         return result.ToActionResult(this);
     }
 
-    [HttpPost("{id}/disable")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> DisableUser(
+    [HttpPost("{id}/remove")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> RemoveUser(
         [FromRoute] Guid id,
-        [FromBody] DisableUserRequestDto request,
+        [FromBody] RemoveUserRequestDto request,
         CancellationToken cancellationToken)
     {
-        var command = new DisableUserCommand(id, request.Reason, true);
+        var command = new DisableUserCommand(id, request.Reason);
         var result = await mediator.Send(command, cancellationToken);
-        return result.ToActionResult(this);
-    }
-
-    [HttpPost("{id}/enable")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> EnableUser(
-        [FromRoute] Guid id,
-        CancellationToken cancellationToken)
-    {
-        var command = new DisableUserCommand(id, string.Empty, false);
-        var result = await mediator.Send(command, cancellationToken);
-        return result.ToActionResult(this);
+        return result.ToNoContentActionResult(this);
     }
 
     [HttpPut("{id}")]

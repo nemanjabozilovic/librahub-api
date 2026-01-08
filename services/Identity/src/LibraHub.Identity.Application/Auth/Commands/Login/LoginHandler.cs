@@ -28,9 +28,9 @@ public class LoginHandler(
             return Result.Failure<AuthTokensDto>(Error.Unauthorized("Invalid credentials"));
         }
 
-        if (user.Status == UserStatus.Disabled)
+        if (user.Status == UserStatus.Removed)
         {
-            return Result.Failure<AuthTokensDto>(Error.Forbidden("Account is disabled"));
+            return Result.Failure<AuthTokensDto>(Error.Forbidden("Account is removed"));
         }
 
         if (user.IsLockedOut(clock.UtcNow))

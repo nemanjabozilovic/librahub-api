@@ -64,4 +64,14 @@ public class BookEditionRepository : IBookEditionRepository
         _context.BookEditions.Update(edition);
         await _context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task DeleteAsync(BookEdition edition, CancellationToken cancellationToken = default)
+    {
+        _context.BookEditions.Remove(edition);
+
+        if (_context.Database.CurrentTransaction == null)
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+    }
 }

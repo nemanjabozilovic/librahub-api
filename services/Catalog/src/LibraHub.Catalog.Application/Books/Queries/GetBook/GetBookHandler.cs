@@ -28,7 +28,7 @@ public class GetBookHandler(
         }
 
         var book = await bookRepository.GetByIdAsync(request.BookId, cancellationToken);
-        if (book == null)
+        if (book == null || book.Status == Domain.Books.BookStatus.Removed)
         {
             return Result.Failure<GetBookResponseDto>(Error.NotFound(CatalogErrors.Book.NotFound));
         }
@@ -44,6 +44,14 @@ public class GetBookHandler(
             Version = e.Version,
             UploadedAt = e.UploadedAt
         }).ToList();
+
+        var coverRef = contentState?.CoverRef;
+
+        var hasEdition = contentState?.HasEdition ?? false;
+        if (!hasEdition && editionDtos.Count > 0)
+        {
+            hasEdition = true;
+        }
 
         var response = new GetBookResponseDto
         {
@@ -75,10 +83,10 @@ public class GetBookHandler(
                 PromoStartDate = pricing.PromoStartDate.HasValue ? new DateTimeOffset(pricing.PromoStartDate.Value, TimeSpan.Zero) : null,
                 PromoEndDate = pricing.PromoEndDate.HasValue ? new DateTimeOffset(pricing.PromoEndDate.Value, TimeSpan.Zero) : null
             } : null,
-            CoverUrl = contentState?.CoverRef != null
-                ? $"{options.Value.GatewayBaseUrl}/api/covers/{contentState.CoverRef}"
+            CoverUrl = !string.IsNullOrWhiteSpace(coverRef)
+                ? $"{options.Value.GatewayBaseUrl}/api/covers/{coverRef}"
                 : null,
-            HasEdition = contentState?.HasEdition ?? false,
+            HasEdition = hasEdition,
             Editions = editionDtos
         };
 

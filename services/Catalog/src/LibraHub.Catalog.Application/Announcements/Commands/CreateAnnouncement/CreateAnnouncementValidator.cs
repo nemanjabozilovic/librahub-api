@@ -6,9 +6,6 @@ public class CreateAnnouncementValidator : AbstractValidator<CreateAnnouncementC
 {
     public CreateAnnouncementValidator()
     {
-        RuleFor(x => x.BookId)
-            .NotEmpty().WithMessage("Book ID is required");
-
         RuleFor(x => x.Title)
             .NotEmpty().WithMessage("Title is required")
             .MaximumLength(500).WithMessage("Title must not exceed 500 characters");

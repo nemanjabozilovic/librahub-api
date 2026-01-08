@@ -42,9 +42,33 @@ public class ReadingProgressRepository : IReadingProgressRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task<List<ReadingProgress>> GetByBookIdAsync(Guid bookId, CancellationToken cancellationToken = default)
+    {
+        return await _context.ReadingProgress
+            .Where(p => p.BookId == bookId)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<ReadingProgress>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        return await _context.ReadingProgress
+            .Where(p => p.UserId == userId)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task UpdateAsync(ReadingProgress progress, CancellationToken cancellationToken = default)
     {
         _context.ReadingProgress.Update(progress);
         await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task DeleteAsync(ReadingProgress progress, CancellationToken cancellationToken = default)
+    {
+        _context.ReadingProgress.Remove(progress);
+
+        if (_context.Database.CurrentTransaction == null)
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+        }
     }
 }

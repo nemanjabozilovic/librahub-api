@@ -44,7 +44,7 @@ public class GetMeQueryHandler : IRequestHandler<GetMeQuery, Result<GetMeRespons
         if (user.Status != UserStatus.Active)
         {
             _logger.LogWarning("User account is not active: {UserId}, Status: {Status}", userId, user.Status);
-            return Result.Failure<GetMeResponseDto>(Error.Forbidden("Account is disabled"));
+            return Result.Failure<GetMeResponseDto>(Error.Forbidden("Account is removed"));
         }
 
         var roles = user.Roles.Select(r => r.Role.ToString()).ToList();

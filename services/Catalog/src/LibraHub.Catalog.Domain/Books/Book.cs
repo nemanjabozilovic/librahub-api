@@ -40,6 +40,7 @@ public class Book
     }
 
     public void UpdateMetadata(
+        string? title = null,
         string? description = null,
         string? language = null,
         string? publisher = null,
@@ -49,6 +50,11 @@ public class Book
         if (Status == BookStatus.Removed)
         {
             throw new InvalidOperationException("Cannot update removed book");
+        }
+
+        if (!string.IsNullOrWhiteSpace(title))
+        {
+            Title = title;
         }
 
         if (!string.IsNullOrWhiteSpace(description))

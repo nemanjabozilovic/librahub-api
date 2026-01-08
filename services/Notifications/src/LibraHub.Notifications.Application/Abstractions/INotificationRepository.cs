@@ -14,7 +14,11 @@ public interface INotificationRepository
 
     Task AddAsync(Notification notification, CancellationToken cancellationToken = default);
 
+    Task<List<Notification>> GetAllByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+
     Task AddRangeAsync(IEnumerable<Notification> notifications, CancellationToken cancellationToken = default);
 
     Task UpdateAsync(Notification notification, CancellationToken cancellationToken = default);
+
+    Task DeleteAsync(Notification notification, CancellationToken cancellationToken = default);
 }

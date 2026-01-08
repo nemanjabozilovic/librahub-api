@@ -14,7 +14,13 @@ public interface IAnnouncementRepository
 
     Task<int> CountPublishedAsync(CancellationToken cancellationToken = default);
 
+    Task<List<Announcement>> GetAllAsync(int page, int pageSize, CancellationToken cancellationToken = default);
+
+    Task<int> CountAllAsync(CancellationToken cancellationToken = default);
+
     Task AddAsync(Announcement announcement, CancellationToken cancellationToken = default);
 
     Task UpdateAsync(Announcement announcement, CancellationToken cancellationToken = default);
+
+    Task DeleteAsync(Announcement announcement, CancellationToken cancellationToken = default);
 }

@@ -12,6 +12,14 @@ services:
       - ConnectionStrings__CatalogDb=Host=librahub-postgres;Port=5432;Database=librahub_catalog;Username=librahub_admin;Password=L1br@Hub_DB_2026!S3cur3_P@ss
       - ConnectionStrings__RabbitMQ=amqp://librahub_mq:R%40bb1tMQ_L1br%40Hub_2026%21S3cur3_P%40ss@librahub-rabbitmq:5672/
       - ConnectionStrings__Redis=librahub-redis:6379
+      - Catalog__GatewayBaseUrl=http://localhost:5000
+      - Catalog__ContentApiUrl=http://librahub-content-api:8080
+      - Storage__Endpoint=librahub-minio:9000
+      - Storage__AccessKey=minioadmin
+      - Storage__SecretKey=minioadmin
+      - Storage__UseSsl=false
+      - Upload__MaxAnnouncementImageSizeBytes=10485760
+      - Upload__AnnouncementImagesBucketName=announcement-images
       - EmailConfig__Host=papercut-smtp
     ports:
       - "60960:8080"

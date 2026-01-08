@@ -3,18 +3,19 @@ namespace LibraHub.Catalog.Domain.Announcements;
 public class Announcement
 {
     public Guid Id { get; private set; }
-    public Guid BookId { get; private set; }
+    public Guid? BookId { get; private set; }
     public string Title { get; private set; } = string.Empty;
     public string Content { get; private set; } = string.Empty;
+    public string? ImageRef { get; private set; }
     public AnnouncementStatus Status { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime? PublishedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
     protected Announcement()
-    { } // For EF Core
+    { }
 
-    public Announcement(Guid id, Guid bookId, string title, string content)
+    public Announcement(Guid id, Guid? bookId, string title, string content)
     {
         Id = id;
         BookId = bookId;
@@ -25,7 +26,7 @@ public class Announcement
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void Update(string? title = null, string? content = null)
+    public void Update(string? title = null, string? content = null, string? imageRef = null)
     {
         if (Status == AnnouncementStatus.Published)
         {
@@ -42,6 +43,41 @@ public class Announcement
             Content = content;
         }
 
+        ImageRef = imageRef;
+
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void UpdateBookId(Guid? bookId)
+    {
+        if (Status == AnnouncementStatus.Published)
+        {
+            throw new InvalidOperationException("Cannot update published announcement");
+        }
+
+        BookId = bookId;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void SetImage(string imageRef)
+    {
+        if (Status == AnnouncementStatus.Published)
+        {
+            throw new InvalidOperationException("Cannot update published announcement");
+        }
+
+        ImageRef = imageRef;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void RemoveImage()
+    {
+        if (Status == AnnouncementStatus.Published)
+        {
+            throw new InvalidOperationException("Cannot update published announcement");
+        }
+
+        ImageRef = null;
         UpdatedAt = DateTime.UtcNow;
     }
 
@@ -49,7 +85,7 @@ public class Announcement
     {
         if (Status == AnnouncementStatus.Published)
         {
-            return; // Already published
+            return;
         }
 
         if (string.IsNullOrWhiteSpace(Title))

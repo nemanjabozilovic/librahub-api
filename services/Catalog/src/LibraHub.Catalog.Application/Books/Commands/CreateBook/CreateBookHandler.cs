@@ -26,6 +26,7 @@ public class CreateBookHandler(
         }
 
         book.UpdateMetadata(
+            title: null,
             request.Description,
             request.Language,
             request.Publisher,

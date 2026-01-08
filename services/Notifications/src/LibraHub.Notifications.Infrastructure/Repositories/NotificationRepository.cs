@@ -48,6 +48,13 @@ public class NotificationRepository : INotificationRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task<List<Notification>> GetAllByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        return await _context.Notifications
+            .Where(n => n.UserId == userId)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task AddRangeAsync(IEnumerable<Notification> notifications, CancellationToken cancellationToken = default)
     {
         await _context.Notifications.AddRangeAsync(notifications, cancellationToken);
@@ -57,5 +64,15 @@ public class NotificationRepository : INotificationRepository
     {
         _context.Notifications.Update(notification);
         await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task DeleteAsync(Notification notification, CancellationToken cancellationToken = default)
+    {
+        _context.Notifications.Remove(notification);
+
+        if (_context.Database.CurrentTransaction == null)
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+        }
     }
 }

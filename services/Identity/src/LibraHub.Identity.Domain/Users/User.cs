@@ -65,16 +65,14 @@ public class User
         return LockedOutUntil.HasValue && LockedOutUntil.Value > utcNow;
     }
 
-    public void Disable(string reason)
+    public void Remove(string reason)
     {
-        Status = UserStatus.Disabled;
-    }
+        Status = UserStatus.Removed;
 
-    public void Enable()
-    {
-        Status = UserStatus.Active;
-        FailedLoginAttempts = 0;
-        LockedOutUntil = null;
+        if (!Email.StartsWith("REMOVED_", StringComparison.OrdinalIgnoreCase))
+        {
+            Email = $"REMOVED_{DateTime.UtcNow.ToString()}_{Email}";
+        }
     }
 
     public void AddRole(Role role)

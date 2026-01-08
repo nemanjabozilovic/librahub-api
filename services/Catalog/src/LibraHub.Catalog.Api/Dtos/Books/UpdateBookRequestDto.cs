@@ -2,6 +2,7 @@ namespace LibraHub.Catalog.Api.Dtos.Books;
 
 public record UpdateBookRequestDto
 {
+    public string? Title { get; init; }
     public string? Description { get; init; }
     public string? Language { get; init; }
     public string? Publisher { get; init; }

@@ -14,4 +14,6 @@ public interface INotificationPreferencesRepository
     Task AddAsync(NotificationPreference preference, CancellationToken cancellationToken = default);
 
     Task UpdateAsync(NotificationPreference preference, CancellationToken cancellationToken = default);
+
+    Task DeleteAsync(NotificationPreference preference, CancellationToken cancellationToken = default);
 }

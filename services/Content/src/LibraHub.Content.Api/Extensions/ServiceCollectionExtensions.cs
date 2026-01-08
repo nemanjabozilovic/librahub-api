@@ -6,6 +6,7 @@ using LibraHub.BuildingBlocks.Messaging;
 using LibraHub.BuildingBlocks.Options;
 using LibraHub.BuildingBlocks.Outbox;
 using LibraHub.BuildingBlocks.Storage;
+using LibraHub.Content.Api.Workers;
 using LibraHub.Content.Application;
 using LibraHub.Content.Application.Abstractions;
 using LibraHub.Content.Application.Options;
@@ -45,6 +46,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IBookEditionRepository, BookEditionRepository>();
         services.AddScoped<ICoverRepository, CoverRepository>();
         services.AddScoped<IAccessGrantRepository, AccessGrantRepository>();
+
+        // Register consumers
+        services.AddScoped<Application.Consumers.BookRemovedConsumer>();
 
         services.AddScoped<IOutboxWriter, OutboxEventPublisher<ContentDbContext>>();
         services.AddScoped<IUnitOfWork, BuildingBlocks.Persistence.UnitOfWork<ContentDbContext>>();
@@ -87,7 +91,9 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddContentRabbitMq(this IServiceCollection services, IConfiguration configuration)
     {
-        return services.AddLibraHubRabbitMq<OutboxPublisherWorkerHelper<ContentDbContext>>(configuration);
+        services.AddLibraHubRabbitMq<OutboxPublisherWorkerHelper<ContentDbContext>>(configuration);
+        services.AddHostedService<ContentEventConsumerWorker>();
+        return services;
     }
 
     public static IServiceCollection AddContentHealthChecks(this IServiceCollection services, IConfiguration configuration)

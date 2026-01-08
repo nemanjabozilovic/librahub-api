@@ -36,6 +36,7 @@ public class UpdateBookHandler(
         }
 
         book.UpdateMetadata(
+            request.Title,
             request.Description,
             request.Language,
             request.Publisher,

@@ -2,6 +2,7 @@ using LibraHub.BuildingBlocks.Abstractions;
 using LibraHub.BuildingBlocks.Results;
 using LibraHub.Content.Application.Access.Commands.CreateReadToken;
 using LibraHub.Content.Application.Access.Queries.ValidateReadToken;
+using LibraHub.Content.Application.Covers.Queries.GetBookCover;
 using LibraHub.Content.Application.Editions.Queries.GetBookEditions;
 using LibraHub.Content.Application.Editions.Queries.GetBookEditionsBatch;
 using LibraHub.Content.Application.Options;
@@ -19,6 +20,19 @@ public class ReadController(
     IObjectStorage objectStorage,
     IOptions<UploadOptions> uploadOptions) : ControllerBase
 {
+    [HttpGet("books/{bookId}/cover")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(BookCoverDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetBookCover(
+        Guid bookId,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new Application.Covers.Queries.GetBookCover.GetBookCoverQuery(bookId);
+        var result = await mediator.Send(query, cancellationToken);
+
+        return result.ToActionResult(this);
+    }
+
     [HttpGet("books/{bookId}/editions")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(List<BookEditionDto>), StatusCodes.Status200OK)]

@@ -1,6 +1,7 @@
 using LibraHub.Library.Application.Abstractions;
 using LibraHub.Library.Infrastructure.Options;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 
@@ -11,17 +12,20 @@ public class IdentityClient : IIdentityClient
     private readonly HttpClient _httpClient;
     private readonly LibraryOptions _options;
     private readonly IMemoryCache _cache;
+    private readonly ILogger<IdentityClient> _logger;
     private readonly JsonSerializerOptions _jsonOptions;
     private static readonly TimeSpan CacheExpiration = TimeSpan.FromMinutes(5);
 
     public IdentityClient(
         HttpClient httpClient,
         IOptions<LibraryOptions> options,
-        IMemoryCache cache)
+        IMemoryCache cache,
+        ILogger<IdentityClient> logger)
     {
         _httpClient = httpClient;
         _options = options.Value;
         _cache = cache;
+        _logger = logger;
         _jsonOptions = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
@@ -103,10 +107,10 @@ public class IdentityClient : IIdentityClient
             var requestBody = System.Text.Json.JsonSerializer.Serialize(new { UserIds = uncachedIds });
             var content = new StringContent(requestBody, System.Text.Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync(
-                $"{_options.IdentityApiUrl}/api/users/by-ids",
-                content,
-                cancellationToken);
+            var url = $"{_options.IdentityApiUrl}/api/users/by-ids";
+            _logger.LogDebug("Calling Identity API for users: {Url}, UserIds: {UserIds}", url, string.Join(", ", uncachedIds));
+
+            var response = await _httpClient.PostAsync(url, content, cancellationToken);
 
             response.EnsureSuccessStatusCode();
 

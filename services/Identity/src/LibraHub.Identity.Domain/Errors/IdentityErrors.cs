@@ -8,10 +8,9 @@ public static class IdentityErrors
         public const string EmailAlreadyExists = "EMAIL_ALREADY_EXISTS";
         public const string InvalidPassword = "INVALID_PASSWORD";
         public const string AccountLocked = "ACCOUNT_LOCKED";
-        public const string AccountDisabled = "ACCOUNT_DISABLED";
+        public const string AccountRemoved = "ACCOUNT_REMOVED";
         public const string EmailNotVerified = "EMAIL_NOT_VERIFIED";
         public const string CannotRemoveLastAdmin = "CANNOT_REMOVE_LAST_ADMIN";
-        public const string CannotDisableLastAdmin = "CANNOT_DISABLE_LAST_ADMIN";
     }
 
     public static class Token

@@ -10,6 +10,8 @@ public interface IEntitlementRepository
 
     Task<List<Entitlement>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
 
+    Task<List<Entitlement>> GetByBookIdAsync(Guid bookId, CancellationToken cancellationToken = default);
+
     Task<List<Entitlement>> GetActiveByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
 
     Task<List<Entitlement>> GetActiveByUserIdPagedAsync(Guid userId, int skip, int take, CancellationToken cancellationToken = default);

@@ -38,6 +38,11 @@ public class PublishBookHandler(
         }
         catch (InvalidOperationException ex)
         {
+            if (ex.Message.Contains("not ready for publishing"))
+            {
+                return Result.Failure(Error.Validation(
+                    "Book content is not ready yet. The cover or edition may still be processing. Please wait a few seconds and try again."));
+            }
             return Result.Failure(Error.Validation(ex.Message));
         }
 

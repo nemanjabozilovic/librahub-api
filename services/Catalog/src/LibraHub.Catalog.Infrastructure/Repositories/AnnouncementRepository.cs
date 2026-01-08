@@ -54,6 +54,22 @@ public class AnnouncementRepository : IAnnouncementRepository
             .CountAsync(cancellationToken);
     }
 
+    public async Task<List<Announcement>> GetAllAsync(int page, int pageSize, CancellationToken cancellationToken = default)
+    {
+        return await _context.Announcements
+            .OrderByDescending(a => a.Status == AnnouncementStatus.Published ? 1 : 0)
+            .ThenByDescending(a => a.PublishedAt ?? a.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<int> CountAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.Announcements
+            .CountAsync(cancellationToken);
+    }
+
     public async Task AddAsync(Announcement announcement, CancellationToken cancellationToken = default)
     {
         await _context.Announcements.AddAsync(announcement, cancellationToken);
@@ -63,6 +79,12 @@ public class AnnouncementRepository : IAnnouncementRepository
     public async Task UpdateAsync(Announcement announcement, CancellationToken cancellationToken = default)
     {
         _context.Announcements.Update(announcement);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task DeleteAsync(Announcement announcement, CancellationToken cancellationToken = default)
+    {
+        _context.Announcements.Remove(announcement);
         await _context.SaveChangesAsync(cancellationToken);
     }
 }

@@ -1,4 +1,6 @@
+using LibraHub.BuildingBlocks.Caching;
 using LibraHub.Catalog.Application.Abstractions;
+using LibraHub.Catalog.Application.Books;
 using LibraHub.Contracts.Content.V1;
 using Microsoft.Extensions.Logging;
 
@@ -6,6 +8,7 @@ namespace LibraHub.Catalog.Application.Consumers;
 
 public class EditionUploadedConsumer(
     IBookContentStateRepository contentStateRepository,
+    ICache cache,
     ILogger<EditionUploadedConsumer> logger)
 {
     public async Task HandleAsync(EditionUploadedV1 @event, CancellationToken cancellationToken)
@@ -23,6 +26,8 @@ public class EditionUploadedConsumer(
         contentState.SetEdition();
         await contentStateRepository.UpdateAsync(contentState, cancellationToken);
 
-        logger.LogInformation("Edition state updated for BookId: {BookId}", @event.BookId);
+        await CacheInvalidationHelper.InvalidateBookCacheAsync(cache, @event.BookId, cancellationToken);
+
+        logger.LogInformation("Edition state updated and cache invalidated for BookId: {BookId}", @event.BookId);
     }
 }

@@ -5,6 +5,7 @@ using LibraHub.BuildingBlocks.Health;
 using LibraHub.BuildingBlocks.Idempotency;
 using LibraHub.BuildingBlocks.Messaging;
 using LibraHub.BuildingBlocks.Outbox;
+using LibraHub.Orders.Api.Workers;
 using LibraHub.Orders.Application;
 using LibraHub.Orders.Application.Abstractions;
 using LibraHub.Orders.Infrastructure.Clients;
@@ -73,7 +74,9 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddOrdersRabbitMq(this IServiceCollection services, IConfiguration configuration)
     {
-        return services.AddLibraHubRabbitMq<OutboxPublisherWorkerHelper<OrdersDbContext>>(configuration);
+        services.AddLibraHubRabbitMq<OutboxPublisherWorkerHelper<OrdersDbContext>>(configuration);
+        services.AddHostedService<OrdersEventConsumerWorker>();
+        return services;
     }
 
     public static IServiceCollection AddOrdersHealthChecks(this IServiceCollection services, IConfiguration configuration)

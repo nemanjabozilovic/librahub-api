@@ -56,7 +56,7 @@ public abstract class OutboxPublisherWorker : BackgroundService
                     _logger.LogWarning("Previous outbox processing is still running, skipping this iteration");
                 }
 
-                await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
             }
             catch (Exception ex)
             {

@@ -47,11 +47,11 @@ public class BookRepository : IBookRepository
 
     public async Task<BookStatisticsResult> GetStatisticsAsync(DateTime last30Days, CancellationToken cancellationToken = default)
     {
-        var total = await _context.Books.CountAsync(cancellationToken);
+        var total = await _context.Books.CountAsync(b => b.Status != BookStatus.Removed, cancellationToken);
         var published = await _context.Books.CountAsync(b => b.Status == BookStatus.Published, cancellationToken);
         var draft = await _context.Books.CountAsync(b => b.Status == BookStatus.Draft, cancellationToken);
         var unlisted = await _context.Books.CountAsync(b => b.Status == BookStatus.Unlisted, cancellationToken);
-        var newLast30Days = await _context.Books.CountAsync(b => b.CreatedAt >= last30Days, cancellationToken);
+        var newLast30Days = await _context.Books.CountAsync(b => b.CreatedAt >= last30Days && b.Status != BookStatus.Removed, cancellationToken);
 
         return new BookStatisticsResult
         {

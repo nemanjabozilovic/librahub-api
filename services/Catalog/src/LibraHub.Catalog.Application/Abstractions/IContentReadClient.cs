@@ -2,6 +2,8 @@ namespace LibraHub.Catalog.Application.Abstractions;
 
 public interface IContentReadClient
 {
+    Task<string?> GetBookCoverRefAsync(Guid bookId, CancellationToken cancellationToken = default);
+
     Task<List<BookEditionInfoDto>> GetBookEditionsAsync(Guid bookId, CancellationToken cancellationToken = default);
 
     Task<Dictionary<Guid, List<BookEditionInfoDto>>> GetBookEditionsBatchAsync(List<Guid> bookIds, CancellationToken cancellationToken = default);

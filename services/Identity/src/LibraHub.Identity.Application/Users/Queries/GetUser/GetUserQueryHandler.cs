@@ -18,7 +18,7 @@ public class GetUserQueryHandler : IRequestHandler<GetUserQuery, Result<GetUserR
     {
         var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
 
-        if (user == null)
+        if (user == null || user.Status == Domain.Users.UserStatus.Removed)
         {
             return Result.Failure<GetUserResponseDto>(Error.NotFound("User not found"));
         }

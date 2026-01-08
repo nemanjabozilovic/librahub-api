@@ -48,4 +48,14 @@ public class NotificationPreferencesRepository : INotificationPreferencesReposit
         _context.NotificationPreferences.Update(preference);
         await _context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task DeleteAsync(NotificationPreference preference, CancellationToken cancellationToken = default)
+    {
+        _context.NotificationPreferences.Remove(preference);
+
+        if (_context.Database.CurrentTransaction == null)
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+    }
 }

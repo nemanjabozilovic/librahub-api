@@ -32,7 +32,7 @@ public class GetUsersByIdsQueryHandler : IRequestHandler<GetUsersByIdsQuery, Res
         foreach (var userId in request.UserIds.Distinct())
         {
             var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
-            if (user != null)
+            if (user != null && user.Status != Domain.Users.UserStatus.Removed)
             {
                 users.Add(new GetUserResponseDto
                 {

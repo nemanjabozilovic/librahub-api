@@ -5,6 +5,7 @@ using LibraHub.BuildingBlocks.Health;
 using LibraHub.BuildingBlocks.Idempotency;
 using LibraHub.BuildingBlocks.Messaging;
 using LibraHub.BuildingBlocks.Outbox;
+using LibraHub.Notifications.Api.Workers;
 using LibraHub.Notifications.Application;
 using LibraHub.Notifications.Application.Abstractions;
 using LibraHub.Notifications.Infrastructure.Idempotency;
@@ -67,6 +68,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<Application.Consumers.OrderPaidConsumer>();
         services.AddScoped<Application.Consumers.OrderRefundedConsumer>();
         services.AddScoped<Application.Consumers.EntitlementGrantedConsumer>();
+        services.AddScoped<Application.Consumers.UserRemovedConsumer>();
 
         // Configure email using BuildingBlocks
         services.AddLibraHubEmail(configuration);
@@ -81,7 +83,9 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddNotificationsRabbitMq(this IServiceCollection services, IConfiguration configuration)
     {
-        return services.AddLibraHubRabbitMq<OutboxPublisherWorkerHelper<NotificationsDbContext>>(configuration);
+        services.AddLibraHubRabbitMq<OutboxPublisherWorkerHelper<NotificationsDbContext>>(configuration);
+        services.AddHostedService<NotificationsEventConsumerWorker>();
+        return services;
     }
 
     public static IServiceCollection AddNotificationsHealthChecks(this IServiceCollection services, IConfiguration configuration)
