@@ -32,11 +32,13 @@ public class CreateReadTokenHandler(
 
         var userId = userIdResult.Value;
 
-        var bookInfo = await catalogClient.GetBookInfoAsync(request.BookId, cancellationToken);
-        if (bookInfo == null)
+        var bookInfoResult = await catalogClient.GetBookInfoAsync(request.BookId, cancellationToken);
+        if (bookInfoResult.IsFailure)
         {
-            return Result.Failure<string>(Error.NotFound(ContentErrors.Book.NotFound));
+            return Result.Failure<string>(bookInfoResult.Error ?? Error.NotFound(ContentErrors.Book.NotFound));
         }
+
+        var bookInfo = bookInfoResult.Value;
 
         if (bookInfo.IsBlocked)
         {
@@ -49,7 +51,13 @@ public class CreateReadTokenHandler(
             hasAccess = bookInfo.IsFree;
             if (!hasAccess)
             {
-                hasAccess = await libraryClient.UserOwnsBookAsync(userId, request.BookId, cancellationToken);
+                var accessResult = await libraryClient.UserOwnsBookAsync(userId, request.BookId, cancellationToken);
+                if (accessResult.IsFailure)
+                {
+                    return Result.Failure<string>(accessResult.Error ?? Error.Unexpected("Failed to validate access"));
+                }
+
+                hasAccess = accessResult.Value;
             }
         }
 

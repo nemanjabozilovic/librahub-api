@@ -1,6 +1,7 @@
 using FluentValidation;
 using LibraHub.BuildingBlocks.Auth;
 using LibraHub.BuildingBlocks.Caching;
+using LibraHub.BuildingBlocks.Correlation;
 using LibraHub.BuildingBlocks.Health;
 using LibraHub.BuildingBlocks.Messaging;
 using LibraHub.BuildingBlocks.Outbox;
@@ -48,7 +49,6 @@ public static class ServiceCollectionExtensions
         services.AddHttpContextAccessor();
         services.AddScoped<BuildingBlocks.Abstractions.ICurrentUser, BuildingBlocks.CurrentUser.CurrentUser>();
 
-        // Register consumers
         services.AddScoped<Application.Consumers.CoverUploadedConsumer>();
         services.AddScoped<Application.Consumers.EditionUploadedConsumer>();
 
@@ -62,10 +62,11 @@ public static class ServiceCollectionExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        // Register storage infrastructure for announcement images
         services.AddLibraHubMinioStorage(configuration);
 
-        services.AddHttpClient<Application.Abstractions.IContentReadClient, Infrastructure.Clients.ContentReadClient>();
+        services.AddHttpClient<Application.Abstractions.IContentReadClient, Infrastructure.Clients.ContentReadClient>()
+            .AddHttpMessageHandler<CorrelationIdHeaderHandler>();
+        services.AddTransient<CorrelationIdHeaderHandler>();
 
         services.AddRedisCache(configuration);
 

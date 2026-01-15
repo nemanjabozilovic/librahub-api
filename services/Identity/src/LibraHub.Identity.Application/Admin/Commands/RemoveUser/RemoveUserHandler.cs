@@ -1,5 +1,6 @@
 using LibraHub.BuildingBlocks.Abstractions;
 using LibraHub.BuildingBlocks.Results;
+using LibraHub.BuildingBlocks.Urls;
 using LibraHub.Contracts.Common;
 using LibraHub.Contracts.Identity.V1;
 using LibraHub.Identity.Application.Abstractions;
@@ -8,9 +9,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Error = LibraHub.BuildingBlocks.Results.Error;
 
-namespace LibraHub.Identity.Application.Admin.Commands.DisableUser;
+namespace LibraHub.Identity.Application.Admin.Commands.RemoveUser;
 
-public class DisableUserHandler : IRequestHandler<DisableUserCommand, Result>
+public class RemoveUserHandler : IRequestHandler<RemoveUserCommand, Result>
 {
     private readonly IUserRepository _userRepository;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
@@ -19,9 +20,9 @@ public class DisableUserHandler : IRequestHandler<DisableUserCommand, Result>
     private readonly IObjectStorage _objectStorage;
     private readonly IConfiguration _configuration;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger<DisableUserHandler> _logger;
+    private readonly ILogger<RemoveUserHandler> _logger;
 
-    public DisableUserHandler(
+    public RemoveUserHandler(
         IUserRepository userRepository,
         IRefreshTokenRepository refreshTokenRepository,
         IOutboxWriter outboxWriter,
@@ -29,7 +30,7 @@ public class DisableUserHandler : IRequestHandler<DisableUserCommand, Result>
         IObjectStorage objectStorage,
         IConfiguration configuration,
         IUnitOfWork unitOfWork,
-        ILogger<DisableUserHandler> logger)
+        ILogger<RemoveUserHandler> logger)
     {
         _userRepository = userRepository;
         _refreshTokenRepository = refreshTokenRepository;
@@ -41,7 +42,7 @@ public class DisableUserHandler : IRequestHandler<DisableUserCommand, Result>
         _logger = logger;
     }
 
-    public async Task<Result> Handle(DisableUserCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(RemoveUserCommand request, CancellationToken cancellationToken)
     {
         var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
         if (user == null)
@@ -49,34 +50,13 @@ public class DisableUserHandler : IRequestHandler<DisableUserCommand, Result>
             return Result.Failure(Error.NotFound("User not found"));
         }
 
-        if (user.IsAdmin())
+        var adminCheck = await EnsureNotLastAdminAsync(user, cancellationToken);
+        if (adminCheck.IsFailure)
         {
-            var adminCount = await _userRepository.CountAdminsAsync(cancellationToken);
-            if (adminCount <= 1)
-            {
-                return Result.Failure(Error.Validation("Cannot remove the last admin user"));
-            }
+            return adminCheck;
         }
 
-        if (!string.IsNullOrWhiteSpace(user.Avatar))
-        {
-            try
-            {
-                var bucketName = _configuration["Storage:AvatarsBucketName"];
-                if (!string.IsNullOrWhiteSpace(bucketName))
-                {
-                    var objectKey = ExtractObjectKeyFromUrl(user.Avatar);
-                    if (!string.IsNullOrWhiteSpace(objectKey))
-                    {
-                        await _objectStorage.DeleteAsync(bucketName, objectKey, cancellationToken);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Failed to delete avatar for user {UserId}", request.UserId);
-            }
-        }
+        await TryDeleteAvatarAsync(user.Avatar, cancellationToken);
 
         var integrationEvent = new UserRemovedV1
         {
@@ -98,24 +78,50 @@ public class DisableUserHandler : IRequestHandler<DisableUserCommand, Result>
         return Result.Success();
     }
 
-    private static string? ExtractObjectKeyFromUrl(string url)
+    private async Task<Result> EnsureNotLastAdminAsync(Domain.Users.User user, CancellationToken cancellationToken)
     {
+        if (!user.IsAdmin())
+        {
+            return Result.Success();
+        }
+
+        var adminCount = await _userRepository.CountAdminsAsync(cancellationToken);
+        if (adminCount <= 1)
+        {
+            return Result.Failure(Error.Validation("Cannot remove the last admin user"));
+        }
+
+        return Result.Success();
+    }
+
+    private async Task TryDeleteAvatarAsync(string? avatarUrl, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(avatarUrl))
+        {
+            return;
+        }
+
+        var bucketName = _configuration["Storage:AvatarsBucketName"];
+        if (string.IsNullOrWhiteSpace(bucketName))
+        {
+            return;
+        }
+
+        var objectKey = UrlPathExtractor.GetPathAfterSegment(avatarUrl, "avatar");
+        if (string.IsNullOrWhiteSpace(objectKey))
+        {
+            return;
+        }
+
         try
         {
-            var uri = new Uri(url);
-            var pathParts = uri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
-
-            var avatarIndex = Array.IndexOf(pathParts, "avatar");
-            if (avatarIndex >= 0 && avatarIndex < pathParts.Length - 1)
-            {
-                return string.Join("/", pathParts.Skip(avatarIndex + 1));
-            }
+            await _objectStorage.DeleteAsync(bucketName, objectKey, cancellationToken);
         }
-        catch
+        catch (Exception ex)
         {
-            // Invalid URL format
+            _logger.LogWarning(ex, "Failed to delete avatar for user {AvatarUrl}", avatarUrl);
         }
-
-        return null;
     }
 }
+
+

@@ -4,10 +4,8 @@
 
 namespace LibraHub.Catalog.Infrastructure.Migrations
 {
-    /// <inheritdoc />
     public partial class AddAnnouncementImageRef : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
@@ -18,7 +16,6 @@ namespace LibraHub.Catalog.Infrastructure.Migrations
                 nullable: true);
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(

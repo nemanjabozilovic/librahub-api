@@ -8,6 +8,7 @@ namespace LibraHub.Notifications.Application.Consumers;
 public class UserRemovedConsumer(
     INotificationRepository notificationRepository,
     INotificationPreferencesRepository notificationPreferencesRepository,
+    IUserNotificationSettingsRepository settingsRepository,
     IUnitOfWork unitOfWork,
     ILogger<UserRemovedConsumer> logger)
 {
@@ -15,13 +16,10 @@ public class UserRemovedConsumer(
     {
         logger.LogInformation("Processing UserRemoved event for UserId: {UserId}, Reason: {Reason}", @event.UserId, @event.Reason);
 
-        // Get all notifications for this user
         var notifications = await notificationRepository.GetAllByUserIdAsync(@event.UserId, cancellationToken);
 
-        // Get all notification preferences for this user
         var preferences = await notificationPreferencesRepository.GetByUserIdAsync(@event.UserId, cancellationToken);
 
-        // Delete all notifications and preferences within a transaction
         await unitOfWork.ExecuteInTransactionAsync(async ct =>
         {
             foreach (var notification in notifications)
@@ -33,6 +31,8 @@ public class UserRemovedConsumer(
             {
                 await notificationPreferencesRepository.DeleteAsync(preference, ct);
             }
+
+            await settingsRepository.DeleteAsync(@event.UserId, ct);
         }, cancellationToken);
 
         logger.LogInformation("Deleted {NotificationCount} notifications and {PreferenceCount} preferences for UserId: {UserId}",

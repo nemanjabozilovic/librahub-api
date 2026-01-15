@@ -81,7 +81,10 @@ public class GetAllEntitlementsHandler(
             cancellationToken);
 
         var uniqueUserIds = entitlements.Select(e => e.UserId).Distinct().ToList();
-        var userInfoDict = await identityClient.GetUsersByIdsAsync(uniqueUserIds, cancellationToken);
+        var userInfoDictResult = await identityClient.GetUsersByIdsAsync(uniqueUserIds, cancellationToken);
+        var userInfoDict = userInfoDictResult.IsSuccess
+            ? userInfoDictResult.Value
+            : new Dictionary<Guid, UserInfo?>();
 
         var uniqueBookIds = entitlements.Select(e => e.BookId).Distinct().ToList();
         var bookSnapshotDict = new Dictionary<Guid, Domain.Books.BookSnapshot?>();

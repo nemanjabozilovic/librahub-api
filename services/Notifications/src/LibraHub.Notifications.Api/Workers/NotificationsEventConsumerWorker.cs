@@ -27,7 +27,8 @@ public class NotificationsEventConsumerWorker : EventConsumerWorker
             EventTypes.OrderPaid,
             EventTypes.OrderRefunded,
             EventTypes.EntitlementGranted,
-            EventTypes.UserRemoved
+            EventTypes.UserRemoved,
+            EventTypes.UserNotificationSettingsChanged
         };
     }
 
@@ -86,6 +87,15 @@ public class NotificationsEventConsumerWorker : EventConsumerWorker
                 {
                     var userRemovedConsumer = scope.ServiceProvider.GetRequiredService<Application.Consumers.UserRemovedConsumer>();
                     await userRemovedConsumer.HandleAsync(userRemovedEvent, cancellationToken);
+                }
+                break;
+
+            case EventTypes.UserNotificationSettingsChanged:
+                var settingsChangedEvent = DeserializeEvent<UserNotificationSettingsChangedV1>(payload);
+                if (settingsChangedEvent != null)
+                {
+                    var settingsConsumer = scope.ServiceProvider.GetRequiredService<Application.Consumers.UserNotificationSettingsChangedConsumer>();
+                    await settingsConsumer.HandleAsync(settingsChangedEvent, cancellationToken);
                 }
                 break;
         }

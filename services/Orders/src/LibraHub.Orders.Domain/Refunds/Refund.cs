@@ -10,7 +10,7 @@ public class Refund
     public DateTime RefundedAt { get; private set; }
 
     private Refund()
-    { } // For EF Core
+    { }
 
     public Refund(
         Guid id,

@@ -45,7 +45,8 @@ public class GetOrderHandler(
         }
 
         var payment = await paymentRepository.GetByOrderIdAsync(order.Id, cancellationToken);
-        var userInfo = await identityClient.GetUserInfoAsync(order.UserId, cancellationToken);
+        var userInfoResult = await identityClient.GetUserInfoAsync(order.UserId, cancellationToken);
+        var userInfo = userInfoResult.IsSuccess ? userInfoResult.Value : null;
 
         var dto = new OrderDto
         {

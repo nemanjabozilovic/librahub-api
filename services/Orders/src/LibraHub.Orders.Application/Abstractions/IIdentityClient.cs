@@ -1,12 +1,14 @@
+using LibraHub.BuildingBlocks.Results;
+
 namespace LibraHub.Orders.Application.Abstractions;
 
 public interface IIdentityClient
 {
-    Task<UserInfo?> GetUserInfoAsync(
+    Task<Result<UserInfo>> GetUserInfoAsync(
         Guid userId,
         CancellationToken cancellationToken = default);
 
-    Task<Dictionary<Guid, UserInfo?>> GetUsersByIdsAsync(
+    Task<Result<Dictionary<Guid, UserInfo?>>> GetUsersByIdsAsync(
         List<Guid> userIds,
         CancellationToken cancellationToken = default);
 }

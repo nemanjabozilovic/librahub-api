@@ -10,7 +10,7 @@ public class Cover
     public DateTime? BlockedAt { get; private set; }
 
     protected Cover()
-    { } // For EF Core
+    { }
 
     public Cover(
         Guid id,

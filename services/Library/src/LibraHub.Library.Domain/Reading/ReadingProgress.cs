@@ -13,7 +13,7 @@ public class ReadingProgress
 
     protected ReadingProgress()
     {
-    } // For EF Core
+    }
 
     public ReadingProgress(
         Guid id,

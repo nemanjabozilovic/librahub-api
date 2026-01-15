@@ -1,4 +1,5 @@
 using LibraHub.BuildingBlocks.Results;
+using LibraHub.Notifications.Api.Dtos.Preferences;
 using LibraHub.Notifications.Application.Preferences.Commands.UpdatePreferences;
 using LibraHub.Notifications.Application.Preferences.Queries.GetPreferences;
 using LibraHub.Notifications.Domain.Notifications;
@@ -44,11 +45,4 @@ public class PreferencesController(IMediator mediator) : ControllerBase
         await mediator.Send(command, cancellationToken);
         return Ok();
     }
-}
-
-public record UpdatePreferencesRequestDto
-{
-    public string Type { get; init; } = string.Empty;
-    public bool EmailEnabled { get; init; }
-    public bool InAppEnabled { get; init; }
 }

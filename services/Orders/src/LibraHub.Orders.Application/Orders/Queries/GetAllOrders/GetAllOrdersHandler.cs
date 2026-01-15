@@ -38,7 +38,10 @@ public class GetAllOrdersHandler(
         var totalCount = await orderRepository.CountAllAsync(fromDate, cancellationToken);
 
         var uniqueUserIds = orders.Select(o => o.UserId).Distinct().ToList();
-        var userInfoDict = await identityClient.GetUsersByIdsAsync(uniqueUserIds, cancellationToken);
+        var userInfoDictResult = await identityClient.GetUsersByIdsAsync(uniqueUserIds, cancellationToken);
+        var userInfoDict = userInfoDictResult.IsSuccess
+            ? userInfoDictResult.Value
+            : new Dictionary<Guid, UserInfo?>();
 
         var response = new GetAllOrdersResponseDto
         {

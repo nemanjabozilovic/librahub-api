@@ -53,68 +53,60 @@ public class CapturePaymentHandler(
             return Result.Failure(Error.Validation("Provider reference mismatch"));
         }
 
-        // Capture payment with gateway
         var paymentResult = await paymentGateway.CapturePaymentAsync(
             request.ProviderReference,
             cancellationToken);
 
-        try
+        if (!paymentResult.Success)
         {
-            if (!paymentResult.Success)
-            {
-                await unitOfWork.ExecuteInTransactionAsync(async ct =>
-                {
-                    payment.MarkAsFailed(paymentResult.FailureReason ?? "Payment capture failed");
-                    await paymentRepository.UpdateAsync(payment, ct);
-
-                    order.Cancel("Payment capture failed");
-                    await orderRepository.UpdateAsync(order, ct);
-                }, cancellationToken);
-
-                return Result.Failure(new Error("INTERNAL_ERROR", $"Payment capture failed: {paymentResult.FailureReason}"));
-            }
-
             await unitOfWork.ExecuteInTransactionAsync(async ct =>
             {
-                payment.MarkAsCompleted(paymentResult.ProviderReference!);
+                payment.MarkAsFailed(paymentResult.FailureReason ?? "Payment capture failed");
                 await paymentRepository.UpdateAsync(payment, ct);
 
-                order.MarkAsPaid();
+                order.Cancel("Payment capture failed");
                 await orderRepository.UpdateAsync(order, ct);
-
-                await outboxWriter.WriteAsync(
-                    new Contracts.Orders.V1.OrderPaidV1
-                    {
-                        OrderId = order.Id,
-                        UserId = order.UserId,
-                        PaymentId = payment.Id,
-                        Items = order.Items.Select(i => new Contracts.Orders.V1.OrderItemDto
-                        {
-                            BookId = i.BookId,
-                            BookTitle = i.BookTitle,
-                            BasePrice = i.BasePrice.Amount,
-                            FinalPrice = i.FinalPrice.Amount,
-                            VatRate = i.VatRate,
-                            VatAmount = i.VatAmount.Amount,
-                            PromotionId = i.PromotionId,
-                            PromotionName = i.PromotionName,
-                            DiscountAmount = i.DiscountAmount
-                        }).ToList(),
-                        Subtotal = order.Subtotal.Amount,
-                        VatTotal = order.VatTotal.Amount,
-                        Total = order.Total.Amount,
-                        Currency = order.Currency,
-                        PaidAt = clock.UtcNowOffset
-                    },
-                    Contracts.Common.EventTypes.OrderPaid,
-                    ct);
             }, cancellationToken);
 
-            return Result.Success();
+            return Result.Failure(new Error("INTERNAL_ERROR", $"Payment capture failed: {paymentResult.FailureReason}"));
         }
-        catch
+
+        await unitOfWork.ExecuteInTransactionAsync(async ct =>
         {
-            throw;
-        }
+            payment.MarkAsCompleted(paymentResult.ProviderReference!);
+            await paymentRepository.UpdateAsync(payment, ct);
+
+            order.MarkAsPaid();
+            await orderRepository.UpdateAsync(order, ct);
+
+            await outboxWriter.WriteAsync(
+                new Contracts.Orders.V1.OrderPaidV1
+                {
+                    OrderId = order.Id,
+                    UserId = order.UserId,
+                    PaymentId = payment.Id,
+                    Items = order.Items.Select(i => new Contracts.Orders.V1.OrderItemDto
+                    {
+                        BookId = i.BookId,
+                        BookTitle = i.BookTitle,
+                        BasePrice = i.BasePrice.Amount,
+                        FinalPrice = i.FinalPrice.Amount,
+                        VatRate = i.VatRate,
+                        VatAmount = i.VatAmount.Amount,
+                        PromotionId = i.PromotionId,
+                        PromotionName = i.PromotionName,
+                        DiscountAmount = i.DiscountAmount
+                    }).ToList(),
+                    Subtotal = order.Subtotal.Amount,
+                    VatTotal = order.VatTotal.Amount,
+                    Total = order.Total.Amount,
+                    Currency = order.Currency,
+                    PaidAt = clock.UtcNowOffset
+                },
+                Contracts.Common.EventTypes.OrderPaid,
+                ct);
+        }, cancellationToken);
+
+        return Result.Success();
     }
 }

@@ -10,6 +10,7 @@ namespace LibraHub.Library.Application.Entitlements.Queries.MyBooks;
 public class MyBooksHandler(
     IEntitlementRepository entitlementRepository,
     IBookSnapshotStore bookSnapshotStore,
+    ICatalogClient catalogClient,
     ICurrentUser currentUser) : IRequestHandler<MyBooksQuery, Result<MyBooksDto>>
 {
     public async Task<Result<MyBooksDto>> Handle(MyBooksQuery request, CancellationToken cancellationToken)
@@ -42,15 +43,35 @@ public class MyBooksHandler(
             }
         }
 
+        var catalogDictResult = await catalogClient.GetBookDetailsByIdsAsync(bookIds, cancellationToken);
+        var catalogDict = catalogDictResult.IsSuccess
+            ? catalogDictResult.Value
+            : new Dictionary<Guid, CatalogBookDetailsDto>();
+
         var books = pagedEntitlements.Select(entitlement =>
         {
             var snapshot = snapshotDict.GetValueOrDefault(entitlement.BookId);
+            var catalog = catalogDict.GetValueOrDefault(entitlement.BookId);
+            var coverUrl = catalog?.CoverUrl;
             return new BookDto
             {
                 BookId = entitlement.BookId,
-                Title = snapshot?.Title ?? "Unknown Book",
-                Authors = snapshot?.Authors ?? "Unknown Author",
-                CoverRef = snapshot?.CoverRef,
+                Title = catalog?.Title ?? snapshot?.Title ?? "Unknown Book",
+                Description = catalog?.Description,
+                Authors = catalog != null && catalog.Authors.Count > 0
+                    ? string.Join(", ", catalog.Authors)
+                    : snapshot?.Authors ?? "Unknown Author",
+                Categories = catalog?.Categories ?? new List<string>(),
+                Tags = catalog?.Tags ?? new List<string>(),
+                CoverUrl = coverUrl,
+                HasEdition = catalog?.HasEdition ?? false,
+                Editions = catalog?.Editions?.Select(e => new BookEditionDto
+                {
+                    Id = e.Id,
+                    Format = e.Format,
+                    Version = e.Version,
+                    UploadedAt = e.UploadedAt
+                }).ToList() ?? new List<BookEditionDto>(),
                 AcquiredAt = new DateTimeOffset(entitlement.AcquiredAt, TimeSpan.Zero)
             };
         }).ToList();

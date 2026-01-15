@@ -13,7 +13,6 @@ public class NotificationSender(
     {
         try
         {
-            // Send notification to user's SignalR group
             await notificationHub.SendToUserAsync(
                 userId,
                 "ReceiveNotification",
@@ -40,7 +39,6 @@ public class NotificationSender(
     {
         try
         {
-            // Send announcement notification to user's SignalR group with full data
             await notificationHub.SendToUserAsync(
                 userId,
                 "ReceiveAnnouncement",

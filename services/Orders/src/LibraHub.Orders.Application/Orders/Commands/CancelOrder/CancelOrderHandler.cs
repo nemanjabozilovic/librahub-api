@@ -37,7 +37,6 @@ public class CancelOrderHandler(
         order.Cancel(request.Reason);
         await orderRepository.UpdateAsync(order, cancellationToken);
 
-        // Cancel payment if exists
         var payment = await paymentRepository.GetByOrderIdAsync(order.Id, cancellationToken);
         if (payment != null && payment.Status == LibraHub.Orders.Domain.Payments.PaymentStatus.Pending)
         {
@@ -45,7 +44,6 @@ public class CancelOrderHandler(
             await paymentRepository.UpdateAsync(payment, cancellationToken);
         }
 
-        // Publish event
         await outboxWriter.WriteAsync(
             new Contracts.Orders.V1.OrderCancelledV1
             {

@@ -20,7 +20,6 @@ public class GetPreferencesHandler(
         var userId = currentUser.UserId.Value;
         var preferences = await preferencesRepository.GetByUserIdAsync(userId, cancellationToken);
 
-        // Return default preferences for all types if none exist
         var allTypes = Enum.GetValues<NotificationType>();
         var preferenceDtos = allTypes.Select(type =>
         {
@@ -28,8 +27,8 @@ public class GetPreferencesHandler(
             return new PreferenceDto
             {
                 Type = type.ToString(),
-                EmailEnabled = existing?.EmailEnabled ?? true,
-                InAppEnabled = existing?.InAppEnabled ?? true
+                EmailEnabled = existing?.EmailEnabled ?? false,
+                InAppEnabled = existing?.InAppEnabled ?? false
             };
         }).ToList();
 

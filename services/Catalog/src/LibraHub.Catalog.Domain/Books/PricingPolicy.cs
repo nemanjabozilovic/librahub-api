@@ -9,11 +9,12 @@ public class PricingPolicy
     public DateTime? PromoStartDate { get; private set; }
     public DateTime? PromoEndDate { get; private set; }
     public Money? PromoPrice { get; private set; }
+    public string? PromoName { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
     protected PricingPolicy()
-    { } // For EF Core
+    { }
 
     public PricingPolicy(Guid id, Guid bookId, Money price, decimal? vatRate = null)
     {
@@ -32,16 +33,21 @@ public class PricingPolicy
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void SetPromo(Money promoPrice, DateTime startDate, DateTime endDate)
+    public void SetPromo(Money promoPrice, DateTime startDate, DateTime endDate, string promoName)
     {
         if (startDate >= endDate)
         {
             throw new ArgumentException("Promo start date must be before end date");
         }
+        if (string.IsNullOrWhiteSpace(promoName))
+        {
+            throw new ArgumentException("Promo name is required");
+        }
 
         PromoPrice = promoPrice;
         PromoStartDate = startDate;
         PromoEndDate = endDate;
+        PromoName = promoName.Trim();
         UpdatedAt = DateTime.UtcNow;
     }
 
@@ -50,6 +56,7 @@ public class PricingPolicy
         PromoPrice = null;
         PromoStartDate = null;
         PromoEndDate = null;
+        PromoName = null;
         UpdatedAt = DateTime.UtcNow;
     }
 

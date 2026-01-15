@@ -44,7 +44,7 @@ public class VerifyEmailHandler : IRequestHandler<VerifyEmailCommand, Result>
 
         if (user.EmailVerified)
         {
-            return Result.Success(); // Already verified
+            return Result.Success();
         }
 
         user.MarkEmailAsVerified();
@@ -53,7 +53,6 @@ public class VerifyEmailHandler : IRequestHandler<VerifyEmailCommand, Result>
         await _userRepository.UpdateAsync(user, cancellationToken);
         await _tokenRepository.UpdateAsync(token, cancellationToken);
 
-        // Publish integration event
         var integrationEvent = new EmailVerifiedV1
         {
             UserId = user.Id,

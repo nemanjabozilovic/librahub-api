@@ -1,8 +1,10 @@
 using FluentValidation;
 using LibraHub.BuildingBlocks.Auth;
 using LibraHub.BuildingBlocks.Caching;
+using LibraHub.BuildingBlocks.Correlation;
 using LibraHub.BuildingBlocks.Health;
 using LibraHub.BuildingBlocks.Idempotency;
+using LibraHub.BuildingBlocks.InternalAccess;
 using LibraHub.BuildingBlocks.Messaging;
 using LibraHub.BuildingBlocks.Outbox;
 using LibraHub.Library.Api.Workers;
@@ -62,7 +64,12 @@ public static class ServiceCollectionExtensions
         services.AddOptions<LibraryOptions>().Bind(configuration.GetSection(LibraryOptions.SectionName)).ValidateDataAnnotations().ValidateOnStart();
 
         services.AddMemoryCache();
-        services.AddHttpClient<Application.Abstractions.IIdentityClient, IdentityClient>();
+        services.AddHttpClient<Application.Abstractions.IIdentityClient, IdentityClient>()
+            .AddHttpMessageHandler<CorrelationIdHeaderHandler>()
+            .AddHttpMessageHandler<InternalAccessHeaderHandler>();
+        services.AddHttpClient<ICatalogClient, CatalogClient>()
+            .AddHttpMessageHandler<CorrelationIdHeaderHandler>();
+        services.AddTransient<CorrelationIdHeaderHandler>();
 
         services.AddRedisCache(configuration);
 
@@ -72,14 +79,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddLibraryJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddLibraHubJwtAuthentication(configuration);
-
-        services.AddAuthorization(options =>
-        {
-            options.AddPolicy("InternalAccess", policy =>
-            {
-                policy.RequireAssertion(_ => true);
-            });
-        });
+        services.AddLibraHubInternalAccess(configuration);
 
         return services;
     }

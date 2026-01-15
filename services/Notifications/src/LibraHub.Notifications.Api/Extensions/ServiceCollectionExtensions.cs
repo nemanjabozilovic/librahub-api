@@ -1,8 +1,10 @@
 using FluentValidation;
 using LibraHub.BuildingBlocks.Auth;
+using LibraHub.BuildingBlocks.Correlation;
 using LibraHub.BuildingBlocks.Email;
 using LibraHub.BuildingBlocks.Health;
 using LibraHub.BuildingBlocks.Idempotency;
+using LibraHub.BuildingBlocks.InternalAccess;
 using LibraHub.BuildingBlocks.Messaging;
 using LibraHub.BuildingBlocks.Outbox;
 using LibraHub.Notifications.Api.Workers;
@@ -40,21 +42,27 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<INotificationPreferencesRepository, NotificationPreferencesRepository>();
+        services.AddScoped<IUserNotificationSettingsRepository, UserNotificationSettingsRepository>();
         services.AddScoped<IInboxRepository, InboxRepository>();
         services.AddScoped<BuildingBlocks.Abstractions.IUnitOfWork, UnitOfWork>();
 
-        // Register SignalR
         services.AddSignalR();
 
-        // Register NotificationHub wrapper
         services.AddScoped<INotificationHub, Hubs.NotificationHubWrapper>();
 
-        // Register notification sender
         services.AddScoped<INotificationSender, Infrastructure.Delivery.NotificationSender>();
 
         services.AddOptions<NotificationsOptions>().Bind(configuration.GetSection(NotificationsOptions.SectionName)).ValidateDataAnnotations().ValidateOnStart();
+        services.AddOptions<InternalAccessOptions>()
+            .Bind(configuration.GetSection(InternalAccessOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+        services.AddTransient<InternalAccessHeaderHandler>();
+        services.AddTransient<CorrelationIdHeaderHandler>();
 
-        services.AddHttpClient<IIdentityClient, Infrastructure.Clients.IdentityClient>();
+        services.AddHttpClient<IIdentityClient, Infrastructure.Clients.IdentityClient>()
+            .AddHttpMessageHandler<CorrelationIdHeaderHandler>()
+            .AddHttpMessageHandler<InternalAccessHeaderHandler>();
 
         services.AddScoped<BuildingBlocks.Abstractions.IOutboxWriter, OutboxEventPublisher<NotificationsDbContext>>();
         services.AddScoped<BuildingBlocks.Abstractions.IClock, BuildingBlocks.Clock>();
@@ -62,15 +70,14 @@ public static class ServiceCollectionExtensions
         services.AddScoped<BuildingBlocks.Abstractions.ICurrentUser, BuildingBlocks.CurrentUser.CurrentUser>();
         services.AddScoped<IIdempotencyStore, IdempotencyStore<NotificationsDbContext, IdempotencyKey>>();
 
-        // Register consumers
         services.AddScoped<Application.Consumers.BookPublishedConsumer>();
         services.AddScoped<Application.Consumers.AnnouncementPublishedConsumer>();
         services.AddScoped<Application.Consumers.OrderPaidConsumer>();
         services.AddScoped<Application.Consumers.OrderRefundedConsumer>();
         services.AddScoped<Application.Consumers.EntitlementGrantedConsumer>();
         services.AddScoped<Application.Consumers.UserRemovedConsumer>();
+        services.AddScoped<Application.Consumers.UserNotificationSettingsChangedConsumer>();
 
-        // Configure email using BuildingBlocks
         services.AddLibraHubEmail(configuration);
 
         return services;

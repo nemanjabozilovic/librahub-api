@@ -1,11 +1,13 @@
 using FluentValidation;
 using LibraHub.BuildingBlocks.Abstractions;
 using LibraHub.BuildingBlocks.Auth;
+using LibraHub.BuildingBlocks.Correlation;
 using LibraHub.BuildingBlocks.Health;
 using LibraHub.BuildingBlocks.Messaging;
 using LibraHub.BuildingBlocks.Options;
 using LibraHub.BuildingBlocks.Outbox;
 using LibraHub.BuildingBlocks.Storage;
+using LibraHub.BuildingBlocks.InternalAccess;
 using LibraHub.Content.Api.Workers;
 using LibraHub.Content.Application;
 using LibraHub.Content.Application.Abstractions;
@@ -47,7 +49,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICoverRepository, CoverRepository>();
         services.AddScoped<IAccessGrantRepository, AccessGrantRepository>();
 
-        // Register consumers
         services.AddScoped<Application.Consumers.BookRemovedConsumer>();
 
         services.AddScoped<IOutboxWriter, OutboxEventPublisher<ContentDbContext>>();
@@ -78,8 +79,17 @@ public static class ServiceCollectionExtensions
         services.AddOptions<UploadOptions>().Bind(configuration.GetSection(UploadOptions.SectionName)).ValidateDataAnnotations().ValidateOnStart();
         services.AddOptions<ReadAccessOptions>().Bind(configuration.GetSection(ReadAccessOptions.SectionName)).ValidateDataAnnotations().ValidateOnStart();
 
-        services.AddHttpClient<ICatalogReadClient, CatalogReadClient>();
-        services.AddHttpClient<ILibraryAccessClient, LibraryAccessClient>();
+        services.AddHttpClient<ICatalogReadClient, CatalogReadClient>()
+            .AddHttpMessageHandler<CorrelationIdHeaderHandler>();
+        services.AddOptions<InternalAccessOptions>()
+            .Bind(configuration.GetSection(InternalAccessOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+        services.AddTransient<InternalAccessHeaderHandler>();
+        services.AddTransient<CorrelationIdHeaderHandler>();
+        services.AddHttpClient<ILibraryAccessClient, LibraryAccessClient>()
+            .AddHttpMessageHandler<CorrelationIdHeaderHandler>()
+            .AddHttpMessageHandler<InternalAccessHeaderHandler>();
 
         return services;
     }

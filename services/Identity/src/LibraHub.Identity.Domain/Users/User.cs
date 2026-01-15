@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace LibraHub.Identity.Domain.Users;
 
 public class User
@@ -17,12 +19,14 @@ public class User
     public DateTime? LastLoginAt { get; private set; }
     public int FailedLoginAttempts { get; private set; }
     public DateTime? LockedOutUntil { get; private set; }
+    public bool EmailAnnouncementsEnabled { get; private set; }
+    public bool EmailPromotionsEnabled { get; private set; }
 
     private readonly List<UserRole> _roles = new();
     public IReadOnlyCollection<UserRole> Roles => _roles.AsReadOnly();
 
     private User()
-    { } // For EF Core
+    { }
 
     public User(Guid id, string email, string passwordHash, string firstName, string lastName, string? phone = null, DateTime dateOfBirth = default)
     {
@@ -37,6 +41,8 @@ public class User
         Status = UserStatus.Active;
         CreatedAt = DateTime.UtcNow;
         FailedLoginAttempts = 0;
+        EmailAnnouncementsEnabled = false;
+        EmailPromotionsEnabled = false;
     }
 
     public void MarkEmailAsVerified()
@@ -71,7 +77,8 @@ public class User
 
         if (!Email.StartsWith("REMOVED_", StringComparison.OrdinalIgnoreCase))
         {
-            Email = $"REMOVED_{DateTime.UtcNow.ToString()}_{Email}";
+            var timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmssfff", CultureInfo.InvariantCulture);
+            Email = $"REMOVED_{timestamp}_{Email}";
         }
     }
 
@@ -80,6 +87,7 @@ public class User
         if (!_roles.Any(r => r.Role == role))
         {
             _roles.Add(new UserRole(Id, role));
+            EnforceBlockedNotificationTypesIfNeeded();
         }
     }
 
@@ -89,6 +97,7 @@ public class User
         if (roleToRemove != null)
         {
             _roles.Remove(roleToRemove);
+            EnforceBlockedNotificationTypesIfNeeded();
         }
     }
 
@@ -100,6 +109,32 @@ public class User
     public bool IsAdmin()
     {
         return HasRole(Role.Admin);
+    }
+
+    public bool IsLibrarian()
+    {
+        return HasRole(Role.Librarian);
+    }
+
+    public bool IsStaff()
+    {
+        return IsAdmin() || IsLibrarian();
+    }
+
+    public void SetEmailNotificationPreferences(bool announcementsEnabled, bool promotionsEnabled)
+    {
+        EmailAnnouncementsEnabled = announcementsEnabled;
+        EmailPromotionsEnabled = promotionsEnabled;
+        EnforceBlockedNotificationTypesIfNeeded();
+    }
+
+    private void EnforceBlockedNotificationTypesIfNeeded()
+    {
+        if (IsStaff())
+        {
+            EmailAnnouncementsEnabled = false;
+            EmailPromotionsEnabled = false;
+        }
     }
 
     public void UpdatePassword(string newPasswordHash)
@@ -128,7 +163,7 @@ public class UserRole
     public DateTime AssignedAt { get; private set; }
 
     private UserRole()
-    { } // For EF Core
+    { }
 
     public UserRole(Guid userId, Role role)
     {

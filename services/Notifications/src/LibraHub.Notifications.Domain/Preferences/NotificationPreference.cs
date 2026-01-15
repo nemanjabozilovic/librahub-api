@@ -14,14 +14,14 @@ public class NotificationPreference
 
     private NotificationPreference()
     {
-    } // For EF Core
+    }
 
     public NotificationPreference(
         Guid id,
         Guid userId,
         NotificationType type,
-        bool emailEnabled = true,
-        bool inAppEnabled = true)
+        bool emailEnabled = false,
+        bool inAppEnabled = false)
     {
         if (id == Guid.Empty)
             throw new ArgumentException("Id cannot be empty", nameof(id));

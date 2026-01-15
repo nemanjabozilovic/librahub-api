@@ -3,6 +3,7 @@ using LibraHub.BuildingBlocks.Auth;
 using LibraHub.BuildingBlocks.Caching;
 using LibraHub.BuildingBlocks.Email;
 using LibraHub.BuildingBlocks.Health;
+using LibraHub.BuildingBlocks.InternalAccess;
 using LibraHub.BuildingBlocks.Messaging;
 using LibraHub.BuildingBlocks.Outbox;
 using LibraHub.BuildingBlocks.Storage;
@@ -70,16 +71,10 @@ public static class ServiceCollectionExtensions
         services.AddOptions<SecurityOptions>().Bind(configuration.GetSection("Security")).ValidateDataAnnotations().ValidateOnStart();
         services.AddOptions<TokenOptions>().Bind(configuration.GetSection(TokenOptions.SectionName)).ValidateDataAnnotations().ValidateOnStart();
         services.AddOptions<FrontendOptions>().Bind(configuration.GetSection(FrontendOptions.SectionName)).ValidateDataAnnotations().ValidateOnStart();
+        services.AddOptions<IdentityOptions>().Bind(configuration.GetSection(IdentityOptions.SectionName)).ValidateDataAnnotations().ValidateOnStart();
 
         services.AddLibraHubJwtAuthentication(configuration);
-
-        services.AddAuthorization(options =>
-        {
-            options.AddPolicy("InternalAccess", policy =>
-            {
-                policy.RequireAssertion(_ => true);
-            });
-        });
+        services.AddLibraHubInternalAccess(configuration);
 
         return services;
     }

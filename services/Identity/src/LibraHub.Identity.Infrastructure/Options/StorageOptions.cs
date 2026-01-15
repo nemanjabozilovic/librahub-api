@@ -19,8 +19,4 @@ public class StorageOptions
 
     [Required(ErrorMessage = "AvatarsBucketName is required")]
     public string AvatarsBucketName { get; set; } = string.Empty;
-
-    [Required(ErrorMessage = "ApiBaseUrl is required")]
-    [Url(ErrorMessage = "ApiBaseUrl must be a valid URL")]
-    public string ApiBaseUrl { get; set; } = string.Empty;
 }

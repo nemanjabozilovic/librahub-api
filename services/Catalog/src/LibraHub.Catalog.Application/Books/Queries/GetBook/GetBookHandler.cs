@@ -36,7 +36,9 @@ public class GetBookHandler(
         var pricing = await pricingRepository.GetByBookIdAsync(request.BookId, cancellationToken);
         var contentState = await contentStateRepository.GetByBookIdAsync(request.BookId, cancellationToken);
 
-        var editions = await contentReadClient.GetBookEditionsAsync(request.BookId, cancellationToken);
+        var editionsResult = await contentReadClient.GetBookEditionsAsync(request.BookId, cancellationToken);
+        var editions = editionsResult.IsSuccess ? editionsResult.Value : new List<Abstractions.BookEditionInfoDto>();
+
         var editionDtos = editions.Select(e => new Dtos.EditionDto
         {
             Id = e.Id,

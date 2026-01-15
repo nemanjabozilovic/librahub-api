@@ -3,6 +3,7 @@ using LibraHub.BuildingBlocks.Results;
 using LibraHub.Contracts.Common;
 using LibraHub.Contracts.Identity.V1;
 using LibraHub.Identity.Application.Abstractions;
+using LibraHub.Identity.Domain.Users;
 using MediatR;
 using Error = LibraHub.BuildingBlocks.Results.Error;
 
@@ -38,6 +39,7 @@ public class CompleteRegistrationHandler(
         {
             user.UpdatePassword(passwordHash);
             user.UpdateProfile(request.FirstName, request.LastName, request.Phone, request.DateOfBirth.UtcDateTime);
+            user.SetEmailNotificationPreferences(request.EmailAnnouncementsEnabled, request.EmailPromotionsEnabled);
 
             if (shouldVerifyEmail)
             {
@@ -59,6 +61,19 @@ public class CompleteRegistrationHandler(
 
                 await outboxWriter.WriteAsync(integrationEvent, EventTypes.EmailVerified, ct);
             }
+
+            var settingsEvent = new UserNotificationSettingsChangedV1
+            {
+                UserId = user.Id,
+                Email = user.Email,
+                IsActive = user.Status == UserStatus.Active,
+                IsStaff = user.IsStaff(),
+                EmailAnnouncementsEnabled = user.EmailAnnouncementsEnabled,
+                EmailPromotionsEnabled = user.EmailPromotionsEnabled,
+                OccurredAt = clock.UtcNowOffset
+            };
+
+            await outboxWriter.WriteAsync(settingsEvent, EventTypes.UserNotificationSettingsChanged, ct);
         }, cancellationToken);
 
         return Result.Success();

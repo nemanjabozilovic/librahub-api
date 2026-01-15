@@ -2,6 +2,7 @@ using LibraHub.BuildingBlocks.Inbox;
 using LibraHub.BuildingBlocks.Outbox;
 using LibraHub.Notifications.Domain.Notifications;
 using LibraHub.Notifications.Domain.Preferences;
+using LibraHub.Notifications.Domain.Recipients;
 using LibraHub.Notifications.Infrastructure.Idempotency;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,6 +16,7 @@ public class NotificationsDbContext : DbContext
 
     public DbSet<Notification> Notifications { get; set; } = null!;
     public DbSet<NotificationPreference> NotificationPreferences { get; set; } = null!;
+    public DbSet<UserNotificationSettings> UserNotificationSettings { get; set; } = null!;
     public DbSet<OutboxMessage> OutboxMessages { get; set; } = null!;
     public DbSet<ProcessedMessage> ProcessedMessages { get; set; } = null!;
     public DbSet<IdempotencyKey> IdempotencyKeys { get; set; } = null!;

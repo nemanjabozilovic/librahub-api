@@ -9,7 +9,7 @@ public class BookContentState
     public DateTime UpdatedAt { get; private set; }
 
     protected BookContentState()
-    { } // For EF Core
+    { }
 
     public BookContentState(Guid bookId)
     {

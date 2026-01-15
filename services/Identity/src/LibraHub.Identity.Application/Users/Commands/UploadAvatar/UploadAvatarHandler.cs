@@ -1,7 +1,9 @@
 using LibraHub.BuildingBlocks.Abstractions;
 using LibraHub.BuildingBlocks.Results;
+using LibraHub.BuildingBlocks.Urls;
 using LibraHub.Identity.Application.Abstractions;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Error = LibraHub.BuildingBlocks.Results.Error;
@@ -14,25 +16,15 @@ public class UploadAvatarHandler(
     IConfiguration configuration,
     ILogger<UploadAvatarHandler> logger) : IRequestHandler<UploadAvatarCommand, Result<string>>
 {
-    private const long MaxFileSize = 5 * 1024 * 1024; // 5MB
+    private const long MaxFileSize = 5 * 1024 * 1024;
     private static readonly string[] AllowedExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
 
     public async Task<Result<string>> Handle(UploadAvatarCommand request, CancellationToken cancellationToken)
     {
-        if (request.File == null || request.File.Length == 0)
+        var fileValidation = ValidateFile(request.File);
+        if (fileValidation.IsFailure)
         {
-            return Result.Failure<string>(Error.Validation("File is required"));
-        }
-
-        if (request.File.Length > MaxFileSize)
-        {
-            return Result.Failure<string>(Error.Validation($"File size must not exceed {MaxFileSize / 1024 / 1024}MB"));
-        }
-
-        var fileExtension = Path.GetExtension(request.File.FileName).ToLowerInvariant();
-        if (!AllowedExtensions.Contains(fileExtension))
-        {
-            return Result.Failure<string>(Error.Validation($"Allowed file extensions: {string.Join(", ", AllowedExtensions)}"));
+            return Result.Failure<string>(fileValidation.Error!);
         }
 
         var user = await userRepository.GetByIdAsync(request.UserId, cancellationToken);
@@ -41,26 +33,21 @@ public class UploadAvatarHandler(
             return Result.Failure<string>(Error.NotFound("User not found"));
         }
 
-        var bucketName = configuration["Storage:AvatarsBucketName"];
-        if (string.IsNullOrWhiteSpace(bucketName))
-        {
-            return Result.Failure<string>(Error.Validation("Storage:AvatarsBucketName configuration is required"));
-        }
-
-        var apiBaseUrl = configuration["Storage:ApiBaseUrl"];
-        if (string.IsNullOrWhiteSpace(apiBaseUrl))
-        {
-            return Result.Failure<string>(Error.Validation("Storage:ApiBaseUrl configuration is required"));
-        }
+        var bucketName = GetRequiredConfigValue(configuration, "Storage:AvatarsBucketName");
+        if (bucketName.IsFailure) return Result.Failure<string>(bucketName.Error!);
 
         if (!string.IsNullOrWhiteSpace(user.Avatar))
         {
             try
             {
-                var oldObjectKey = ExtractObjectKeyFromUrl(user.Avatar);
-                if (!string.IsNullOrWhiteSpace(oldObjectKey))
+                var oldPath = UrlPathExtractor.GetPathAfterSegment(user.Avatar, "avatar");
+                if (!string.IsNullOrWhiteSpace(oldPath))
                 {
-                    await objectStorage.DeleteAsync(bucketName, oldObjectKey, cancellationToken);
+                    var normalizedOldKey = oldPath.Contains('/', StringComparison.Ordinal)
+                        ? oldPath
+                        : $"users/{request.UserId}/avatar/{oldPath}";
+
+                    await objectStorage.DeleteAsync(bucketName.Value!, normalizedOldKey, cancellationToken);
                 }
             }
             catch (Exception ex)
@@ -69,12 +56,14 @@ public class UploadAvatarHandler(
             }
         }
 
-        var objectKey = $"users/{request.UserId}/avatar/{Guid.NewGuid()}{fileExtension}";
+        var fileExtension = Path.GetExtension(request.File!.FileName).ToLowerInvariant();
+        var fileName = $"{Guid.NewGuid()}{fileExtension}";
+        var objectKey = $"users/{request.UserId}/avatar/{fileName}";
 
         try
         {
             await objectStorage.UploadAsync(
-                bucketName,
+                bucketName.Value!,
                 objectKey,
                 request.File.OpenReadStream(),
                 request.File.ContentType,
@@ -86,7 +75,7 @@ public class UploadAvatarHandler(
             return Result.Failure<string>(Error.Validation("Failed to upload avatar"));
         }
 
-        var avatarUrl = $"{apiBaseUrl.TrimEnd('/')}/api/users/{request.UserId}/avatar/{objectKey}";
+        var avatarUrl = $"/api/users/{request.UserId}/avatar/{fileName}";
         user.UpdateAvatar(avatarUrl);
 
         await userRepository.UpdateAsync(user, cancellationToken);
@@ -94,17 +83,35 @@ public class UploadAvatarHandler(
         return Result.Success(avatarUrl);
     }
 
-    private static string? ExtractObjectKeyFromUrl(string url)
+    private static Result ValidateFile(IFormFile? file)
     {
-        var uri = new Uri(url);
-        var pathParts = uri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
-
-        var avatarIndex = Array.IndexOf(pathParts, "avatar");
-        if (avatarIndex >= 0 && avatarIndex < pathParts.Length - 1)
+        if (file == null || file.Length == 0)
         {
-            return string.Join("/", pathParts.Skip(avatarIndex + 1));
+            return Result.Failure(Error.Validation("File is required"));
         }
 
-        return null;
+        if (file.Length > MaxFileSize)
+        {
+            return Result.Failure(Error.Validation($"File size must not exceed {MaxFileSize / 1024 / 1024}MB"));
+        }
+
+        var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (!AllowedExtensions.Contains(fileExtension))
+        {
+            return Result.Failure(Error.Validation($"Allowed file extensions: {string.Join(", ", AllowedExtensions)}"));
+        }
+
+        return Result.Success();
+    }
+
+    private static Result<string> GetRequiredConfigValue(IConfiguration configuration, string key)
+    {
+        var value = configuration[key];
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return Result.Failure<string>(Error.Validation($"{key} configuration is required"));
+        }
+
+        return Result.Success(value);
     }
 }

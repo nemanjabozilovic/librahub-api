@@ -11,7 +11,7 @@ public class AnnouncementPublishedConsumer(
     INotificationRepository notificationRepository,
     INotificationPreferencesRepository preferencesRepository,
     INotificationSender notificationSender,
-    IIdentityClient identityClient,
+    IUserNotificationSettingsRepository settingsRepository,
     IInboxRepository inboxRepository,
     IUnitOfWork unitOfWork,
     ILogger<AnnouncementPublishedConsumer> logger)
@@ -32,87 +32,35 @@ public class AnnouncementPublishedConsumer(
             return;
         }
 
-        var allUserIds = await preferencesRepository.GetUserIdsWithEnabledNotificationsAsync(
+        var inAppUserIds = await preferencesRepository.GetUserIdsWithInAppEnabledAsync(
             NotificationType.AnnouncementPublished,
             cancellationToken);
 
-        logger.LogInformation("Found {Count} users with AnnouncementPublished notifications enabled for AnnouncementId: {AnnouncementId}",
-            allUserIds.Count, @event.AnnouncementId);
+        var staffUserIds = await settingsRepository.GetStaffUserIdsAsync(cancellationToken);
+        var eligibleInAppUserIds = inAppUserIds.Where(id => !staffUserIds.Contains(id)).ToList();
+        var emailRecipients = await settingsRepository.GetEmailAnnouncementRecipientsAsync(cancellationToken);
 
-        var notificationsToCreate = new List<Notification>();
+        logger.LogInformation(
+            "AnnouncementPublished recipients for AnnouncementId: {AnnouncementId}, InApp: {InAppCount}, Email: {EmailCount}",
+            @event.AnnouncementId,
+            eligibleInAppUserIds.Count,
+            emailRecipients.Count);
+
+        var notificationsToCreate = new List<Notification>(eligibleInAppUserIds.Count);
+        foreach (var userId in eligibleInAppUserIds)
+        {
+            notificationsToCreate.Add(new Notification(
+                Guid.NewGuid(),
+                userId,
+                NotificationType.AnnouncementPublished,
+                NotificationMessages.AnnouncementPublished.Title,
+                NotificationMessages.AnnouncementPublished.GetMessage(@event.Title)));
+        }
 
         try
         {
             await unitOfWork.ExecuteInTransactionAsync(async ct =>
             {
-                foreach (var userId in allUserIds)
-                {
-                    try
-                    {
-                        var preference = await preferencesRepository.GetByUserIdAndTypeAsync(
-                            userId,
-                            NotificationType.AnnouncementPublished,
-                            ct);
-
-                        var emailEnabled = preference?.EmailEnabled ?? true;
-                        var inAppEnabled = preference?.InAppEnabled ?? true;
-
-                        if (inAppEnabled)
-                        {
-                            var notification = new Notification(
-                                Guid.NewGuid(),
-                                userId,
-                                NotificationType.AnnouncementPublished,
-                                NotificationMessages.AnnouncementPublished.Title,
-                                NotificationMessages.AnnouncementPublished.GetMessage(@event.Title));
-
-                            notificationsToCreate.Add(notification);
-                        }
-
-                        if (emailEnabled)
-                        {
-                            var userInfo = await identityClient.GetUserInfoAsync(userId, ct);
-
-                            if (userInfo != null && !string.IsNullOrWhiteSpace(userInfo.Email) && userInfo.IsActive)
-                            {
-                                var emailSubject = NotificationMessages.AnnouncementPublished.Title;
-                                var fullName = !string.IsNullOrWhiteSpace(userInfo.FullName)
-                                    ? userInfo.FullName
-                                    : userInfo.Email.Split('@')[0];
-
-                                var emailModel = new
-                                {
-                                    FullName = fullName,
-                                    AnnouncementTitle = @event.Title,
-                                    AnnouncementContent = @event.Content,
-                                    BookId = @event.BookId,
-                                    AnnouncementId = @event.AnnouncementId,
-                                    ImageUrl = @event.ImageUrl,
-                                    PublishedAt = @event.PublishedAt
-                                };
-
-                                await SendEmailNotificationAsync(
-                                    notificationSender,
-                                    userInfo.Email,
-                                    emailSubject,
-                                    emailModel,
-                                    userId,
-                                    @event.AnnouncementId,
-                                    ct);
-                            }
-                            else
-                            {
-                                logger.LogWarning("User info not found, inactive, or email not available for UserId: {UserId}, skipping email notification", userId);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.LogError(ex, "Failed to process AnnouncementPublished notification for UserId: {UserId} for AnnouncementId: {AnnouncementId}",
-                            userId, @event.AnnouncementId);
-                    }
-                }
-
                 if (notificationsToCreate.Count > 0)
                 {
                     await notificationRepository.AddRangeAsync(notificationsToCreate, ct);
@@ -144,35 +92,43 @@ public class AnnouncementPublishedConsumer(
                         notification.UserId, @event.AnnouncementId);
                 }
             }
+
+            foreach (var recipient in emailRecipients)
+            {
+                try
+                {
+                    var emailSubject = NotificationMessages.AnnouncementPublished.Title;
+                    var email = recipient.Email;
+                    var fullName = email.Split('@')[0];
+                    var emailModel = new
+                    {
+                        FullName = fullName,
+                        AnnouncementTitle = @event.Title,
+                        AnnouncementContent = @event.Content,
+                        BookId = @event.BookId,
+                        AnnouncementId = @event.AnnouncementId,
+                        ImageUrl = @event.ImageUrl,
+                        PublishedAt = @event.PublishedAt
+                    };
+
+                    await notificationSender.SendEmailWithTemplateAsync(
+                        email,
+                        emailSubject,
+                        "ANNOUNCEMENT_PUBLISHED",
+                        emailModel,
+                        cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Failed to send announcement email to UserId: {UserId} for AnnouncementId: {AnnouncementId}",
+                        recipient.UserId, @event.AnnouncementId);
+                }
+            }
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to process AnnouncementPublished event for AnnouncementId: {AnnouncementId}, MessageId: {MessageId}",
                 @event.AnnouncementId, messageId);
-            throw;
-        }
-    }
-
-    private static async Task SendEmailNotificationAsync(
-        INotificationSender notificationSender,
-        string email,
-        string subject,
-        object model,
-        Guid userId,
-        Guid announcementId,
-        CancellationToken cancellationToken)
-    {
-        try
-        {
-            await notificationSender.SendEmailWithTemplateAsync(
-                email,
-                subject,
-                "ANNOUNCEMENT_PUBLISHED",
-                model,
-                cancellationToken);
-        }
-        catch (Exception)
-        {
             throw;
         }
     }

@@ -54,8 +54,8 @@ public class BookPublishedConsumer(
                             NotificationType.BookPublished,
                             ct);
 
-                        var emailEnabled = preference?.EmailEnabled ?? true;
-                        var inAppEnabled = preference?.InAppEnabled ?? true;
+                        var emailEnabled = preference?.EmailEnabled ?? false;
+                        var inAppEnabled = preference?.InAppEnabled ?? false;
 
                         if (inAppEnabled)
                         {
@@ -71,7 +71,8 @@ public class BookPublishedConsumer(
 
                         if (emailEnabled)
                         {
-                            var userInfo = await identityClient.GetUserInfoAsync(userId, ct);
+                            var userInfoResult = await identityClient.GetUserInfoAsync(userId, ct);
+                            var userInfo = userInfoResult.IsSuccess ? userInfoResult.Value : null;
 
                             if (userInfo != null && !string.IsNullOrWhiteSpace(userInfo.Email) && userInfo.IsActive)
                             {
@@ -152,18 +153,11 @@ public class BookPublishedConsumer(
         Guid bookId,
         CancellationToken cancellationToken)
     {
-        try
-        {
-            await notificationSender.SendEmailWithTemplateAsync(
-                email,
-                subject,
-                "BOOK_PUBLISHED",
-                model,
-                cancellationToken);
-        }
-        catch (Exception)
-        {
-            throw;
-        }
+        await notificationSender.SendEmailWithTemplateAsync(
+            email,
+            subject,
+            "BOOK_PUBLISHED",
+            model,
+            cancellationToken);
     }
 }

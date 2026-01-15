@@ -18,7 +18,7 @@ public class Order
     public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
 
     private Order()
-    { } // For EF Core
+    { }
 
     public Order(
         Guid id,

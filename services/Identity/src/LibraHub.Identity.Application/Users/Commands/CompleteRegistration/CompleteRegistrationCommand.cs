@@ -10,4 +10,6 @@ public record CompleteRegistrationCommand(
     string FirstName,
     string LastName,
     DateTimeOffset DateOfBirth,
+    bool EmailAnnouncementsEnabled,
+    bool EmailPromotionsEnabled,
     string? Phone = null) : IRequest<Result>;

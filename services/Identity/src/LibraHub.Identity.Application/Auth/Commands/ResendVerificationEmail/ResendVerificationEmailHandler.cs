@@ -27,7 +27,6 @@ public class ResendVerificationEmailHandler(
 
         if (user == null)
         {
-            // Don't reveal if user exists
             logger.LogWarning("Resend verification email requested for non-existent email: {Email}", emailLower);
             return Result.Success();
         }
@@ -35,7 +34,7 @@ public class ResendVerificationEmailHandler(
         if (user.EmailVerified)
         {
             logger.LogInformation("Resend verification email requested for already verified user: {Email}", emailLower);
-            return Result.Success(); // Already verified, silently succeed
+            return Result.Success();
         }
 
         var newVerificationToken = tokenService.GenerateToken();

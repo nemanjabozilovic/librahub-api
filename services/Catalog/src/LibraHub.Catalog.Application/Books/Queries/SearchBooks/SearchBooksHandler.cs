@@ -37,7 +37,10 @@ public class SearchBooksHandler(
         var pricingDict = await pricingRepository.GetByBookIdsAsync(bookIds, cancellationToken);
         var contentStateDict = await contentStateRepository.GetByBookIdsAsync(bookIds, cancellationToken);
 
-        var editionsDict = await contentReadClient.GetBookEditionsBatchAsync(bookIds, cancellationToken);
+        var editionsDictResult = await contentReadClient.GetBookEditionsBatchAsync(bookIds, cancellationToken);
+        var editionsDict = editionsDictResult.IsSuccess
+            ? editionsDictResult.Value
+            : bookIds.ToDictionary(id => id, _ => new List<Abstractions.BookEditionInfoDto>());
 
         var bookSummaries = books.Select(b =>
         {

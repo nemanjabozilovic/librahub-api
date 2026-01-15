@@ -28,7 +28,6 @@ public class RevokeEntitlementHandler(
         entitlement.Revoke(request.Reason);
         await entitlementRepository.UpdateAsync(entitlement, cancellationToken);
 
-        // Publish event
         await outboxWriter.WriteAsync(
             new EntitlementRevokedV1
             {

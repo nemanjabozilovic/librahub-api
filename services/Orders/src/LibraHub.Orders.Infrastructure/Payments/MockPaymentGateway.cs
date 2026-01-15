@@ -30,7 +30,16 @@ public class MockPaymentGateway : IPaymentGateway
             return PaymentResult.Failed(failureReason);
         }
 
-        var providerReference = $"mock_{orderId}_{Guid.NewGuid():N}";
+        var prefix = provider switch
+        {
+            PaymentProvider.Visa => "visa",
+            PaymentProvider.Mastercard => "mastercard",
+            PaymentProvider.Stripe => "stripe",
+            PaymentProvider.PayPal => "paypal",
+            _ => "mock"
+        };
+
+        var providerReference = $"{prefix}_{orderId}_{Guid.NewGuid():N}";
         return PaymentResult.Succeeded(providerReference);
     }
 

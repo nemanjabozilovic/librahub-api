@@ -48,7 +48,6 @@ public class EntitlementConfig : IEntityTypeConfiguration<Entitlement>
         builder.Property(x => x.OrderId)
             .HasColumnName("order_id");
 
-        // Unique constraint on (UserId, BookId)
         builder.HasIndex(x => new { x.UserId, x.BookId })
             .IsUnique();
 

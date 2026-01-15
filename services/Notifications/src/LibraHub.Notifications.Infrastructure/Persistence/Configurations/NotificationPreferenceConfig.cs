@@ -41,7 +41,6 @@ public class NotificationPreferenceConfig : IEntityTypeConfiguration<Notificatio
             .HasColumnName("updated_at")
             .IsRequired();
 
-        // Unique constraint on (UserId, Type)
         builder.HasIndex(x => new { x.UserId, x.Type })
             .IsUnique();
 

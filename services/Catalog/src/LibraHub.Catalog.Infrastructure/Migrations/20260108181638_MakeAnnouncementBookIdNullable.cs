@@ -4,10 +4,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace LibraHub.Catalog.Infrastructure.Migrations
 {
-    /// <inheritdoc />
     public partial class MakeAnnouncementBookIdNullable : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<Guid>(
@@ -19,7 +17,6 @@ namespace LibraHub.Catalog.Infrastructure.Migrations
                 oldType: "uuid");
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<Guid>(

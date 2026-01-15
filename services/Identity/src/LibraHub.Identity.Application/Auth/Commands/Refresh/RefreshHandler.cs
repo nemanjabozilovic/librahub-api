@@ -41,11 +41,9 @@ public class RefreshHandler : IRequestHandler<RefreshCommand, Result<AuthTokensD
             return Result.Failure<AuthTokensDto>(Error.Forbidden("User account is removed"));
         }
 
-        // Revoke old token (rotation)
         refreshToken.Revoke();
         await _refreshTokenRepository.UpdateAsync(refreshToken, cancellationToken);
 
-        // Generate new tokens
         var accessToken = _tokenService.GenerateAccessToken(user);
         var newRefreshTokenValue = _tokenService.GenerateRefreshToken();
         var refreshTokenExpiresAt = _tokenService.GetRefreshTokenExpiration();

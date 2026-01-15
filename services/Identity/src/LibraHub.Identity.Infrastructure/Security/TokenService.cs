@@ -29,7 +29,7 @@ public class TokenService : ITokenService
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new("sub", user.Id.ToString()), // Standard JWT subject claim
+            new("sub", user.Id.ToString()),
             new(ClaimTypes.Email, user.Email),
             new("email_verified", user.EmailVerified.ToString().ToLower())
         };

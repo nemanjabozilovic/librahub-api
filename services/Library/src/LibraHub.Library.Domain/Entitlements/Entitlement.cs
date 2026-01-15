@@ -14,7 +14,7 @@ public class Entitlement
 
     protected Entitlement()
     {
-    } // For EF Core
+    }
 
     public Entitlement(
         Guid id,

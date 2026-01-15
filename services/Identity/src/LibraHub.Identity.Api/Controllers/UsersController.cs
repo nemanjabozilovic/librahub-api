@@ -1,7 +1,7 @@
 using LibraHub.BuildingBlocks.Results;
 using LibraHub.Identity.Api.Dtos.Users;
 using LibraHub.Identity.Application.Admin.Commands.AssignRole;
-using LibraHub.Identity.Application.Admin.Commands.DisableUser;
+using LibraHub.Identity.Application.Admin.Commands.RemoveUser;
 using LibraHub.Identity.Application.Users.Commands.CompleteRegistration;
 using LibraHub.Identity.Application.Users.Commands.CreateUser;
 using LibraHub.Identity.Application.Users.Commands.UpdateUser;
@@ -19,10 +19,10 @@ namespace LibraHub.Identity.Api.Controllers;
 
 [ApiController]
 [Route("users")]
-[Authorize(Roles = "Admin")]
 public class UsersController(IMediator mediator) : ControllerBase
 {
     [HttpGet]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(GetUsersResponseDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetUsers(
         [FromQuery] int skip = 0,
@@ -35,6 +35,7 @@ public class UsersController(IMediator mediator) : ControllerBase
     }
 
     [HttpGet("removed")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(GetRemovedUsersResponseDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetRemovedUsers(
         [FromQuery] int skip = 0,
@@ -47,6 +48,7 @@ public class UsersController(IMediator mediator) : ControllerBase
     }
 
     [HttpGet("{id}/info")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(GetUserResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetUserInfo(
@@ -72,6 +74,7 @@ public class UsersController(IMediator mediator) : ControllerBase
     }
 
     [HttpPost("{id}/roles")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> AssignRole(
         [FromRoute] Guid id,
@@ -85,6 +88,7 @@ public class UsersController(IMediator mediator) : ControllerBase
     }
 
     [HttpDelete("{id}/roles/{role}")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> RemoveRole(
         [FromRoute] Guid id,
@@ -98,6 +102,7 @@ public class UsersController(IMediator mediator) : ControllerBase
     }
 
     [HttpPost("{id}/remove")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status404NotFound)]
@@ -106,12 +111,13 @@ public class UsersController(IMediator mediator) : ControllerBase
         [FromBody] RemoveUserRequestDto request,
         CancellationToken cancellationToken)
     {
-        var command = new DisableUserCommand(id, request.Reason);
+        var command = new RemoveUserCommand(id, request.Reason);
         var result = await mediator.Send(command, cancellationToken);
         return result.ToNoContentActionResult(this);
     }
 
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(LibraHub.Identity.Application.Users.Queries.GetUsers.UserDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status404NotFound)]
@@ -132,6 +138,7 @@ public class UsersController(IMediator mediator) : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateUser(
@@ -160,12 +167,15 @@ public class UsersController(IMediator mediator) : ControllerBase
             request.FirstName,
             request.LastName,
             request.DateOfBirth,
+            request.EmailAnnouncementsEnabled,
+            request.EmailPromotionsEnabled,
             request.Phone);
         var result = await mediator.Send(command, cancellationToken);
         return result.ToActionResult(this);
     }
 
     [HttpPost("{id}/avatar")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UploadAvatar(

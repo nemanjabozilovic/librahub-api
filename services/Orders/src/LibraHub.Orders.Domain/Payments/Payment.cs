@@ -16,7 +16,7 @@ public class Payment
     public DateTime? FailedAt { get; private set; }
 
     private Payment()
-    { } // For EF Core
+    { }
 
     public Payment(
         Guid id,
@@ -42,6 +42,21 @@ public class Payment
         Status = PaymentStatus.Completed;
         ProviderReference = providerReference;
         CompletedAt = DateTime.UtcNow;
+    }
+
+    public void SetProviderReference(string providerReference)
+    {
+        if (Status != PaymentStatus.Pending)
+        {
+            throw new InvalidOperationException($"Cannot set provider reference when status is {Status}");
+        }
+
+        if (string.IsNullOrWhiteSpace(providerReference))
+        {
+            throw new ArgumentException("Provider reference is required", nameof(providerReference));
+        }
+
+        ProviderReference = providerReference;
     }
 
     public void MarkAsFailed(string reason)

@@ -22,4 +22,6 @@ public class Error
     public static Error Unauthorized(string message = "Unauthorized") => new("UNAUTHORIZED", message);
 
     public static Error Forbidden(string message = "Forbidden") => new("FORBIDDEN", message);
+
+    public static Error Unexpected(string message = "Unexpected error") => new("UNEXPECTED", message);
 }

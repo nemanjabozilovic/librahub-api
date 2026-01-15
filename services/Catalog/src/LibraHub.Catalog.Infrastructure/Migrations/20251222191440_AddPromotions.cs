@@ -4,10 +4,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace LibraHub.Catalog.Infrastructure.Migrations
 {
-    /// <inheritdoc />
     public partial class AddPromotions : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -89,7 +87,6 @@ namespace LibraHub.Catalog.Infrastructure.Migrations
                 column: "campaign_id");
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

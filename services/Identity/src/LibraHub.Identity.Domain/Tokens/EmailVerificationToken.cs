@@ -13,7 +13,7 @@ public class EmailVerificationToken
     public bool IsValid => !IsUsed && !IsExpired;
 
     private EmailVerificationToken()
-    { } // For EF Core
+    { }
 
     public EmailVerificationToken(Guid id, Guid userId, string token, DateTime expiresAt)
     {

@@ -8,4 +8,6 @@ public record RegisterRequestDto
     public string LastName { get; init; } = string.Empty;
     public string? Phone { get; init; }
     public DateTimeOffset DateOfBirth { get; init; }
+    public bool EmailAnnouncementsEnabled { get; init; }
+    public bool EmailPromotionsEnabled { get; init; }
 }

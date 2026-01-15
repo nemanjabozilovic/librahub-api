@@ -15,19 +15,15 @@ public static class PasswordPolicy
         if (password.Length < MinLength || password.Length > MaxLength)
             return false;
 
-        // At least one uppercase letter
         if (!Regex.IsMatch(password, @"[A-Z]"))
             return false;
 
-        // At least one lowercase letter
         if (!Regex.IsMatch(password, @"[a-z]"))
             return false;
 
-        // At least one digit
         if (!Regex.IsMatch(password, @"[0-9]"))
             return false;
 
-        // At least one special character
         if (!Regex.IsMatch(password, @"[!@#$%^&*()_+\-=\[\]{};':""\\|,.<>\/?]"))
             return false;
 

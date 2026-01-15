@@ -88,6 +88,7 @@ public class LibraryEventConsumerWorker : EventConsumerWorker
                     await userRemovedConsumer.HandleAsync(userRemovedEvent, cancellationToken);
                 }
                 break;
+
         }
     }
 }

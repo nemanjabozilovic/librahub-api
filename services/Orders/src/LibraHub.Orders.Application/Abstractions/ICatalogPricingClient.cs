@@ -1,8 +1,10 @@
+using LibraHub.BuildingBlocks.Results;
+
 namespace LibraHub.Orders.Application.Abstractions;
 
 public interface ICatalogPricingClient
 {
-    Task<PricingQuote?> GetPricingQuoteAsync(
+    Task<Result<PricingQuote>> GetPricingQuoteAsync(
         List<Guid> bookIds,
         Guid? userId = null,
         CancellationToken cancellationToken = default);

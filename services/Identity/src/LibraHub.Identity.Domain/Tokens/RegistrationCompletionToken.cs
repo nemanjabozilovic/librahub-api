@@ -13,7 +13,7 @@ public class RegistrationCompletionToken
     public bool IsValid => !IsUsed && !IsExpired;
 
     private RegistrationCompletionToken()
-    { } // For EF Core
+    { }
 
     public RegistrationCompletionToken(Guid id, Guid userId, string token, DateTime expiresAt)
     {

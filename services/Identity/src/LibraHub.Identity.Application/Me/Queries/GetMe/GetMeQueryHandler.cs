@@ -4,7 +4,9 @@ using LibraHub.Identity.Application.Abstractions;
 using LibraHub.Identity.Domain.Users;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Error = LibraHub.BuildingBlocks.Results.Error;
+using LibraHub.Identity.Application.Options;
 
 namespace LibraHub.Identity.Application.Me.Queries.GetMe;
 
@@ -13,14 +15,17 @@ public class GetMeQueryHandler : IRequestHandler<GetMeQuery, Result<GetMeRespons
     private readonly IUserRepository _userRepository;
     private readonly ICurrentUser _currentUser;
     private readonly ILogger<GetMeQueryHandler> _logger;
+    private readonly IdentityOptions _identityOptions;
 
     public GetMeQueryHandler(
         IUserRepository userRepository,
         ICurrentUser currentUser,
+        IOptions<IdentityOptions> identityOptions,
         ILogger<GetMeQueryHandler> logger)
     {
         _userRepository = userRepository;
         _currentUser = currentUser;
+        _identityOptions = identityOptions.Value;
         _logger = logger;
     }
 
@@ -57,7 +62,7 @@ public class GetMeQueryHandler : IRequestHandler<GetMeQuery, Result<GetMeRespons
             LastName = user.LastName,
             DisplayName = user.DisplayName,
             Phone = user.Phone,
-            Avatar = user.Avatar,
+            Avatar = BuildAvatarUrl(user.Avatar, user.Id),
             DateOfBirth = user.DateOfBirth != default ? new DateTimeOffset(user.DateOfBirth, TimeSpan.Zero) : null,
             Roles = roles,
             EmailVerified = user.EmailVerified,
@@ -67,5 +72,50 @@ public class GetMeQueryHandler : IRequestHandler<GetMeQuery, Result<GetMeRespons
         };
 
         return Result.Success(response);
+    }
+
+    private string? BuildAvatarUrl(string? avatar, Guid userId)
+    {
+        var relative = NormalizeAvatarPath(avatar, userId);
+        if (string.IsNullOrWhiteSpace(relative))
+        {
+            return null;
+        }
+
+        return $"{_identityOptions.GatewayBaseUrl.TrimEnd('/')}{relative}";
+    }
+
+    private static string? NormalizeAvatarPath(string? avatar, Guid userId)
+    {
+        if (string.IsNullOrWhiteSpace(avatar))
+        {
+            return null;
+        }
+
+        var path = avatar.Trim();
+
+        if (path.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+        {
+            if (Uri.TryCreate(path, UriKind.Absolute, out var uri))
+            {
+                path = uri.AbsolutePath;
+            }
+        }
+
+        var marker = "/avatar/";
+        var idx = path.LastIndexOf(marker, StringComparison.OrdinalIgnoreCase);
+        if (idx < 0)
+        {
+            return path.StartsWith("/api/", StringComparison.OrdinalIgnoreCase) ? path : null;
+        }
+
+        var after = path[(idx + marker.Length)..];
+        var fileName = Path.GetFileName(after);
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            return null;
+        }
+
+        return $"/api/users/{userId}/avatar/{fileName}";
     }
 }

@@ -17,7 +17,7 @@ public class AccessGrant
     public DateTime? RevokedAt { get; private set; }
 
     protected AccessGrant()
-    { } // For EF Core
+    { }
 
     public AccessGrant(
         Guid id,

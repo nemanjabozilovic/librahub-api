@@ -17,7 +17,7 @@ public class PromotionRule
     private const string SupportedCurrency = "USD";
 
     protected PromotionRule()
-    { } // For EF Core
+    { }
 
     public PromotionRule(
         Guid id,
@@ -94,12 +94,11 @@ public class PromotionRule
         {
             if (Currency != currency)
             {
-                return 0; // Currency mismatch, no discount
+                return 0;
             }
             discount = DiscountValue;
         }
 
-        // Apply max discount cap if specified
         if (MaxDiscountAmount.HasValue && discount > MaxDiscountAmount.Value)
         {
             discount = MaxDiscountAmount.Value;
@@ -113,13 +112,11 @@ public class PromotionRule
         var discount = CalculateDiscount(basePrice, currency);
         var finalPrice = basePrice - discount;
 
-        // Ensure minimum price
         if (MinPriceAfterDiscount.HasValue && finalPrice < MinPriceAfterDiscount.Value)
         {
             finalPrice = MinPriceAfterDiscount.Value;
         }
 
-        // Ensure non-negative
         if (finalPrice < 0)
         {
             finalPrice = 0;

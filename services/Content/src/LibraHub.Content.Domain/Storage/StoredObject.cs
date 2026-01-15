@@ -14,7 +14,7 @@ public class StoredObject
     public string? BlockReason { get; private set; }
 
     protected StoredObject()
-    { } // For EF Core
+    { }
 
     public StoredObject(
         Guid id,
@@ -38,7 +38,7 @@ public class StoredObject
     {
         if (Status == ObjectStatus.Blocked)
         {
-            return; // Already blocked
+            return;
         }
 
         Status = ObjectStatus.Blocked;

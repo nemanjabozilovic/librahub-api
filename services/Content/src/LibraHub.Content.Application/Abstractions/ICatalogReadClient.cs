@@ -1,8 +1,10 @@
+using LibraHub.BuildingBlocks.Results;
+
 namespace LibraHub.Content.Application.Abstractions;
 
 public interface ICatalogReadClient
 {
-    Task<BookInfo?> GetBookInfoAsync(Guid bookId, CancellationToken cancellationToken = default);
+    Task<Result<BookInfo>> GetBookInfoAsync(Guid bookId, CancellationToken cancellationToken = default);
 }
 
 public record BookInfo

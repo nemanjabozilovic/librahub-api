@@ -36,7 +36,14 @@ public class CreateOrderHandler(
             return userValidationResult;
         }
 
-        var pricingQuote = await catalogClient.GetPricingQuoteAsync(request.BookIds, userId, cancellationToken);
+        var pricingQuoteResult = await catalogClient.GetPricingQuoteAsync(request.BookIds, userId, cancellationToken);
+        if (pricingQuoteResult.IsFailure)
+        {
+            return Result.Failure<Guid>(pricingQuoteResult.Error ?? Error.Unexpected("Failed to retrieve pricing quote"));
+        }
+
+        var pricingQuote = pricingQuoteResult.Value;
+
         var pricingValidationResult = ValidatePricingQuote(pricingQuote, request.BookIds.Count);
         if (pricingValidationResult.IsFailure)
         {
@@ -55,18 +62,20 @@ public class CreateOrderHandler(
             return ownershipValidationResult;
         }
 
-        var order = CreateOrderFromQuote(userId, pricingQuote!);
+        var order = CreateOrderFromQuote(userId, pricingQuote);
 
         return await SaveOrderWithTransactionAsync(order, cancellationToken);
     }
 
     private async Task<Result<Guid>> ValidateUserAsync(IIdentityClient identityClient, Guid userId, CancellationToken cancellationToken)
     {
-        var userInfo = await identityClient.GetUserInfoAsync(userId, cancellationToken);
-        if (userInfo == null)
+        var userInfoResult = await identityClient.GetUserInfoAsync(userId, cancellationToken);
+        if (userInfoResult.IsFailure)
         {
-            return Result.Failure<Guid>(Error.NotFound("User not found"));
+            return Result.Failure<Guid>(userInfoResult.Error ?? Error.NotFound("User"));
         }
+
+        var userInfo = userInfoResult.Value;
 
         if (!userInfo.IsActive)
         {
@@ -116,7 +125,13 @@ public class CreateOrderHandler(
 
     private async Task<Result<Guid>> ValidateBookOwnershipAsync(ILibraryOwnershipClient libraryClient, Guid userId, List<Guid> bookIds, CancellationToken cancellationToken)
     {
-        var ownedBookIds = await libraryClient.GetOwnedBookIdsAsync(userId, bookIds, cancellationToken);
+        var ownedBookIdsResult = await libraryClient.GetOwnedBookIdsAsync(userId, bookIds, cancellationToken);
+        if (ownedBookIdsResult.IsFailure)
+        {
+            return Result.Failure<Guid>(ownedBookIdsResult.Error ?? Error.Unexpected("Failed to validate book ownership"));
+        }
+
+        var ownedBookIds = ownedBookIdsResult.Value;
         if (ownedBookIds.Count > 0)
         {
             return Result.Failure<Guid>(Error.Validation(OrdersErrors.Book.AlreadyOwned));

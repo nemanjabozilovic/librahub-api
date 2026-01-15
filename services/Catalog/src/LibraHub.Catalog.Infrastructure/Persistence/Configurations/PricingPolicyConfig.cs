@@ -53,6 +53,10 @@ public class PricingPolicyConfig : IEntityTypeConfiguration<PricingPolicy>
         builder.Property(p => p.PromoEndDate)
             .HasColumnName("promo_end_date");
 
+        builder.Property(p => p.PromoName)
+            .HasColumnName("promo_name")
+            .HasMaxLength(200);
+
         builder.Property(p => p.CreatedAt)
             .HasColumnName("created_at")
             .IsRequired();

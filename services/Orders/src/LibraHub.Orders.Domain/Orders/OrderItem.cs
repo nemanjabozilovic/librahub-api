@@ -15,7 +15,7 @@ public class OrderItem
     public decimal? DiscountAmount { get; private set; }
 
     private OrderItem()
-    { } // For EF Core
+    { }
 
     public OrderItem(
         Guid id,

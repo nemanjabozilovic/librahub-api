@@ -13,7 +13,7 @@ public class Notification
 
     private Notification()
     {
-    } // For EF Core
+    }
 
     public Notification(
         Guid id,

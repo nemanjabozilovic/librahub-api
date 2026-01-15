@@ -40,7 +40,11 @@ public class SetPricingHandler(
         if (request.PromoPrice.HasValue && request.PromoStartDate.HasValue && request.PromoEndDate.HasValue)
         {
             var promoMoney = new Money(request.PromoPrice.Value, request.Currency);
-            existingPricing.SetPromo(promoMoney, request.PromoStartDate.Value.UtcDateTime, request.PromoEndDate.Value.UtcDateTime);
+            existingPricing.SetPromo(
+                promoMoney,
+                request.PromoStartDate.Value.UtcDateTime,
+                request.PromoEndDate.Value.UtcDateTime,
+                request.PromoName!);
             await pricingRepository.UpdateAsync(existingPricing, cancellationToken);
         }
         else if (existingPricing.PromoPrice != null)

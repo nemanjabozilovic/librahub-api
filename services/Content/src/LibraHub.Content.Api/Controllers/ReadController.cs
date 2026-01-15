@@ -106,7 +106,6 @@ public class ReadController(
 
         var grantInfo = result.Value;
 
-        // Determine bucket based on scope
         var bucketName = grantInfo.Scope == "Cover"
             ? uploadOptions.Value.CoversBucketName
             : uploadOptions.Value.EditionsBucketName;

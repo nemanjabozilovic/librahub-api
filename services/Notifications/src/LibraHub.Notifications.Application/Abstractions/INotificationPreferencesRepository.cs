@@ -10,6 +10,7 @@ public interface INotificationPreferencesRepository
     Task<List<NotificationPreference>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
 
     Task<List<Guid>> GetUserIdsWithEnabledNotificationsAsync(NotificationType type, CancellationToken cancellationToken = default);
+    Task<List<Guid>> GetUserIdsWithInAppEnabledAsync(NotificationType type, CancellationToken cancellationToken = default);
 
     Task AddAsync(NotificationPreference preference, CancellationToken cancellationToken = default);
 

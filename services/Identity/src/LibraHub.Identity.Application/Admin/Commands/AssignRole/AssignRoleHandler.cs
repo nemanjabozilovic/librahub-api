@@ -33,7 +33,6 @@ public class AssignRoleHandler : IRequestHandler<AssignRoleCommand, Result>
             return Result.Failure(Error.NotFound("User not found"));
         }
 
-        // Prevent removing the last admin
         if (request.Role == Role.Admin && !request.Assign)
         {
             var adminCount = await _userRepository.CountAdminsAsync(cancellationToken);
@@ -54,7 +53,6 @@ public class AssignRoleHandler : IRequestHandler<AssignRoleCommand, Result>
 
         await _userRepository.UpdateAsync(user, cancellationToken);
 
-        // Publish integration event
         var integrationEvent = new RoleAssignedV1
         {
             UserId = user.Id,
@@ -63,6 +61,19 @@ public class AssignRoleHandler : IRequestHandler<AssignRoleCommand, Result>
         };
 
         await _outboxWriter.WriteAsync(integrationEvent, EventTypes.RoleAssigned, cancellationToken);
+
+        var settingsEvent = new UserNotificationSettingsChangedV1
+        {
+            UserId = user.Id,
+            Email = user.Email,
+            IsActive = user.Status == UserStatus.Active,
+            IsStaff = user.IsStaff(),
+            EmailAnnouncementsEnabled = user.EmailAnnouncementsEnabled,
+            EmailPromotionsEnabled = user.EmailPromotionsEnabled,
+            OccurredAt = _clock.UtcNowOffset
+        };
+
+        await _outboxWriter.WriteAsync(settingsEvent, EventTypes.UserNotificationSettingsChanged, cancellationToken);
 
         return Result.Success();
     }

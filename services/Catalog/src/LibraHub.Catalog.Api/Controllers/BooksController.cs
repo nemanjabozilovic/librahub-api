@@ -7,6 +7,7 @@ using LibraHub.Catalog.Application.Books.Commands.RemoveBook;
 using LibraHub.Catalog.Application.Books.Commands.SetPricing;
 using LibraHub.Catalog.Application.Books.Commands.UnlistBook;
 using LibraHub.Catalog.Application.Books.Commands.UpdateBook;
+using LibraHub.Catalog.Application.Books.Queries.GetOrderPricingQuote;
 using LibraHub.Catalog.Application.Books.Queries.GetBook;
 using LibraHub.Catalog.Application.Books.Queries.GetBookInfo;
 using LibraHub.Catalog.Application.Books.Queries.SearchBooks;
@@ -114,11 +115,26 @@ public class BooksController(IMediator mediator) : ControllerBase
             request.Currency,
             request.VatRate,
             request.PromoPrice,
+            request.PromoName,
             request.PromoStartDate,
             request.PromoEndDate);
 
         var result = await mediator.Send(command, cancellationToken);
         return result.ToNoContentActionResult(this);
+    }
+
+    // Used by Orders service for checkout pricing validation and order totals.
+    [HttpPost("pricing/quote")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(OrderPricingQuoteResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetOrderPricingQuote(
+        [FromBody] OrderPricingQuoteRequestDto request,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetOrderPricingQuoteQuery(request.BookIds, request.UserId, request.AtUtc);
+        var result = await mediator.Send(query, cancellationToken);
+        return result.ToActionResult(this);
     }
 
     [HttpPost("{id}/publish")]

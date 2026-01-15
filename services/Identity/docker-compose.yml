@@ -14,7 +14,8 @@ services:
       - ConnectionStrings__Redis=librahub-redis:6379
       - EmailConfig__Host=papercut-smtp
       - Storage__Endpoint=librahub-minio:9000
-      - Storage__ApiBaseUrl=http://librahub-identity-api:8081
+      - Identity__GatewayBaseUrl=http://localhost:5000
+      - InternalAccess__ApiKey=librahub_internal_dev_2026
     ports:
       - "60950:8080"
       - "60951:8081"

@@ -28,7 +28,7 @@ public class Book
     public virtual IReadOnlyCollection<BookTag> Tags => _tags.AsReadOnly();
 
     protected Book()
-    { } // For EF Core
+    { }
 
     public Book(Guid id, string title)
     {
@@ -172,7 +172,7 @@ public class Book
 
         if (Status == BookStatus.Published)
         {
-            return; // Already published
+            return;
         }
 
         ValidatePublishingRequirements(pricingPolicy, contentState);
@@ -217,7 +217,7 @@ public class Book
     {
         if (Status == BookStatus.Removed)
         {
-            return; // Already removed
+            return;
         }
 
         if (string.IsNullOrWhiteSpace(reason))
@@ -280,7 +280,7 @@ public class BookAuthor
     public string Name { get; private set; } = string.Empty;
 
     protected BookAuthor()
-    { } // For EF Core
+    { }
 
     public BookAuthor(Guid bookId, string name)
     {
@@ -295,7 +295,7 @@ public class BookCategory
     public string Name { get; private set; } = string.Empty;
 
     protected BookCategory()
-    { } // For EF Core
+    { }
 
     public BookCategory(Guid bookId, string name)
     {
@@ -310,7 +310,7 @@ public class BookTag
     public string Name { get; private set; } = string.Empty;
 
     protected BookTag()
-    { } // For EF Core
+    { }
 
     public BookTag(Guid bookId, string name)
     {

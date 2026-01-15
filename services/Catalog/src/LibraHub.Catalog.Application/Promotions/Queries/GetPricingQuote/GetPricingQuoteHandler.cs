@@ -54,8 +54,27 @@ public class GetPricingQuoteHandler(
 
             var promotionResult = evaluator.EvaluateBestDiscount(book, basePrice, currency, utcNow, activeCampaigns);
 
+            var vatRate = pricing.VatRate ?? 0m;
+
+            var manualPromoActive =
+                book.Status == Domain.Books.BookStatus.Published &&
+                pricing.PromoPrice != null &&
+                !string.IsNullOrWhiteSpace(pricing.PromoName) &&
+                pricing.PromoStartDate.HasValue &&
+                pricing.PromoEndDate.HasValue &&
+                utcNow >= pricing.PromoStartDate.Value &&
+                utcNow <= pricing.PromoEndDate.Value;
+
+            var manualPromoNet = manualPromoActive && pricing.PromoPrice != null
+                ? pricing.PromoPrice.Amount
+                : basePrice;
+
+            var campaignPromoNet = promotionResult?.FinalPrice ?? basePrice;
+
+            var bestNet = Math.Min(manualPromoNet, campaignPromoNet);
+
             AppliedPromotionDto? appliedPromotion = null;
-            if (promotionResult != null)
+            if (promotionResult != null && campaignPromoNet <= manualPromoNet && campaignPromoNet < basePrice)
             {
                 appliedPromotion = new AppliedPromotionDto
                 {
@@ -66,13 +85,28 @@ public class GetPricingQuoteHandler(
                     DiscountValue = promotionResult.DiscountValue
                 };
             }
+            else if (manualPromoActive && manualPromoNet < basePrice)
+            {
+                var discountAmount = basePrice - manualPromoNet;
+
+                appliedPromotion = new AppliedPromotionDto
+                {
+                    CampaignId = Guid.Empty,
+                    RuleId = Guid.Empty,
+                    Name = pricing.PromoName ?? string.Empty,
+                    DiscountType = DiscountType.FixedAmount.ToString(),
+                    DiscountValue = discountAmount
+                };
+            }
+
+            var finalPriceWithVat = ApplyVat(bestNet, vatRate);
 
             items.Add(new PricingQuoteItemDto
             {
                 BookId = itemRequest.BookId,
                 BasePrice = basePrice,
-                FinalPrice = promotionResult?.FinalPrice ?? basePrice,
-                VatRate = pricing.VatRate ?? 0m,
+                FinalPrice = finalPriceWithVat,
+                VatRate = vatRate,
                 AppliedPromotion = appliedPromotion
             });
         }
@@ -82,5 +116,15 @@ public class GetPricingQuoteHandler(
             Currency = currency,
             Items = items
         });
+    }
+
+    private static decimal ApplyVat(decimal net, decimal vatRate)
+    {
+        if (vatRate <= 0m)
+        {
+            return net;
+        }
+
+        return net * (1m + vatRate / 100m);
     }
 }

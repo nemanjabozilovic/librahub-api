@@ -1,10 +1,10 @@
 using LibraHub.BuildingBlocks.Results;
 using LibraHub.Orders.Api.Dtos.Orders;
 using LibraHub.Orders.Api.Dtos.Payments;
+using LibraHub.Orders.Application.Orders.Commands.StartPayment;
 using LibraHub.Orders.Application.Orders.Commands.CancelOrder;
 using LibraHub.Orders.Application.Orders.Commands.CapturePayment;
 using LibraHub.Orders.Application.Orders.Commands.CreateOrder;
-using LibraHub.Orders.Application.Orders.Commands.StartPayment;
 using LibraHub.Orders.Application.Orders.Queries.GetMyOrders;
 using LibraHub.Orders.Application.Orders.Queries.GetOrder;
 using MediatR;
@@ -45,7 +45,7 @@ public class OrdersController(IMediator mediator) : ControllerBase
     }
 
     [HttpPost("{orderId}/start-payment")]
-    [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(StartPaymentResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> StartPayment(
@@ -62,6 +62,23 @@ public class OrdersController(IMediator mediator) : ControllerBase
         var result = await mediator.Send(command, cancellationToken);
 
         return result.ToActionResult(this);
+    }
+
+    [HttpGet("payment-providers")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(PaymentProvidersResponseDto), StatusCodes.Status200OK)]
+    public IActionResult GetPaymentProviders()
+    {
+        return Ok(new PaymentProvidersResponseDto
+        {
+            Providers = new List<PaymentProviderDto>
+            {
+                new() { Id = "Visa", DisplayName = "VISA card", Type = "Card", IsMocked = true },
+                new() { Id = "Mastercard", DisplayName = "Mastercard", Type = "Card", IsMocked = true },
+                new() { Id = "Stripe", DisplayName = "Stripe", Type = "Wallet", IsMocked = true },
+                new() { Id = "PayPal", DisplayName = "PayPal", Type = "Wallet", IsMocked = true }
+            }
+        });
     }
 
     [HttpPost("{orderId}/capture-payment")]

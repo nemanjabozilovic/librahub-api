@@ -55,6 +55,7 @@ public class RegisterHandler(
             request.DateOfBirth.UtcDateTime);
 
         user.AddRole(Role.User);
+        user.SetEmailNotificationPreferences(request.EmailAnnouncementsEnabled, request.EmailPromotionsEnabled);
         return user;
     }
 
@@ -85,6 +86,19 @@ public class RegisterHandler(
                 };
 
                 await outboxWriter.WriteAsync(integrationEvent, EventTypes.UserRegistered, ct);
+
+                var settingsEvent = new UserNotificationSettingsChangedV1
+                {
+                    UserId = user.Id,
+                    Email = user.Email,
+                    IsActive = user.Status == UserStatus.Active,
+                    IsStaff = user.IsStaff(),
+                    EmailAnnouncementsEnabled = user.EmailAnnouncementsEnabled,
+                    EmailPromotionsEnabled = user.EmailPromotionsEnabled,
+                    OccurredAt = clock.UtcNowOffset
+                };
+
+                await outboxWriter.WriteAsync(settingsEvent, EventTypes.UserNotificationSettingsChanged, ct);
             }, cancellationToken);
 
             return verificationToken;

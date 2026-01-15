@@ -5,7 +5,7 @@ public class Sha256
     public string Value { get; private set; } = string.Empty;
 
     private Sha256()
-    { } // For EF Core
+    { }
 
     public Sha256(string value)
     {

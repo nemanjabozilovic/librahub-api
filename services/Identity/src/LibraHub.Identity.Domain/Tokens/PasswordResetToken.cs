@@ -13,7 +13,7 @@ public class PasswordResetToken
     public bool IsValid => !IsUsed && !IsExpired;
 
     private PasswordResetToken()
-    { } // For EF Core
+    { }
 
     public PasswordResetToken(Guid id, Guid userId, string token, DateTime expiresAt)
     {

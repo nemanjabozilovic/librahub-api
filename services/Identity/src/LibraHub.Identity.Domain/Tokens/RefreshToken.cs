@@ -14,7 +14,7 @@ public class RefreshToken
     public bool IsActive => !IsRevoked && !IsExpired;
 
     private RefreshToken()
-    { } // For EF Core
+    { }
 
     public RefreshToken(Guid id, Guid userId, string token, DateTime expiresAt)
     {

@@ -144,6 +144,9 @@ namespace LibraHub.Catalog.Infrastructure.Migrations
 
                     b.HasIndex("Status");
 
+                    b.HasIndex("Status", "PublishedAt")
+                        .HasFilter("\"status\" = 1");
+
                     b.ToTable("announcements", (string)null);
                 });
 
@@ -282,6 +285,11 @@ namespace LibraHub.Catalog.Infrastructure.Migrations
                     b.Property<DateTime?>("PromoEndDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("promo_end_date");
+
+                    b.Property<string>("PromoName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("promo_name");
 
                     b.Property<DateTime?>("PromoStartDate")
                         .HasColumnType("timestamp with time zone")

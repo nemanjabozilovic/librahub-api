@@ -1,8 +1,10 @@
 using LibraHub.Notifications.Application.Abstractions;
 using LibraHub.Notifications.Infrastructure.Options;
+using LibraHub.BuildingBlocks.Http;
+using LibraHub.BuildingBlocks.Results;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using System.Text.Json;
 
 namespace LibraHub.Notifications.Infrastructure.Clients;
 
@@ -11,60 +13,44 @@ public class IdentityClient : IIdentityClient
     private readonly HttpClient _httpClient;
     private readonly NotificationsOptions _options;
     private readonly IMemoryCache _cache;
-    private readonly JsonSerializerOptions _jsonOptions;
+    private readonly ILogger<IdentityClient> _logger;
     private static readonly TimeSpan CacheExpiration = TimeSpan.FromMinutes(5);
 
     public IdentityClient(
         HttpClient httpClient,
         IOptions<NotificationsOptions> options,
-        IMemoryCache cache)
+        IMemoryCache cache,
+        ILogger<IdentityClient> logger)
     {
         _httpClient = httpClient;
         _options = options.Value;
         _cache = cache;
-        _jsonOptions = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        };
+        _logger = logger;
     }
 
-    public async Task<UserInfo?> GetUserInfoAsync(
+    public async Task<Result<UserInfo>> GetUserInfoAsync(
         Guid userId,
         CancellationToken cancellationToken = default)
     {
         var cacheKey = $"user_info_{userId}";
 
-        if (_cache.TryGetValue<UserInfo>(cacheKey, out var cachedInfo))
+        if (_cache.TryGetValue<UserInfo>(cacheKey, out var cachedInfo) && cachedInfo != null)
         {
-            return cachedInfo;
+            return Result.Success(cachedInfo);
         }
 
-        try
+        var url = $"{_options.IdentityApiUrl}/internal/users/{userId}/info";
+        var result = await _httpClient.GetJsonResultAsync<UserInfo>(
+            url,
+            _logger,
+            notFoundResourceName: "User",
+            cancellationToken);
+
+        if (result.IsSuccess)
         {
-            var response = await _httpClient.GetAsync(
-                $"{_options.IdentityApiUrl}/api/users/{userId}/info",
-                cancellationToken);
-
-            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-            {
-                return null;
-            }
-
-            response.EnsureSuccessStatusCode();
-
-            var content = await response.Content.ReadAsStringAsync(cancellationToken);
-            var userInfo = JsonSerializer.Deserialize<UserInfo>(content, _jsonOptions);
-
-            if (userInfo != null)
-            {
-                _cache.Set(cacheKey, userInfo, CacheExpiration);
-            }
-
-            return userInfo;
+            _cache.Set(cacheKey, result.Value, CacheExpiration);
         }
-        catch (HttpRequestException)
-        {
-            return null;
-        }
+
+        return result;
     }
 }

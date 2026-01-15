@@ -10,7 +10,7 @@ public class PromotionAudit
     public string? MetadataJson { get; private set; }
 
     protected PromotionAudit()
-    { } // For EF Core
+    { }
 
     public PromotionAudit(
         Guid id,

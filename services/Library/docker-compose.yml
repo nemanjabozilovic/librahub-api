@@ -14,12 +14,14 @@ services:
       - ConnectionStrings__Redis=librahub-redis:6379
       - Library__ConnectionString=Host=librahub-postgres;Port=5432;Database=librahub_library;Username=librahub_admin;Password=L1br@Hub_DB_2026!S3cur3_P@ss
       - Library__IdentityApiUrl=http://librahub-identity-api:8080
+      - Library__CatalogApiUrl=http://librahub-catalog-api:8080
       - Library__RabbitMq__HostName=librahub-rabbitmq
       - Library__RabbitMq__Port=5672
       - Library__RabbitMq__UserName=librahub_mq
       - Library__RabbitMq__Password=R@bb1tMQ_L1br@Hub_2026!S3cur3_P@ss
       - Library__RabbitMq__ExchangeName=librahub.events
       - EmailConfig__Host=papercut-smtp
+      - InternalAccess__ApiKey=librahub_internal_dev_2026
     ports:
       - "60990:8080"
       - "60991:8081"

@@ -61,7 +61,7 @@ public class UserConfig : IEntityTypeConfiguration<User>
             .HasMaxLength(100)
             .IsRequired();
 
-        builder.Ignore(u => u.DisplayName); // Computed property
+        builder.Ignore(u => u.DisplayName);
 
         builder.Property(u => u.Phone)
             .HasColumnName("phone")
@@ -73,6 +73,14 @@ public class UserConfig : IEntityTypeConfiguration<User>
 
         builder.Property(u => u.DateOfBirth)
             .HasColumnName("date_of_birth")
+            .IsRequired();
+
+        builder.Property(u => u.EmailAnnouncementsEnabled)
+            .HasColumnName("email_announcements_enabled")
+            .IsRequired();
+
+        builder.Property(u => u.EmailPromotionsEnabled)
+            .HasColumnName("email_promotions_enabled")
             .IsRequired();
 
         builder.HasMany(u => u.Roles)

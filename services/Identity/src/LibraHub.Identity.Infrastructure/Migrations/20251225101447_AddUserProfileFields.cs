@@ -4,10 +4,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace LibraHub.Identity.Infrastructure.Migrations
 {
-    /// <inheritdoc />
     public partial class AddUserProfileFields : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
@@ -101,7 +99,6 @@ namespace LibraHub.Identity.Infrastructure.Migrations
                 column: "UserId");
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

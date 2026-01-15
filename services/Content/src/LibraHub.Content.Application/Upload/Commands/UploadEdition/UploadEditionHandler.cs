@@ -23,11 +23,13 @@ public class UploadEditionHandler(
 {
     public async Task<Result<Guid>> Handle(UploadEditionCommand request, CancellationToken cancellationToken)
     {
-        var bookInfo = await catalogClient.GetBookInfoAsync(request.BookId, cancellationToken);
-        if (bookInfo == null)
+        var bookInfoResult = await catalogClient.GetBookInfoAsync(request.BookId, cancellationToken);
+        if (bookInfoResult.IsFailure)
         {
-            return Result.Failure<Guid>(Error.NotFound(ContentErrors.Book.NotFound));
+            return Result.Failure<Guid>(bookInfoResult.Error ?? Error.NotFound(ContentErrors.Book.NotFound));
         }
+
+        var bookInfo = bookInfoResult.Value;
 
         if (bookInfo.IsBlocked)
         {

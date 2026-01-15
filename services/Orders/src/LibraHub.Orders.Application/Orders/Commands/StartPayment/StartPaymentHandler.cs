@@ -15,14 +15,14 @@ public class StartPaymentHandler(
     IPaymentGateway paymentGateway,
     IOutboxWriter outboxWriter,
     ICurrentUser currentUser,
-    IClock clock) : IRequestHandler<StartPaymentCommand, Result<Guid>>
+    IClock clock) : IRequestHandler<StartPaymentCommand, Result<StartPaymentResponseDto>>
 {
-    public async Task<Result<Guid>> Handle(StartPaymentCommand request, CancellationToken cancellationToken)
+    public async Task<Result<StartPaymentResponseDto>> Handle(StartPaymentCommand request, CancellationToken cancellationToken)
     {
         var userIdResult = currentUser.RequireUserId(OrdersErrors.User.NotAuthenticated);
         if (userIdResult.IsFailure)
         {
-            return userIdResult;
+            return Result.Failure<StartPaymentResponseDto>(userIdResult.Error!);
         }
 
         var userId = userIdResult.Value;
@@ -30,17 +30,17 @@ public class StartPaymentHandler(
         var order = await orderRepository.GetByIdAndUserIdAsync(request.OrderId, userId, cancellationToken);
         if (order == null)
         {
-            return Result.Failure<Guid>(Error.NotFound(OrdersErrors.Order.NotFound));
+            return Result.Failure<StartPaymentResponseDto>(Error.NotFound(OrdersErrors.Order.NotFound));
         }
 
         if (order.Status != OrderStatus.Created)
         {
-            return Result.Failure<Guid>(Error.Validation(OrdersErrors.Order.InvalidStatus));
+            return Result.Failure<StartPaymentResponseDto>(Error.Validation(OrdersErrors.Order.InvalidStatus));
         }
 
         if (!Enum.TryParse<PaymentProvider>(request.Provider, ignoreCase: true, out var provider))
         {
-            return Result.Failure<Guid>(Error.Validation("Invalid payment provider"));
+            return Result.Failure<StartPaymentResponseDto>(Error.Validation("Invalid payment provider"));
         }
 
         var paymentResult = await paymentGateway.InitiatePaymentAsync(
@@ -51,7 +51,7 @@ public class StartPaymentHandler(
 
         if (!paymentResult.Success)
         {
-            return Result.Failure<Guid>(new Error("INTERNAL_ERROR", $"Payment initiation failed: {paymentResult.FailureReason}"));
+            return Result.Failure<StartPaymentResponseDto>(new Error("INTERNAL_ERROR", $"Payment initiation failed: {paymentResult.FailureReason}"));
         }
 
         var payment = new Payment(
@@ -60,7 +60,7 @@ public class StartPaymentHandler(
             provider,
             order.Total);
 
-        payment.MarkAsCompleted(paymentResult.ProviderReference!);
+        payment.SetProviderReference(paymentResult.ProviderReference!);
 
         await paymentRepository.AddAsync(payment, cancellationToken);
 
@@ -79,6 +79,10 @@ public class StartPaymentHandler(
             Contracts.Common.EventTypes.PaymentInitiated,
             cancellationToken);
 
-        return Result.Success(payment.Id);
+        return Result.Success(new StartPaymentResponseDto
+        {
+            PaymentId = payment.Id,
+            ProviderReference = paymentResult.ProviderReference!
+        });
     }
 }

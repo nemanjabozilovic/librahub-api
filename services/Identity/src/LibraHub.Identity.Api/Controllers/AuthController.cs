@@ -29,6 +29,8 @@ public class AuthController(IMediator mediator) : ControllerBase
             request.FirstName,
             request.LastName,
             request.DateOfBirth,
+            request.EmailAnnouncementsEnabled,
+            request.EmailPromotionsEnabled,
             request.Phone);
         var result = await mediator.Send(command, cancellationToken);
         return result.ToActionResult(this);

@@ -9,19 +9,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddGatewaySwagger();
 builder.Services.AddGatewayJwtAuthentication(builder.Configuration);
+builder.Services.AddGatewayCors(builder.Configuration);
 builder.Services.AddGatewayReverseProxy(builder.Configuration);
 builder.Services.AddTelemetry("LibraHub.Gateway", "1.0.0");
-
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(policy =>
-    {
-        policy.WithOrigins("http://localhost:3000")
-              .AllowAnyMethod()
-              .AllowAnyHeader()
-              .AllowCredentials();
-    });
-});
 
 var app = builder.Build();
 

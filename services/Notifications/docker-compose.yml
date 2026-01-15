@@ -14,6 +14,7 @@ services:
       - ConnectionStrings__Redis=librahub-redis:6379
       - EmailConfig__Host=papercut-smtp
       - Notifications__IdentityApiUrl=http://librahub-identity-api:8080
+      - InternalAccess__ApiKey=librahub_internal_dev_2026
     ports:
       - "61000:8080"
       - "61001:8081"

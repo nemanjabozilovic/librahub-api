@@ -12,7 +12,7 @@ public class BookSnapshot
 
     protected BookSnapshot()
     {
-    } // For EF Core
+    }
 
     public BookSnapshot(
         Guid bookId,

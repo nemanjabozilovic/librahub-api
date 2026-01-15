@@ -24,6 +24,8 @@ public class SetPricingValidator : AbstractValidator<SetPricingCommand>
         RuleFor(x => x)
             .Must(x => !x.PromoPrice.HasValue || (x.PromoStartDate.HasValue && x.PromoEndDate.HasValue))
             .WithMessage("Promo dates are required when promo price is set")
+            .Must(x => !x.PromoPrice.HasValue || !string.IsNullOrWhiteSpace(x.PromoName))
+            .WithMessage("Promo name is required when promo price is set")
             .Must(x => !x.PromoStartDate.HasValue || x.PromoStartDate < x.PromoEndDate)
             .WithMessage("Promo start date must be before end date")
             .When(x => x.PromoPrice.HasValue);

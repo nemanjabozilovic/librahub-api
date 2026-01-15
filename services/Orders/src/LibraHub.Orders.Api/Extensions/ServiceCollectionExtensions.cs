@@ -1,8 +1,10 @@
 using FluentValidation;
 using LibraHub.BuildingBlocks.Auth;
 using LibraHub.BuildingBlocks.Caching;
+using LibraHub.BuildingBlocks.Correlation;
 using LibraHub.BuildingBlocks.Health;
 using LibraHub.BuildingBlocks.Idempotency;
+using LibraHub.BuildingBlocks.InternalAccess;
 using LibraHub.BuildingBlocks.Messaging;
 using LibraHub.BuildingBlocks.Outbox;
 using LibraHub.Orders.Api.Workers;
@@ -58,11 +60,22 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IPaymentGateway, MockPaymentGateway>();
 
-        services.AddHttpClient<ICatalogPricingClient, CatalogPricingClient>();
-        services.AddHttpClient<ILibraryOwnershipClient, LibraryOwnershipClient>();
-        services.AddHttpClient<IIdentityClient, IdentityClient>();
+        services.AddHttpClient<ICatalogPricingClient, CatalogPricingClient>()
+            .AddHttpMessageHandler<CorrelationIdHeaderHandler>();
+        services.AddHttpClient<ILibraryOwnershipClient, LibraryOwnershipClient>()
+            .AddHttpMessageHandler<CorrelationIdHeaderHandler>()
+            .AddHttpMessageHandler<InternalAccessHeaderHandler>();
+        services.AddHttpClient<IIdentityClient, IdentityClient>()
+            .AddHttpMessageHandler<CorrelationIdHeaderHandler>()
+            .AddHttpMessageHandler<InternalAccessHeaderHandler>();
 
         services.AddRedisCache(configuration);
+        services.AddOptions<InternalAccessOptions>()
+            .Bind(configuration.GetSection(InternalAccessOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+        services.AddTransient<InternalAccessHeaderHandler>();
+        services.AddTransient<CorrelationIdHeaderHandler>();
 
         return services;
     }

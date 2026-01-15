@@ -12,7 +12,7 @@ public class BookEdition
     public DateTime? BlockedAt { get; private set; }
 
     protected BookEdition()
-    { } // For EF Core
+    { }
 
     public BookEdition(
         Guid id,

@@ -18,7 +18,7 @@ public class PromotionEvaluator
 
         if (basePrice <= 0)
         {
-            return null; // Free books don't get discounts
+            return null;
         }
 
         var applicableRules = new List<(PromotionRule Rule, PromotionCampaign Campaign)>();

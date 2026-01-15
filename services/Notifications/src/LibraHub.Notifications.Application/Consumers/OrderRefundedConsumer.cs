@@ -39,8 +39,8 @@ public class OrderRefundedConsumer(
             NotificationType.OrderRefunded,
             cancellationToken);
 
-        var emailEnabled = preference?.EmailEnabled ?? true;
-        var inAppEnabled = preference?.InAppEnabled ?? true;
+        var emailEnabled = preference?.EmailEnabled ?? false;
+        var inAppEnabled = preference?.InAppEnabled ?? false;
 
         Notification? notification = null;
 
@@ -87,7 +87,8 @@ public class OrderRefundedConsumer(
         {
             try
             {
-                var userInfo = await identityClient.GetUserInfoAsync(userId, cancellationToken);
+                var userInfoResult = await identityClient.GetUserInfoAsync(userId, cancellationToken);
+                var userInfo = userInfoResult.IsSuccess ? userInfoResult.Value : null;
 
                 if (userInfo != null && !string.IsNullOrWhiteSpace(userInfo.Email) && userInfo.IsActive)
                 {

@@ -17,7 +17,7 @@ public class PromotionCampaign
     public virtual IReadOnlyCollection<PromotionRule> Rules => _rules.AsReadOnly();
 
     protected PromotionCampaign()
-    { } // For EF Core
+    { }
 
     public PromotionCampaign(
         Guid id,
