@@ -2,7 +2,6 @@ using LibraHub.BuildingBlocks.Results;
 using LibraHub.Notifications.Api.Dtos.Preferences;
 using LibraHub.Notifications.Application.Preferences.Commands.UpdatePreferences;
 using LibraHub.Notifications.Application.Preferences.Queries.GetPreferences;
-using LibraHub.Notifications.Domain.Notifications;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -32,15 +31,8 @@ public class PreferencesController(IMediator mediator) : ControllerBase
         [FromBody] UpdatePreferencesRequestDto request,
         CancellationToken cancellationToken = default)
     {
-        if (!Enum.TryParse<NotificationType>(request.Type, out var notificationType))
-        {
-            return BadRequest(new Error("INVALID_TYPE", "Invalid notification type"));
-        }
-
         var command = new UpdatePreferencesCommand(
-            notificationType,
-            request.EmailEnabled,
-            request.InAppEnabled);
+            request.EmailEnabled);
 
         await mediator.Send(command, cancellationToken);
         return Ok();

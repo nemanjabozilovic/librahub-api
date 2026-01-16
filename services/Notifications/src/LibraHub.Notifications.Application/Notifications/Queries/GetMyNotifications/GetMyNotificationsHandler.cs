@@ -26,6 +26,7 @@ public class GetMyNotificationsHandler(
             Type = n.Type.ToString(),
             Title = n.Title,
             Message = n.Message,
+            ImageUrl = n.ImageUrl,
             Status = n.Status.ToString(),
             CreatedAt = new DateTimeOffset(n.CreatedAt, TimeSpan.Zero),
             ReadAt = n.ReadAt.HasValue ? new DateTimeOffset(n.ReadAt.Value, TimeSpan.Zero) : null

@@ -35,6 +35,10 @@ public class NotificationConfig : IEntityTypeConfiguration<Notification>
             .HasMaxLength(1000)
             .IsRequired();
 
+        builder.Property(x => x.ImageUrl)
+            .HasColumnName("image_url")
+            .HasMaxLength(2048);
+
         builder.Property(x => x.Status)
             .HasColumnName("status")
             .HasConversion<int>()

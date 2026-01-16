@@ -41,7 +41,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IPricingRepository, PricingRepository>();
         services.AddScoped<IAnnouncementRepository, AnnouncementRepository>();
         services.AddScoped<IBookContentStateRepository, BookContentStateRepository>();
-        services.AddScoped<IPromotionRepository, PromotionRepository>();
 
         services.AddScoped<BuildingBlocks.Abstractions.IOutboxWriter, OutboxEventPublisher<CatalogDbContext>>();
         services.AddScoped<BuildingBlocks.Abstractions.IUnitOfWork, Infrastructure.Persistence.UnitOfWork>();

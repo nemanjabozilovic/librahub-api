@@ -1,9 +1,9 @@
-using LibraHub.Orders.Application.Abstractions;
-using LibraHub.Orders.Infrastructure.Options;
 using LibraHub.BuildingBlocks.Http;
 using LibraHub.BuildingBlocks.Results;
-using Microsoft.Extensions.Logging;
+using LibraHub.Orders.Application.Abstractions;
+using LibraHub.Orders.Infrastructure.Options;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 namespace LibraHub.Orders.Infrastructure.Clients;

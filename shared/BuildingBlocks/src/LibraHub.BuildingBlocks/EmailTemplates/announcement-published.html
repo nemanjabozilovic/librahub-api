@@ -8,10 +8,18 @@
     <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
         <h2 style="color: #2c3e50;">New Announcement Published</h2>
         <p>Dear @Model.FullName,</p>
-        <p>A new announcement has been published for a book you might be interested in.</p>
+        @if (Model.BookId == null)
+        {
+            <p>A new general announcement has been published.</p>
+        }
+        else
+        {
+            <p>A new announcement has been published for a book you might be interested in.</p>
+        }
         <p><strong>Announcement Title:</strong> @Model.AnnouncementTitle</p>
+        <div style="margin: 12px 0; padding: 12px; background: #f7f7f7; border-radius: 6px; white-space: pre-line;">@Model.AnnouncementContent</div>
         <p><strong>Published At:</strong> @Model.PublishedAt</p>
-        <p>Check it out in our catalog!</p>
+        <p>Open LibraHub to view the full details in the app.</p>
         <p>Best regards,<br />LibraHub Team</p>
     </div>
 </body>

@@ -17,8 +17,6 @@ public record PricingQuoteItemDto
 
 public record AppliedPromotionDto
 {
-    public Guid CampaignId { get; init; }
-    public Guid RuleId { get; init; }
     public string Name { get; init; } = string.Empty;
     public string DiscountType { get; init; } = string.Empty;
     public decimal DiscountValue { get; init; }

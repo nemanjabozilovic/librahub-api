@@ -9,7 +9,6 @@ namespace LibraHub.Notifications.Application.Consumers;
 
 public class AnnouncementPublishedConsumer(
     INotificationRepository notificationRepository,
-    INotificationPreferencesRepository preferencesRepository,
     INotificationSender notificationSender,
     IUserNotificationSettingsRepository settingsRepository,
     IInboxRepository inboxRepository,
@@ -32,13 +31,8 @@ public class AnnouncementPublishedConsumer(
             return;
         }
 
-        var inAppUserIds = await preferencesRepository.GetUserIdsWithInAppEnabledAsync(
-            NotificationType.AnnouncementPublished,
-            cancellationToken);
-
-        var staffUserIds = await settingsRepository.GetStaffUserIdsAsync(cancellationToken);
-        var eligibleInAppUserIds = inAppUserIds.Where(id => !staffUserIds.Contains(id)).ToList();
-        var emailRecipients = await settingsRepository.GetEmailAnnouncementRecipientsAsync(cancellationToken);
+        var eligibleInAppUserIds = await settingsRepository.GetActiveNonStaffUserIdsWithInAppEnabledAsync(cancellationToken);
+        var emailRecipients = await settingsRepository.GetEmailRecipientsAsync(cancellationToken);
 
         logger.LogInformation(
             "AnnouncementPublished recipients for AnnouncementId: {AnnouncementId}, InApp: {InAppCount}, Email: {EmailCount}",
@@ -53,8 +47,9 @@ public class AnnouncementPublishedConsumer(
                 Guid.NewGuid(),
                 userId,
                 NotificationType.AnnouncementPublished,
-                NotificationMessages.AnnouncementPublished.Title,
-                NotificationMessages.AnnouncementPublished.GetMessage(@event.Title)));
+                @event.Title,
+                @event.Content,
+                @event.ImageUrl));
         }
 
         try

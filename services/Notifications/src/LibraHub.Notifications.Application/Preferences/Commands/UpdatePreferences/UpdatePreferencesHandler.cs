@@ -1,13 +1,12 @@
 using LibraHub.BuildingBlocks.Abstractions;
 using LibraHub.Notifications.Application.Abstractions;
 using LibraHub.Notifications.Domain.Errors;
-using LibraHub.Notifications.Domain.Preferences;
 using MediatR;
 
 namespace LibraHub.Notifications.Application.Preferences.Commands.UpdatePreferences;
 
 public class UpdatePreferencesHandler(
-    INotificationPreferencesRepository preferencesRepository,
+    IUserNotificationSettingsRepository settingsRepository,
     ICurrentUser currentUser) : IRequestHandler<UpdatePreferencesCommand>
 {
     public async Task Handle(UpdatePreferencesCommand request, CancellationToken cancellationToken)
@@ -18,22 +17,14 @@ public class UpdatePreferencesHandler(
         }
 
         var userId = currentUser.UserId.Value;
-        var preference = await preferencesRepository.GetByUserIdAndTypeAsync(userId, request.Type, cancellationToken);
+        var settings = await settingsRepository.GetByUserIdAsync(userId, cancellationToken);
 
-        if (preference == null)
+        if (settings == null)
         {
-            preference = new NotificationPreference(
-                Guid.NewGuid(),
-                userId,
-                request.Type,
-                request.EmailEnabled,
-                request.InAppEnabled);
-            await preferencesRepository.AddAsync(preference, cancellationToken);
+            throw new InvalidOperationException("User notification settings not found. Please complete registration first.");
         }
-        else
-        {
-            preference.Update(request.EmailEnabled, request.InAppEnabled);
-            await preferencesRepository.UpdateAsync(preference, cancellationToken);
-        }
+
+        settings.Update(request.EmailEnabled, inAppEnabled: true);
+        await settingsRepository.UpsertAsync(settings, cancellationToken);
     }
 }

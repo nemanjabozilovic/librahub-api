@@ -15,11 +15,23 @@ public class LoginHandler(
     IRefreshTokenRepository refreshTokenRepository,
     IPasswordHasher passwordHasher,
     ITokenService tokenService,
+    IRecaptchaService recaptchaService,
     IClock clock,
     IOptions<SecurityOptions> securityOptions) : IRequestHandler<LoginCommand, Result<AuthTokensDto>>
 {
     public async Task<Result<AuthTokensDto>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
+        if (string.IsNullOrWhiteSpace(request.RecaptchaToken))
+        {
+            return Result.Failure<AuthTokensDto>(Error.Validation("reCAPTCHA token is required"));
+        }
+
+        var isRecaptchaValid = await recaptchaService.VerifyAsync(request.RecaptchaToken, cancellationToken);
+        if (!isRecaptchaValid)
+        {
+            return Result.Failure<AuthTokensDto>(Error.Validation("reCAPTCHA verification failed"));
+        }
+
         var emailLower = request.Email.ToLowerInvariant();
         var user = await userRepository.GetByEmailAsync(emailLower, cancellationToken);
 

@@ -12,7 +12,6 @@ namespace LibraHub.Catalog.Application.Promotions.Queries.GetPricingQuote;
 public class GetPricingQuoteHandler(
     IBookRepository bookRepository,
     IPricingRepository pricingRepository,
-    IPromotionRepository promotionRepository,
     IClock clock) : IRequestHandler<GetPricingQuoteQuery, Result<PricingQuoteResponseDto>>
 {
     public async Task<Result<PricingQuoteResponseDto>> Handle(GetPricingQuoteQuery request, CancellationToken cancellationToken)
@@ -25,8 +24,6 @@ public class GetPricingQuoteHandler(
         }
 
         var utcNow = request.AtUtc?.UtcDateTime ?? clock.UtcNow;
-        var activeCampaigns = await promotionRepository.GetActiveAsync(utcNow, cancellationToken);
-        var evaluator = new PromotionEvaluator();
 
         var items = new List<PricingQuoteItemDto>();
 
@@ -52,8 +49,6 @@ public class GetPricingQuoteHandler(
                 return Result.Failure<PricingQuoteResponseDto>(Error.Validation($"Book {itemRequest.BookId} has price in {bookCurrency}, but only {Currency.USD} is supported"));
             }
 
-            var promotionResult = evaluator.EvaluateBestDiscount(book, basePrice, currency, utcNow, activeCampaigns);
-
             var vatRate = pricing.VatRate ?? 0m;
 
             var manualPromoActive =
@@ -69,30 +64,15 @@ public class GetPricingQuoteHandler(
                 ? pricing.PromoPrice.Amount
                 : basePrice;
 
-            var campaignPromoNet = promotionResult?.FinalPrice ?? basePrice;
-
-            var bestNet = Math.Min(manualPromoNet, campaignPromoNet);
+            var bestNet = manualPromoNet;
 
             AppliedPromotionDto? appliedPromotion = null;
-            if (promotionResult != null && campaignPromoNet <= manualPromoNet && campaignPromoNet < basePrice)
-            {
-                appliedPromotion = new AppliedPromotionDto
-                {
-                    CampaignId = promotionResult.CampaignId,
-                    RuleId = promotionResult.RuleId,
-                    Name = promotionResult.CampaignName,
-                    DiscountType = promotionResult.DiscountType.ToString(),
-                    DiscountValue = promotionResult.DiscountValue
-                };
-            }
-            else if (manualPromoActive && manualPromoNet < basePrice)
+            if (manualPromoActive && manualPromoNet < basePrice)
             {
                 var discountAmount = basePrice - manualPromoNet;
 
                 appliedPromotion = new AppliedPromotionDto
                 {
-                    CampaignId = Guid.Empty,
-                    RuleId = Guid.Empty,
                     Name = pricing.PromoName ?? string.Empty,
                     DiscountType = DiscountType.FixedAmount.ToString(),
                     DiscountValue = discountAmount

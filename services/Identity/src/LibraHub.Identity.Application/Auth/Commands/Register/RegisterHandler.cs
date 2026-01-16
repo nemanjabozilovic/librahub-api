@@ -18,6 +18,7 @@ public class RegisterHandler(
     IEmailVerificationTokenRepository tokenRepository,
     IPasswordHasher passwordHasher,
     IEmailVerificationTokenService tokenService,
+    IRecaptchaService recaptchaService,
     IOutboxWriter outboxWriter,
     IEmailSender emailSender,
     IClock clock,
@@ -27,6 +28,17 @@ public class RegisterHandler(
 {
     public async Task<Result> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
+        if (string.IsNullOrWhiteSpace(request.RecaptchaToken))
+        {
+            return Result.Failure(Error.Validation("reCAPTCHA token is required"));
+        }
+
+        var isRecaptchaValid = await recaptchaService.VerifyAsync(request.RecaptchaToken, cancellationToken);
+        if (!isRecaptchaValid)
+        {
+            return Result.Failure(Error.Validation("reCAPTCHA verification failed"));
+        }
+
         var emailLower = request.Email.ToLowerInvariant();
 
         if (await userRepository.ExistsByEmailAsync(emailLower, cancellationToken))

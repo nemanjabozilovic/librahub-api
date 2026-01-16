@@ -9,8 +9,8 @@ namespace LibraHub.Notifications.Application.Consumers;
 
 public class BookPublishedConsumer(
     INotificationRepository notificationRepository,
-    INotificationPreferencesRepository preferencesRepository,
     INotificationSender notificationSender,
+    IUserNotificationSettingsRepository settingsRepository,
     IIdentityClient identityClient,
     IInboxRepository inboxRepository,
     IUnitOfWork unitOfWork,
@@ -32,12 +32,11 @@ public class BookPublishedConsumer(
             return;
         }
 
-        var allUserIds = await preferencesRepository.GetUserIdsWithEnabledNotificationsAsync(
-            NotificationType.BookPublished,
-            cancellationToken);
+        var eligibleInAppUserIds = await settingsRepository.GetActiveNonStaffUserIdsWithInAppEnabledAsync(cancellationToken);
+        var emailRecipients = await settingsRepository.GetEmailRecipientsAsync(cancellationToken);
 
-        logger.LogInformation("Found {Count} users with BookPublished notifications enabled for BookId: {BookId}",
-            allUserIds.Count, @event.BookId);
+        logger.LogInformation("Found {InAppCount} users with in-app and {EmailCount} users with email notifications enabled for BookId: {BookId}",
+            eligibleInAppUserIds.Count, emailRecipients.Count, @event.BookId);
 
         var notificationsToCreate = new List<Notification>();
 
@@ -45,70 +44,57 @@ public class BookPublishedConsumer(
         {
             await unitOfWork.ExecuteInTransactionAsync(async ct =>
             {
-                foreach (var userId in allUserIds)
+                foreach (var userId in eligibleInAppUserIds)
+                {
+                    var notification = new Notification(
+                        Guid.NewGuid(),
+                        userId,
+                        NotificationType.BookPublished,
+                        NotificationMessages.BookPublished.Title,
+                        NotificationMessages.BookPublished.GetMessage(@event.Title, @event.Authors));
+
+                    notificationsToCreate.Add(notification);
+                }
+
+                foreach (var recipient in emailRecipients)
                 {
                     try
                     {
-                        var preference = await preferencesRepository.GetByUserIdAndTypeAsync(
-                            userId,
-                            NotificationType.BookPublished,
-                            ct);
+                        var userInfoResult = await identityClient.GetUserInfoAsync(recipient.UserId, ct);
+                        var userInfo = userInfoResult.IsSuccess ? userInfoResult.Value : null;
 
-                        var emailEnabled = preference?.EmailEnabled ?? false;
-                        var inAppEnabled = preference?.InAppEnabled ?? false;
-
-                        if (inAppEnabled)
+                        if (userInfo != null && !string.IsNullOrWhiteSpace(userInfo.Email) && userInfo.IsActive)
                         {
-                            var notification = new Notification(
-                                Guid.NewGuid(),
-                                userId,
-                                NotificationType.BookPublished,
-                                NotificationMessages.BookPublished.Title,
-                                NotificationMessages.BookPublished.GetMessage(@event.Title, @event.Authors));
+                            var emailSubject = NotificationMessages.BookPublished.Title;
+                            var fullName = !string.IsNullOrWhiteSpace(userInfo.FullName)
+                                ? userInfo.FullName
+                                : userInfo.Email.Split('@')[0];
 
-                            notificationsToCreate.Add(notification);
+                            var emailModel = new
+                            {
+                                FullName = fullName,
+                                BookTitle = @event.Title,
+                                Authors = @event.Authors,
+                                BookId = @event.BookId,
+                                PublishedAt = @event.PublishedAt
+                            };
+
+                            await notificationSender.SendEmailWithTemplateAsync(
+                                userInfo.Email,
+                                emailSubject,
+                                "BOOK_PUBLISHED",
+                                emailModel,
+                                ct);
                         }
-
-                        if (emailEnabled)
+                        else
                         {
-                            var userInfoResult = await identityClient.GetUserInfoAsync(userId, ct);
-                            var userInfo = userInfoResult.IsSuccess ? userInfoResult.Value : null;
-
-                            if (userInfo != null && !string.IsNullOrWhiteSpace(userInfo.Email) && userInfo.IsActive)
-                            {
-                                var emailSubject = NotificationMessages.BookPublished.Title;
-                                var fullName = !string.IsNullOrWhiteSpace(userInfo.FullName)
-                                    ? userInfo.FullName
-                                    : userInfo.Email.Split('@')[0];
-
-                                var emailModel = new
-                                {
-                                    FullName = fullName,
-                                    BookTitle = @event.Title,
-                                    Authors = @event.Authors,
-                                    BookId = @event.BookId,
-                                    PublishedAt = @event.PublishedAt
-                                };
-
-                                await SendEmailNotificationAsync(
-                                    notificationSender,
-                                    userInfo.Email,
-                                    emailSubject,
-                                    emailModel,
-                                    userId,
-                                    @event.BookId,
-                                    ct);
-                            }
-                            else
-                            {
-                                logger.LogWarning("User info not found, inactive, or email not available for UserId: {UserId}, skipping email notification", userId);
-                            }
+                            logger.LogWarning("User info not found, inactive, or email not available for UserId: {UserId}, skipping email notification", recipient.UserId);
                         }
                     }
                     catch (Exception ex)
                     {
-                        logger.LogError(ex, "Failed to process BookPublished notification for UserId: {UserId} for BookId: {BookId}",
-                            userId, @event.BookId);
+                        logger.LogError(ex, "Failed to send email notification for UserId: {UserId} for BookId: {BookId}",
+                            recipient.UserId, @event.BookId);
                     }
                 }
 
@@ -142,22 +128,5 @@ public class BookPublishedConsumer(
                 @event.BookId, messageId);
             throw;
         }
-    }
-
-    private static async Task SendEmailNotificationAsync(
-        INotificationSender notificationSender,
-        string email,
-        string subject,
-        object model,
-        Guid userId,
-        Guid bookId,
-        CancellationToken cancellationToken)
-    {
-        await notificationSender.SendEmailWithTemplateAsync(
-            email,
-            subject,
-            "BOOK_PUBLISHED",
-            model,
-            cancellationToken);
     }
 }

@@ -31,7 +31,8 @@ public class AuthController(IMediator mediator) : ControllerBase
             request.DateOfBirth,
             request.EmailAnnouncementsEnabled,
             request.EmailPromotionsEnabled,
-            request.Phone);
+            request.Phone,
+            request.RecaptchaToken);
         var result = await mediator.Send(command, cancellationToken);
         return result.ToActionResult(this);
     }
@@ -40,7 +41,7 @@ public class AuthController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(AuthTokensDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> Login([FromBody] LoginRequestDto request, CancellationToken cancellationToken)
     {
-        var command = new LoginCommand(request.Email, request.Password);
+        var command = new LoginCommand(request.Email, request.Password, request.RecaptchaToken);
         var result = await mediator.Send(command, cancellationToken);
         return result.ToActionResult(this);
     }

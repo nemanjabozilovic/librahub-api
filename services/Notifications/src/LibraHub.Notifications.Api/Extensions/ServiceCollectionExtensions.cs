@@ -41,7 +41,6 @@ public static class ServiceCollectionExtensions
         services.AddValidatorsFromAssembly(typeof(ApplicationAssembly).Assembly);
 
         services.AddScoped<INotificationRepository, NotificationRepository>();
-        services.AddScoped<INotificationPreferencesRepository, NotificationPreferencesRepository>();
         services.AddScoped<IUserNotificationSettingsRepository, UserNotificationSettingsRepository>();
         services.AddScoped<IInboxRepository, InboxRepository>();
         services.AddScoped<BuildingBlocks.Abstractions.IUnitOfWork, UnitOfWork>();

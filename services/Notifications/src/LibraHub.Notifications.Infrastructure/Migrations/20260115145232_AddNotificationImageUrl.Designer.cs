@@ -3,6 +3,7 @@ using System;
 using LibraHub.Notifications.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LibraHub.Notifications.Infrastructure.Migrations
 {
     [DbContext(typeof(NotificationsDbContext))]
-    partial class NotificationsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260115145232_AddNotificationImageUrl")]
+    partial class AddNotificationImageUrl
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -150,6 +153,47 @@ namespace LibraHub.Notifications.Infrastructure.Migrations
                     b.ToTable("notifications", (string)null);
                 });
 
+            modelBuilder.Entity("LibraHub.Notifications.Domain.Preferences.NotificationPreference", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<bool>("EmailEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("email_enabled");
+
+                    b.Property<bool>("InAppEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("in_app_enabled");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer")
+                        .HasColumnName("type");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId", "Type")
+                        .IsUnique();
+
+                    b.ToTable("notification_preferences", (string)null);
+                });
+
             modelBuilder.Entity("LibraHub.Notifications.Domain.Recipients.UserNotificationSettings", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -163,13 +207,13 @@ namespace LibraHub.Notifications.Infrastructure.Migrations
                         .HasColumnType("character varying(320)")
                         .HasColumnName("email");
 
-                    b.Property<bool>("EmailEnabled")
+                    b.Property<bool>("EmailAnnouncementsEnabled")
                         .HasColumnType("boolean")
-                        .HasColumnName("email_enabled");
+                        .HasColumnName("email_announcements_enabled");
 
-                    b.Property<bool>("InAppEnabled")
+                    b.Property<bool>("EmailPromotionsEnabled")
                         .HasColumnType("boolean")
-                        .HasColumnName("in_app_enabled");
+                        .HasColumnName("email_promotions_enabled");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
@@ -185,13 +229,11 @@ namespace LibraHub.Notifications.Infrastructure.Migrations
 
                     b.HasKey("UserId");
 
-                    b.HasIndex("EmailEnabled");
+                    b.HasIndex("EmailAnnouncementsEnabled");
 
-                    b.HasIndex("InAppEnabled");
+                    b.HasIndex("EmailPromotionsEnabled");
 
                     b.HasIndex("IsStaff");
-
-                    b.HasIndex("IsActive", "IsStaff");
 
                     b.ToTable("user_notification_settings", (string)null);
                 });

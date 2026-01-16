@@ -9,8 +9,8 @@ namespace LibraHub.Notifications.Application.Consumers;
 
 public class OrderPaidConsumer(
     INotificationRepository notificationRepository,
-    INotificationPreferencesRepository preferencesRepository,
     INotificationSender notificationSender,
+    IUserNotificationSettingsRepository settingsRepository,
     IIdentityClient identityClient,
     IInboxRepository inboxRepository,
     IUnitOfWork unitOfWork,
@@ -34,13 +34,19 @@ public class OrderPaidConsumer(
 
         var userId = @event.UserId;
 
-        var preference = await preferencesRepository.GetByUserIdAndTypeAsync(
-            userId,
-            NotificationType.OrderPaid,
-            cancellationToken);
+        var userSettings = await settingsRepository.GetByUserIdAsync(userId, cancellationToken);
+        if (!NotificationConsumerHelper.ShouldReceiveNotifications(userSettings))
+        {
+            var isStaff = userSettings?.IsStaff ?? false;
+            var isActive = userSettings?.IsActive ?? false;
+            logger.LogInformation("User {UserId} should not receive notifications (staff: {IsStaff}, active: {IsActive}), skipping OrderPaid notification for OrderId: {OrderId}",
+                userId, isStaff, isActive, @event.OrderId);
+            await inboxRepository.MarkAsProcessedAsync(messageId, EventType, cancellationToken);
+            return;
+        }
 
-        var emailEnabled = preference?.EmailEnabled ?? false;
-        var inAppEnabled = preference?.InAppEnabled ?? false;
+        var emailEnabled = userSettings!.EmailEnabled;
+        var inAppEnabled = userSettings!.InAppEnabled;
 
         Notification? notification = null;
 
@@ -83,7 +89,7 @@ public class OrderPaidConsumer(
             throw;
         }
 
-        if (emailEnabled)
+        if (emailEnabled && !string.IsNullOrWhiteSpace(userSettings!.Email))
         {
             try
             {

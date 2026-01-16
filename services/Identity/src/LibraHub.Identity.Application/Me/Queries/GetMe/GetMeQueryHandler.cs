@@ -1,12 +1,12 @@
 using LibraHub.BuildingBlocks.Abstractions;
 using LibraHub.BuildingBlocks.Results;
 using LibraHub.Identity.Application.Abstractions;
+using LibraHub.Identity.Application.Options;
 using LibraHub.Identity.Domain.Users;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Error = LibraHub.BuildingBlocks.Results.Error;
-using LibraHub.Identity.Application.Options;
 
 namespace LibraHub.Identity.Application.Me.Queries.GetMe;
 

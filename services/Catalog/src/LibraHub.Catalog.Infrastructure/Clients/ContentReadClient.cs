@@ -1,7 +1,7 @@
-using LibraHub.Catalog.Application.Abstractions;
-using LibraHub.Catalog.Application.Options;
 using LibraHub.BuildingBlocks.Correlation;
 using LibraHub.BuildingBlocks.Results;
+using LibraHub.Catalog.Application.Abstractions;
+using LibraHub.Catalog.Application.Options;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Text;

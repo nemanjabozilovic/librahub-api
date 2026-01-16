@@ -11,4 +11,5 @@ public record RegisterCommand(
     DateTimeOffset DateOfBirth,
     bool EmailAnnouncementsEnabled,
     bool EmailPromotionsEnabled,
-    string? Phone = null) : IRequest<Result>;
+    string? Phone = null,
+    string? RecaptchaToken = null) : IRequest<Result>;

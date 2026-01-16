@@ -3,7 +3,6 @@ using LibraHub.BuildingBlocks.Outbox;
 using LibraHub.Catalog.Domain.Announcements;
 using LibraHub.Catalog.Domain.Books;
 using LibraHub.Catalog.Domain.Projections;
-using LibraHub.Catalog.Domain.Promotions;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibraHub.Catalog.Infrastructure.Persistence;
@@ -21,9 +20,6 @@ public class CatalogDbContext : DbContext
     public DbSet<PricingPolicy> PricingPolicies { get; set; } = null!;
     public DbSet<Announcement> Announcements { get; set; } = null!;
     public DbSet<BookContentState> BookContentStates { get; set; } = null!;
-    public DbSet<PromotionCampaign> PromotionCampaigns { get; set; } = null!;
-    public DbSet<PromotionRule> PromotionRules { get; set; } = null!;
-    public DbSet<PromotionAudit> PromotionAudits { get; set; } = null!;
     public DbSet<OutboxMessage> OutboxMessages { get; set; } = null!;
     public DbSet<ProcessedMessage> ProcessedMessages { get; set; } = null!;
 

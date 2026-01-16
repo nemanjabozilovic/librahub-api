@@ -10,4 +10,5 @@ public record RegisterRequestDto
     public DateTimeOffset DateOfBirth { get; init; }
     public bool EmailAnnouncementsEnabled { get; init; }
     public bool EmailPromotionsEnabled { get; init; }
+    public string? RecaptchaToken { get; init; }
 }

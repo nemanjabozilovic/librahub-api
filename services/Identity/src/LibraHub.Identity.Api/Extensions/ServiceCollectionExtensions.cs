@@ -50,6 +50,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IEmailVerificationTokenService, EmailVerificationTokenService>();
         services.AddScoped<IPasswordResetTokenService, PasswordResetTokenService>();
         services.AddScoped<IRegistrationCompletionTokenService, RegistrationCompletionTokenService>();
+        services.AddScoped<IRecaptchaService, RecaptchaService>();
+        services.AddHttpClient();
 
         services.AddScoped<BuildingBlocks.Abstractions.IOutboxWriter, OutboxEventPublisher<IdentityDbContext>>();
         services.AddScoped<BuildingBlocks.Abstractions.IUnitOfWork, Infrastructure.Persistence.UnitOfWork>();
@@ -72,6 +74,7 @@ public static class ServiceCollectionExtensions
         services.AddOptions<TokenOptions>().Bind(configuration.GetSection(TokenOptions.SectionName)).ValidateDataAnnotations().ValidateOnStart();
         services.AddOptions<FrontendOptions>().Bind(configuration.GetSection(FrontendOptions.SectionName)).ValidateDataAnnotations().ValidateOnStart();
         services.AddOptions<IdentityOptions>().Bind(configuration.GetSection(IdentityOptions.SectionName)).ValidateDataAnnotations().ValidateOnStart();
+        services.AddOptions<RecaptchaOptions>().Bind(configuration.GetSection(RecaptchaOptions.SectionName)).ValidateDataAnnotations().ValidateOnStart();
 
         services.AddLibraHubJwtAuthentication(configuration);
         services.AddLibraHubInternalAccess(configuration);

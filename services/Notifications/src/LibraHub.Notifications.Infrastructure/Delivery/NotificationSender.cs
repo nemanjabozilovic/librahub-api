@@ -13,17 +13,19 @@ public class NotificationSender(
     {
         try
         {
+            logger.LogInformation("Sending SignalR notification via method 'ReceiveNotification' to UserId: {UserId}, Title: {Title}", userId, title);
+
             await notificationHub.SendToUserAsync(
                 userId,
                 "ReceiveNotification",
                 new { Title = title, Message = message },
                 cancellationToken);
 
-            logger.LogInformation("Notification sent via SignalR to UserId: {UserId}, Title: {Title}", userId, title);
+            logger.LogInformation("Notification sent successfully via SignalR to UserId: {UserId}, Title: {Title}", userId, title);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to send notification via SignalR to UserId: {UserId}", userId);
+            logger.LogError(ex, "Failed to send notification via SignalR to UserId: {UserId}, Method: ReceiveNotification", userId);
         }
     }
 
@@ -39,6 +41,10 @@ public class NotificationSender(
     {
         try
         {
+            logger.LogInformation(
+                "Sending SignalR announcement via method 'ReceiveAnnouncement' to UserId: {UserId}, AnnouncementId: {AnnouncementId}, BookId: {BookId}, Title: {Title}",
+                userId, announcementId, bookId, title);
+
             await notificationHub.SendToUserAsync(
                 userId,
                 "ReceiveAnnouncement",
@@ -53,11 +59,15 @@ public class NotificationSender(
                 },
                 cancellationToken);
 
-            logger.LogInformation("Announcement notification sent via SignalR to UserId: {UserId}, AnnouncementId: {AnnouncementId}", userId, announcementId);
+            logger.LogInformation(
+                "Announcement notification sent successfully via SignalR to UserId: {UserId}, AnnouncementId: {AnnouncementId}, Method: ReceiveAnnouncement",
+                userId, announcementId);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to send announcement notification via SignalR to UserId: {UserId}, AnnouncementId: {AnnouncementId}", userId, announcementId);
+            logger.LogError(ex,
+                "Failed to send announcement notification via SignalR to UserId: {UserId}, AnnouncementId: {AnnouncementId}, Method: ReceiveAnnouncement",
+                userId, announcementId);
         }
     }
 

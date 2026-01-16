@@ -29,12 +29,12 @@ public class UserNotificationSettingsConfig : IEntityTypeConfiguration<UserNotif
             .HasColumnName("is_staff")
             .IsRequired();
 
-        builder.Property(x => x.EmailAnnouncementsEnabled)
-            .HasColumnName("email_announcements_enabled")
+        builder.Property(x => x.EmailEnabled)
+            .HasColumnName("email_enabled")
             .IsRequired();
 
-        builder.Property(x => x.EmailPromotionsEnabled)
-            .HasColumnName("email_promotions_enabled")
+        builder.Property(x => x.InAppEnabled)
+            .HasColumnName("in_app_enabled")
             .IsRequired();
 
         builder.Property(x => x.UpdatedAt)
@@ -42,8 +42,9 @@ public class UserNotificationSettingsConfig : IEntityTypeConfiguration<UserNotif
             .IsRequired();
 
         builder.HasIndex(x => x.IsStaff);
-        builder.HasIndex(x => x.EmailAnnouncementsEnabled);
-        builder.HasIndex(x => x.EmailPromotionsEnabled);
+        builder.HasIndex(x => x.EmailEnabled);
+        builder.HasIndex(x => x.InAppEnabled);
+        builder.HasIndex(x => new { x.IsActive, x.IsStaff });
     }
 }
 

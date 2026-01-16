@@ -18,20 +18,43 @@ public class UserNotificationSettingsRepository(NotificationsDbContext context) 
         }
         else
         {
-            context.Entry(existing).CurrentValues.SetValues(settings);
+            existing.UpdateEmail(settings.Email, settings.IsActive, settings.IsStaff);
+            existing.Update(settings.EmailEnabled, inAppEnabled: true);
         }
 
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<List<UserNotificationSettings>> GetEmailAnnouncementRecipientsAsync(CancellationToken cancellationToken = default)
+    public async Task<UserNotificationSettings?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        return await context.UserNotificationSettings
+            .FirstOrDefaultAsync(x => x.UserId == userId, cancellationToken);
+    }
+
+    public async Task<List<UserNotificationSettings>> GetEmailRecipientsAsync(CancellationToken cancellationToken = default)
     {
         return await context.UserNotificationSettings
             .Where(x =>
                 x.IsActive &&
                 !x.IsStaff &&
-                x.EmailAnnouncementsEnabled &&
-                x.Email != string.Empty)
+                x.EmailEnabled &&
+                !string.IsNullOrWhiteSpace(x.Email))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<Guid>> GetActiveNonStaffUserIdsAsync(CancellationToken cancellationToken = default)
+    {
+        return await context.UserNotificationSettings
+            .Where(x => x.IsActive && !x.IsStaff)
+            .Select(x => x.UserId)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<Guid>> GetActiveNonStaffUserIdsWithInAppEnabledAsync(CancellationToken cancellationToken = default)
+    {
+        return await context.UserNotificationSettings
+            .Where(x => x.IsActive && !x.IsStaff && x.InAppEnabled)
+            .Select(x => x.UserId)
             .ToListAsync(cancellationToken);
     }
 

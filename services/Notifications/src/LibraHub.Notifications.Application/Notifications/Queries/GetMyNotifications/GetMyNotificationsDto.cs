@@ -12,6 +12,7 @@ public record NotificationDto
     public string Type { get; init; } = string.Empty;
     public string Title { get; init; } = string.Empty;
     public string Message { get; init; } = string.Empty;
+    public string? ImageUrl { get; init; }
     public string Status { get; init; } = string.Empty;
     public DateTimeOffset CreatedAt { get; init; }
     public DateTimeOffset? ReadAt { get; init; }

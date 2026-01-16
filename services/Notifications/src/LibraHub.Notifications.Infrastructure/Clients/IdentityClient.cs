@@ -1,9 +1,9 @@
-using LibraHub.Notifications.Application.Abstractions;
-using LibraHub.Notifications.Infrastructure.Options;
 using LibraHub.BuildingBlocks.Http;
 using LibraHub.BuildingBlocks.Results;
-using Microsoft.Extensions.Logging;
+using LibraHub.Notifications.Application.Abstractions;
+using LibraHub.Notifications.Infrastructure.Options;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace LibraHub.Notifications.Infrastructure.Clients;

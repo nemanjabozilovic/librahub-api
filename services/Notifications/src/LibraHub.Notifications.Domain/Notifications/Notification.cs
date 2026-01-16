@@ -7,6 +7,7 @@ public class Notification
     public NotificationType Type { get; private set; }
     public string Title { get; private set; } = string.Empty;
     public string Message { get; private set; } = string.Empty;
+    public string? ImageUrl { get; private set; }
     public NotificationStatus Status { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime? ReadAt { get; private set; }
@@ -20,7 +21,8 @@ public class Notification
         Guid userId,
         NotificationType type,
         string title,
-        string message)
+        string message,
+        string? imageUrl = null)
     {
         if (id == Guid.Empty)
             throw new ArgumentException("Id cannot be empty", nameof(id));
@@ -36,6 +38,7 @@ public class Notification
         Type = type;
         Title = title;
         Message = message;
+        ImageUrl = string.IsNullOrWhiteSpace(imageUrl) ? null : imageUrl;
         Status = NotificationStatus.Unread;
         CreatedAt = DateTime.UtcNow;
     }
