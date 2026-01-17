@@ -23,15 +23,10 @@ public class UpdateProgressHandler(
 
         var userId = userIdResult.Value;
 
-        bool hasAccess = currentUser.IsInRole("Admin") || currentUser.IsInRole("Librarian");
-        if (!hasAccess)
+        var accessResult = await ValidateUserAccessAsync(userId, request.BookId, cancellationToken);
+        if (accessResult.IsFailure)
         {
-            hasAccess = await entitlementRepository.HasAccessAsync(userId, request.BookId, cancellationToken);
-        }
-
-        if (!hasAccess)
-        {
-            return Result.Failure(Error.Validation("User does not have access to this book"));
+            return accessResult;
         }
 
         var normalizedFormat = request.Format?.ToUpperInvariant();
@@ -53,6 +48,22 @@ public class UpdateProgressHandler(
         {
             progress.UpdateProgress(request.Percentage, request.LastPage);
             await progressRepository.UpdateAsync(progress, cancellationToken);
+        }
+
+        return Result.Success();
+    }
+
+    private async Task<Result> ValidateUserAccessAsync(Guid userId, Guid bookId, CancellationToken cancellationToken)
+    {
+        bool hasAccess = currentUser.IsInRole("Admin") || currentUser.IsInRole("Librarian");
+        if (!hasAccess)
+        {
+            hasAccess = await entitlementRepository.HasAccessAsync(userId, bookId, cancellationToken);
+        }
+
+        if (!hasAccess)
+        {
+            return Result.Failure(Error.Validation("User does not have access to this book"));
         }
 
         return Result.Success();

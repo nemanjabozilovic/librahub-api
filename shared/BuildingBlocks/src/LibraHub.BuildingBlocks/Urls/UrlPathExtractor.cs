@@ -33,5 +33,3 @@ public static class UrlPathExtractor
         return null;
     }
 }
-
-

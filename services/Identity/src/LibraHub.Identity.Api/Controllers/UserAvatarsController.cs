@@ -28,4 +28,3 @@ public class UserAvatarsController(IMediator mediator) : ControllerBase
         return File(result.Value.Content, result.Value.ContentType);
     }
 }
-

@@ -21,13 +21,7 @@ public class GetBookEditionsBatchHandler(
             .GroupBy(e => e.BookId)
             .ToDictionary(
                 g => g.Key,
-                g => g.Select(e => new GetBookEditions.BookEditionDto
-                {
-                    Id = e.Id,
-                    Format = e.Format.ToString().ToUpperInvariant(),
-                    Version = e.Version,
-                    UploadedAt = new DateTimeOffset(e.UploadedAt, TimeSpan.Zero)
-                })
+                g => g.Select(GetBookEditions.BookEditionDtoMapper.MapFromBookEdition)
                 .OrderByDescending(e => e.Format)
                 .ThenByDescending(e => e.Version)
                 .ToList());

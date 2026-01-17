@@ -10,4 +10,3 @@ public class IdentityOptions
     [Url(ErrorMessage = "GatewayBaseUrl must be a valid URL")]
     public string GatewayBaseUrl { get; set; } = string.Empty;
 }
-

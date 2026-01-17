@@ -75,23 +75,7 @@ public class SearchBooksHandler(
                 Authors = b.Authors.Select(a => a.Name).ToList(),
                 Categories = b.Categories.Select(c => c.Name).ToList(),
                 Tags = b.Tags.Select(t => t.Name).ToList(),
-                Pricing = pricing != null ? new PricingDto
-                {
-                    Price = pricing.Price.Amount,
-                    Currency = pricing.Price.Currency,
-                    VatRate = pricing.VatRate,
-                    PriceWithVat = pricing.VatRate.HasValue && pricing.VatRate.Value > 0
-                        ? pricing.Price.Amount * (1 + pricing.VatRate.Value / 100m)
-                        : pricing.Price.Amount,
-                    PromoPrice = pricing.PromoPrice?.Amount,
-                    PromoPriceWithVat = pricing.PromoPrice != null
-                        ? (pricing.VatRate.HasValue && pricing.VatRate.Value > 0
-                            ? pricing.PromoPrice.Amount * (1 + pricing.VatRate.Value / 100m)
-                            : pricing.PromoPrice.Amount)
-                        : null,
-                    PromoStartDate = pricing.PromoStartDate.HasValue ? new DateTimeOffset(pricing.PromoStartDate.Value, TimeSpan.Zero) : null,
-                    PromoEndDate = pricing.PromoEndDate.HasValue ? new DateTimeOffset(pricing.PromoEndDate.Value, TimeSpan.Zero) : null
-                } : null,
+                Pricing = PricingDtoMapper.MapFromPricingPolicy(pricing),
                 CoverUrl = !string.IsNullOrWhiteSpace(coverRef)
                     ? $"{options.Value.GatewayBaseUrl}/api/covers/{coverRef}"
                     : null,

@@ -19,12 +19,13 @@ public class RefundOrderHandler(
 {
     public async Task<Result> Handle(RefundOrderCommand request, CancellationToken cancellationToken)
     {
-        if (!currentUser.UserId.HasValue)
+        var userIdResult = currentUser.RequireUserId(OrdersErrors.User.NotAuthenticated);
+        if (userIdResult.IsFailure)
         {
-            return Result.Failure(Error.Unauthorized(OrdersErrors.User.NotAuthenticated));
+            return Result.Failure(userIdResult.Error!);
         }
 
-        var refundedBy = currentUser.UserId.Value;
+        var refundedBy = userIdResult.Value;
 
         var order = await orderRepository.GetByIdAsync(request.OrderId, cancellationToken);
         if (order == null)
@@ -50,34 +51,27 @@ public class RefundOrderHandler(
             request.Reason,
             refundedBy);
 
-        try
+        await unitOfWork.ExecuteInTransactionAsync(async ct =>
         {
-            await unitOfWork.ExecuteInTransactionAsync(async ct =>
-            {
-                await refundRepository.AddAsync(refund, ct);
+            await refundRepository.AddAsync(refund, ct);
 
-                order.MarkAsRefunded();
-                await orderRepository.UpdateAsync(order, ct);
+            order.MarkAsRefunded();
+            await orderRepository.UpdateAsync(order, ct);
 
-                await outboxWriter.WriteAsync(
-                    new Contracts.Orders.V1.OrderRefundedV1
-                    {
-                        OrderId = order.Id,
-                        UserId = order.UserId,
-                        RefundId = refund.Id,
-                        Reason = request.Reason,
-                        RefundedBy = refundedBy,
-                        RefundedAt = clock.UtcNowOffset
-                    },
-                    Contracts.Common.EventTypes.OrderRefunded,
-                    ct);
-            }, cancellationToken);
+            await outboxWriter.WriteAsync(
+                new Contracts.Orders.V1.OrderRefundedV1
+                {
+                    OrderId = order.Id,
+                    UserId = order.UserId,
+                    RefundId = refund.Id,
+                    Reason = request.Reason,
+                    RefundedBy = refundedBy,
+                    RefundedAt = clock.UtcNowOffset
+                },
+                Contracts.Common.EventTypes.OrderRefunded,
+                ct);
+        }, cancellationToken);
 
-            return Result.Success();
-        }
-        catch
-        {
-            throw;
-        }
+        return Result.Success();
     }
 }

@@ -30,9 +30,9 @@ namespace LibraHub.Notifications.Infrastructure.Migrations
                 DO $$
                 BEGIN
                     IF EXISTS (
-                        SELECT 1 FROM information_schema.columns 
+                        SELECT 1 FROM information_schema.columns
                         WHERE table_schema = 'public'
-                        AND table_name = 'user_notification_settings' 
+                        AND table_name = 'user_notification_settings'
                         AND (column_name = 'email_announcements_enabled' OR column_name = 'email_promotions_enabled')
                     ) THEN
                         UPDATE user_notification_settings
@@ -49,7 +49,7 @@ namespace LibraHub.Notifications.Infrastructure.Migrations
                 DO $$
                 BEGIN
                     IF EXISTS (
-                        SELECT 1 FROM information_schema.tables 
+                        SELECT 1 FROM information_schema.tables
                         WHERE table_schema = 'public'
                         AND table_name = 'notification_preferences'
                     ) THEN

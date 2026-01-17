@@ -12,4 +12,3 @@ public class UploadOptions
     [Required(ErrorMessage = "AnnouncementImagesBucketName is required")]
     public string AnnouncementImagesBucketName { get; set; } = "announcement-images";
 }
-

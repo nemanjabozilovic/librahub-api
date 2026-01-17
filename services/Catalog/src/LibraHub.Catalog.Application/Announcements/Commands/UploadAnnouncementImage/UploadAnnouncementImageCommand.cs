@@ -7,4 +7,3 @@ namespace LibraHub.Catalog.Application.Announcements.Commands.UploadAnnouncement
 public record UploadAnnouncementImageCommand(
     Guid AnnouncementId,
     IFormFile File) : IRequest<Result<string>>;
-

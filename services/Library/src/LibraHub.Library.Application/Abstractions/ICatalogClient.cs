@@ -31,4 +31,3 @@ public record CatalogEditionDto
     public int Version { get; init; }
     public DateTimeOffset UploadedAt { get; init; }
 }
-

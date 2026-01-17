@@ -30,19 +30,7 @@ public class UpdateUserHandler(
 
         await userRepository.UpdateAsync(user, cancellationToken);
 
-        var userDto = new UserDto
-        {
-            Id = user.Id,
-            Email = user.Email,
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            DisplayName = user.DisplayName,
-            Roles = user.Roles.Select(r => r.Role.ToString()).ToList(),
-            EmailVerified = user.EmailVerified,
-            Status = user.Status.ToString(),
-            CreatedAt = user.CreatedAt,
-            LastLoginAt = user.LastLoginAt
-        };
+        var userDto = UserDtoMapper.MapFromUser(user);
 
         return Result.Success(userDto);
     }

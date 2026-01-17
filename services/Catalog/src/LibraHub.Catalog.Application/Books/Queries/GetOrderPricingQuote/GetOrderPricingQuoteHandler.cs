@@ -49,13 +49,11 @@ public class GetOrderPricingQuoteHandler(
                 return Result.Failure<OrderPricingQuoteResponseDto>(Error.Validation($"Only {Currency.USD} currency is supported"));
             }
 
-            var basePrice = pricing.Price.Amount; // net
+            var basePrice = pricing.Price.Amount;
             var vatRate = pricing.VatRate ?? 0m;
 
             var isPublished = book.Status == BookStatus.Published;
             var isRemoved = book.Status == BookStatus.Removed;
-
-            // Promo from pricing policy (manual promo window).
             var manualPromoActive =
                 isPublished &&
                 pricing.PromoPrice != null &&
@@ -102,4 +100,3 @@ public class GetOrderPricingQuoteHandler(
         });
     }
 }
-

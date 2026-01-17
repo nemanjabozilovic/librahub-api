@@ -23,17 +23,10 @@ public class UploadCoverHandler(
 {
     public async Task<Result<Guid>> Handle(UploadCoverCommand request, CancellationToken cancellationToken)
     {
-        var bookInfoResult = await catalogClient.GetBookInfoAsync(request.BookId, cancellationToken);
+        var bookInfoResult = await ValidateBookInfoAsync(request.BookId, cancellationToken);
         if (bookInfoResult.IsFailure)
         {
-            return Result.Failure<Guid>(bookInfoResult.Error ?? Error.NotFound(ContentErrors.Book.NotFound));
-        }
-
-        var bookInfo = bookInfoResult.Value;
-
-        if (bookInfo.IsBlocked)
-        {
-            return Result.Failure<Guid>(Error.Validation(ContentErrors.Book.Blocked));
+            return Result.Failure<Guid>(bookInfoResult.Error!);
         }
 
         var existingCover = await coverRepository.GetByBookIdAsync(request.BookId, cancellationToken);
@@ -111,6 +104,24 @@ public class UploadCoverHandler(
             cancellationToken);
 
         return Result.Success(cover.Id);
+    }
+
+    private async Task<Result> ValidateBookInfoAsync(Guid bookId, CancellationToken cancellationToken)
+    {
+        var bookInfoResult = await catalogClient.GetBookInfoAsync(bookId, cancellationToken);
+        if (bookInfoResult.IsFailure)
+        {
+            return Result.Failure(bookInfoResult.Error ?? Error.NotFound(ContentErrors.Book.NotFound));
+        }
+
+        var bookInfo = bookInfoResult.Value;
+
+        if (bookInfo.IsBlocked)
+        {
+            return Result.Failure(Error.Validation(ContentErrors.Book.Blocked));
+        }
+
+        return Result.Success();
     }
 
     private static string GetFileExtension(string contentType)

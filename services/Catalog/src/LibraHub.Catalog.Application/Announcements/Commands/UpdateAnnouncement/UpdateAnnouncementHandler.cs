@@ -48,4 +48,3 @@ public class UpdateAnnouncementHandler(
         return Result.Success();
     }
 }
-

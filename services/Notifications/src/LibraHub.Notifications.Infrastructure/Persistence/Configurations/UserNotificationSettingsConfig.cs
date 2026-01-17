@@ -47,4 +47,3 @@ public class UserNotificationSettingsConfig : IEntityTypeConfiguration<UserNotif
         builder.HasIndex(x => new { x.IsActive, x.IsStaff });
     }
 }
-

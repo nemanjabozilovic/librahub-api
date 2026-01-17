@@ -86,4 +86,3 @@ public class UserNotificationSettingsRepository(NotificationsDbContext context) 
         }
     }
 }
-

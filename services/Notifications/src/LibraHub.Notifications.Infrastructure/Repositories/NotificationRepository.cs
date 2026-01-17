@@ -5,24 +5,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LibraHub.Notifications.Infrastructure.Repositories;
 
-public class NotificationRepository : INotificationRepository
+public class NotificationRepository(NotificationsDbContext context) : INotificationRepository
 {
-    private readonly NotificationsDbContext _context;
-
-    public NotificationRepository(NotificationsDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<Notification?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await _context.Notifications
+        return await context.Notifications
             .FirstOrDefaultAsync(n => n.Id == id, cancellationToken);
     }
 
     public async Task<List<Notification>> GetByUserIdAsync(Guid userId, int skip, int take, CancellationToken cancellationToken = default)
     {
-        return await _context.Notifications
+        return await context.Notifications
             .Where(n => n.UserId == userId)
             .OrderByDescending(n => n.CreatedAt)
             .Skip(skip)
@@ -32,47 +25,47 @@ public class NotificationRepository : INotificationRepository
 
     public async Task<int> GetTotalCountByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        return await _context.Notifications
+        return await context.Notifications
             .CountAsync(n => n.UserId == userId, cancellationToken);
     }
 
     public async Task<int> GetUnreadCountByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        return await _context.Notifications
+        return await context.Notifications
             .CountAsync(n => n.UserId == userId && n.Status == NotificationStatus.Unread, cancellationToken);
     }
 
     public async Task AddAsync(Notification notification, CancellationToken cancellationToken = default)
     {
-        await _context.Notifications.AddAsync(notification, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
+        await context.Notifications.AddAsync(notification, cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<List<Notification>> GetAllByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        return await _context.Notifications
+        return await context.Notifications
             .Where(n => n.UserId == userId)
             .ToListAsync(cancellationToken);
     }
 
     public async Task AddRangeAsync(IEnumerable<Notification> notifications, CancellationToken cancellationToken = default)
     {
-        await _context.Notifications.AddRangeAsync(notifications, cancellationToken);
+        await context.Notifications.AddRangeAsync(notifications, cancellationToken);
     }
 
     public async Task UpdateAsync(Notification notification, CancellationToken cancellationToken = default)
     {
-        _context.Notifications.Update(notification);
-        await _context.SaveChangesAsync(cancellationToken);
+        context.Notifications.Update(notification);
+        await context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task DeleteAsync(Notification notification, CancellationToken cancellationToken = default)
     {
-        _context.Notifications.Remove(notification);
+        context.Notifications.Remove(notification);
 
-        if (_context.Database.CurrentTransaction == null)
+        if (context.Database.CurrentTransaction == null)
         {
-            await _context.SaveChangesAsync(cancellationToken);
+            await context.SaveChangesAsync(cancellationToken);
         }
     }
 }

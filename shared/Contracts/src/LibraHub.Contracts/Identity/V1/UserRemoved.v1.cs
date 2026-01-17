@@ -6,4 +6,3 @@ public record UserRemovedV1
     public string Reason { get; init; } = string.Empty;
     public DateTimeOffset OccurredAt { get; init; }
 }
-

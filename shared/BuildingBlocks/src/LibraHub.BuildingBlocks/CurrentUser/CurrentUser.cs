@@ -6,44 +6,15 @@ namespace LibraHub.BuildingBlocks.CurrentUser;
 
 public class CurrentUser(IHttpContextAccessor httpContextAccessor) : ICurrentUser
 {
-    public Guid? UserId
-    {
-        get
-        {
-            var user = httpContextAccessor.HttpContext?.User;
-            return user?.GetUserId();
-        }
-    }
+    private System.Security.Claims.ClaimsPrincipal? User => httpContextAccessor.HttpContext?.User;
 
-    public string? Email
-    {
-        get
-        {
-            var user = httpContextAccessor.HttpContext?.User;
-            return user?.GetEmail();
-        }
-    }
+    public Guid? UserId => User?.GetUserId();
 
-    public bool IsAuthenticated
-    {
-        get
-        {
-            return httpContextAccessor.HttpContext?.User?.Identity?.IsAuthenticated ?? false;
-        }
-    }
+    public string? Email => User?.GetEmail();
 
-    public bool IsInRole(string role)
-    {
-        var user = httpContextAccessor.HttpContext?.User;
-        return user?.IsInRole(role) ?? false;
-    }
+    public bool IsAuthenticated => User?.Identity?.IsAuthenticated ?? false;
 
-    public IEnumerable<string> Roles
-    {
-        get
-        {
-            var user = httpContextAccessor.HttpContext?.User;
-            return user?.GetRoles() ?? Enumerable.Empty<string>();
-        }
-    }
+    public bool IsInRole(string role) => User?.IsInRole(role) ?? false;
+
+    public IEnumerable<string> Roles => User?.GetRoles() ?? Enumerable.Empty<string>();
 }

@@ -55,4 +55,3 @@ public class UserNotificationSettings
         UpdatedAt = DateTime.UtcNow;
     }
 }
-

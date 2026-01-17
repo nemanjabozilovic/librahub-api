@@ -141,4 +141,3 @@ public static class HttpClientResultExtensions
             CorrelationContext.Current);
     }
 }
-

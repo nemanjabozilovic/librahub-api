@@ -11,4 +11,3 @@ public record UpdateMyProfileCommand(
     string? Phone,
     bool EmailAnnouncementsEnabled,
     bool EmailPromotionsEnabled) : IRequest<Result<UserProfileDto>>;
-

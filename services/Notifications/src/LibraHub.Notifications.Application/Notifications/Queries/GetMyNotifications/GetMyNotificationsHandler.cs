@@ -1,4 +1,5 @@
 using LibraHub.BuildingBlocks.Abstractions;
+using LibraHub.BuildingBlocks.Results;
 using LibraHub.Notifications.Application.Abstractions;
 using LibraHub.Notifications.Domain.Errors;
 using MediatR;
@@ -7,16 +8,17 @@ namespace LibraHub.Notifications.Application.Notifications.Queries.GetMyNotifica
 
 public class GetMyNotificationsHandler(
     INotificationRepository notificationRepository,
-    ICurrentUser currentUser) : IRequestHandler<GetMyNotificationsQuery, GetMyNotificationsDto>
+    ICurrentUser currentUser) : IRequestHandler<GetMyNotificationsQuery, Result<GetMyNotificationsDto>>
 {
-    public async Task<GetMyNotificationsDto> Handle(GetMyNotificationsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<GetMyNotificationsDto>> Handle(GetMyNotificationsQuery request, CancellationToken cancellationToken)
     {
-        if (!currentUser.UserId.HasValue)
+        var userIdResult = currentUser.RequireUserId(NotificationsErrors.User.NotAuthenticated);
+        if (userIdResult.IsFailure)
         {
-            throw new UnauthorizedAccessException(NotificationsErrors.User.NotAuthenticated);
+            return Result.Failure<GetMyNotificationsDto>(userIdResult.Error!);
         }
 
-        var userId = currentUser.UserId.Value;
+        var userId = userIdResult.Value;
         var notifications = await notificationRepository.GetByUserIdAsync(userId, request.Skip, request.Take, cancellationToken);
         var totalCount = await notificationRepository.GetTotalCountByUserIdAsync(userId, cancellationToken);
 
@@ -32,10 +34,10 @@ public class GetMyNotificationsHandler(
             ReadAt = n.ReadAt.HasValue ? new DateTimeOffset(n.ReadAt.Value, TimeSpan.Zero) : null
         }).ToList();
 
-        return new GetMyNotificationsDto
+        return Result.Success(new GetMyNotificationsDto
         {
             Notifications = notificationDtos,
             TotalCount = totalCount
-        };
+        });
     }
 }

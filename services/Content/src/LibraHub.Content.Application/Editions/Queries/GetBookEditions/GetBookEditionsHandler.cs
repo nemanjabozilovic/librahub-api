@@ -17,13 +17,7 @@ public class GetBookEditionsHandler(
             .ThenByDescending(e => e.Version)
             .ToList();
 
-        var result = accessibleEditions.Select(e => new BookEditionDto
-        {
-            Id = e.Id,
-            Format = e.Format.ToString().ToUpperInvariant(),
-            Version = e.Version,
-            UploadedAt = new DateTimeOffset(e.UploadedAt, TimeSpan.Zero)
-        }).ToList();
+        var result = accessibleEditions.Select(BookEditionDtoMapper.MapFromBookEdition).ToList();
 
         return Result.Success(result);
     }

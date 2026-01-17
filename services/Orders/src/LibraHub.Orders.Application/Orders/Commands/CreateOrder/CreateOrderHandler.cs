@@ -181,24 +181,17 @@ public class CreateOrderHandler(
 
     private async Task<Result<Guid>> SaveOrderWithTransactionAsync(Order order, CancellationToken cancellationToken)
     {
-        try
+        await unitOfWork.ExecuteInTransactionAsync(async ct =>
         {
-            await unitOfWork.ExecuteInTransactionAsync(async ct =>
-            {
-                await orderRepository.AddAsync(order, ct);
+            await orderRepository.AddAsync(order, ct);
 
-                await outboxWriter.WriteAsync(
-                    CreateOrderCreatedEvent(order),
-                    Contracts.Common.EventTypes.OrderCreated,
-                    ct);
-            }, cancellationToken);
+            await outboxWriter.WriteAsync(
+                CreateOrderCreatedEvent(order),
+                Contracts.Common.EventTypes.OrderCreated,
+                ct);
+        }, cancellationToken);
 
-            return Result.Success(order.Id);
-        }
-        catch
-        {
-            throw;
-        }
+        return Result.Success(order.Id);
     }
 
     private Contracts.Orders.V1.OrderCreatedV1 CreateOrderCreatedEvent(Order order)
@@ -207,18 +200,7 @@ public class CreateOrderHandler(
         {
             OrderId = order.Id,
             UserId = order.UserId,
-            Items = order.Items.Select(i => new Contracts.Orders.V1.OrderItemDto
-            {
-                BookId = i.BookId,
-                BookTitle = i.BookTitle,
-                BasePrice = i.BasePrice.Amount,
-                FinalPrice = i.FinalPrice.Amount,
-                VatRate = i.VatRate,
-                VatAmount = i.VatAmount.Amount,
-                PromotionId = i.PromotionId,
-                PromotionName = i.PromotionName,
-                DiscountAmount = i.DiscountAmount
-            }).ToList(),
+            Items = order.Items.Select(OrderItemEventMapper.MapToEventDto).ToList(),
             Subtotal = order.Subtotal.Amount,
             VatTotal = order.VatTotal.Amount,
             Total = order.Total.Amount,

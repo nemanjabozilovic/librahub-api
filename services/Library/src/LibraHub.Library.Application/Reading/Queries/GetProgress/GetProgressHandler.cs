@@ -3,7 +3,6 @@ using LibraHub.BuildingBlocks.Results;
 using LibraHub.Library.Application.Abstractions;
 using LibraHub.Library.Domain.Errors;
 using MediatR;
-using Error = LibraHub.BuildingBlocks.Results.Error;
 
 namespace LibraHub.Library.Application.Reading.Queries.GetProgress;
 
@@ -13,12 +12,13 @@ public class GetProgressHandler(
 {
     public async Task<Result<ReadingProgressDto>> Handle(GetProgressQuery request, CancellationToken cancellationToken)
     {
-        if (!currentUser.UserId.HasValue)
+        var userIdResult = currentUser.RequireUserId(LibraryErrors.User.NotAuthenticated);
+        if (userIdResult.IsFailure)
         {
-            return Result.Failure<ReadingProgressDto>(Error.Unauthorized(LibraryErrors.User.NotAuthenticated));
+            return Result.Failure<ReadingProgressDto>(userIdResult.Error!);
         }
 
-        var userId = currentUser.UserId.Value;
+        var userId = userIdResult.Value;
 
         var normalizedFormat = request.Format?.ToUpperInvariant();
         var progress = await progressRepository.GetByUserBookFormatAndVersionAsync(

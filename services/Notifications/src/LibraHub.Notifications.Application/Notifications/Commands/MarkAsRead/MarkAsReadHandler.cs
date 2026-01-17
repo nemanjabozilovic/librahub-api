@@ -1,33 +1,40 @@
 using LibraHub.BuildingBlocks.Abstractions;
+using LibraHub.BuildingBlocks.Results;
 using LibraHub.Notifications.Application.Abstractions;
 using LibraHub.Notifications.Domain.Errors;
 using MediatR;
+using Error = LibraHub.BuildingBlocks.Results.Error;
 
 namespace LibraHub.Notifications.Application.Notifications.Commands.MarkAsRead;
 
 public class MarkAsReadHandler(
     INotificationRepository notificationRepository,
-    ICurrentUser currentUser) : IRequestHandler<MarkAsReadCommand>
+    ICurrentUser currentUser) : IRequestHandler<MarkAsReadCommand, Result>
 {
-    public async Task Handle(MarkAsReadCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(MarkAsReadCommand request, CancellationToken cancellationToken)
     {
-        if (!currentUser.UserId.HasValue)
+        var userIdResult = currentUser.RequireUserId(NotificationsErrors.User.NotAuthenticated);
+        if (userIdResult.IsFailure)
         {
-            throw new UnauthorizedAccessException(NotificationsErrors.User.NotAuthenticated);
+            return Result.Failure(userIdResult.Error!);
         }
+
+        var currentUserId = userIdResult.Value;
 
         var notification = await notificationRepository.GetByIdAsync(request.NotificationId, cancellationToken);
         if (notification == null)
         {
-            throw new InvalidOperationException(NotificationsErrors.Notification.NotFound);
+            return Result.Failure(Error.NotFound(NotificationsErrors.Notification.NotFound));
         }
 
-        if (notification.UserId != currentUser.UserId.Value)
+        if (notification.UserId != currentUserId)
         {
-            throw new UnauthorizedAccessException("Notification does not belong to current user");
+            return Result.Failure(Error.Forbidden("Notification does not belong to current user"));
         }
 
         notification.MarkAsRead();
         await notificationRepository.UpdateAsync(notification, cancellationToken);
+
+        return Result.Success();
     }
 }

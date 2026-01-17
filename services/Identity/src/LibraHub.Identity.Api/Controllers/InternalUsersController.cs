@@ -21,4 +21,3 @@ public class InternalUsersController(IMediator mediator) : ControllerBase
         return result.ToActionResult(this);
     }
 }
-

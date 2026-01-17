@@ -16,11 +16,6 @@ public class GetOrderHandler(
 {
     public async Task<Result<OrderDto>> Handle(GetOrderQuery request, CancellationToken cancellationToken)
     {
-        if (!currentUser.IsAuthenticated)
-        {
-            return Result.Failure<OrderDto>(Error.Unauthorized(OrdersErrors.User.NotAuthenticated));
-        }
-
         Order? order;
 
         if (currentUser.IsInRole("Admin"))
@@ -63,19 +58,7 @@ public class GetOrderHandler(
             UpdatedAt = order.UpdatedAt.HasValue ? new DateTimeOffset(order.UpdatedAt.Value, TimeSpan.Zero) : null,
             CancelledAt = order.CancelledAt.HasValue ? new DateTimeOffset(order.CancelledAt.Value, TimeSpan.Zero) : null,
             CancellationReason = order.CancellationReason,
-            Items = order.Items.Select(i => new OrderItemDto
-            {
-                Id = i.Id,
-                BookId = i.BookId,
-                BookTitle = i.BookTitle,
-                BasePrice = i.BasePrice.Amount,
-                FinalPrice = i.FinalPrice.Amount,
-                VatRate = i.VatRate,
-                VatAmount = i.VatAmount.Amount,
-                PromotionId = i.PromotionId,
-                PromotionName = i.PromotionName,
-                DiscountAmount = i.DiscountAmount
-            }).ToList(),
+            Items = order.Items.Select(OrderItemDtoMapper.MapFromOrderItem).ToList(),
             Payment = payment != null ? new PaymentDto
             {
                 Id = payment.Id,

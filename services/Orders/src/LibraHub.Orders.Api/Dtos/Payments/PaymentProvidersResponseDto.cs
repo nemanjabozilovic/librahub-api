@@ -12,4 +12,3 @@ public record PaymentProviderDto
     public string Type { get; init; } = "Mock";
     public bool IsMocked { get; init; } = true;
 }
-

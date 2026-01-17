@@ -21,17 +21,7 @@ public class GetAllOrdersHandler(
             return Result.Failure<GetAllOrdersResponseDto>(Error.Validation("PageSize must be between 1 and 100"));
         }
 
-        DateTime? fromDate = null;
-        if (!string.IsNullOrWhiteSpace(request.Period))
-        {
-            fromDate = request.Period.ToLower() switch
-            {
-                "24h" => DateTime.UtcNow.AddHours(-24),
-                "7d" => DateTime.UtcNow.AddDays(-7),
-                "30d" => DateTime.UtcNow.AddDays(-30),
-                _ => null
-            };
-        }
+        var fromDate = ParsePeriod(request.Period);
 
         var skip = (request.Page - 1) * request.PageSize;
         var orders = await orderRepository.GetAllAsync(skip, request.PageSize, fromDate, cancellationToken);
@@ -67,5 +57,21 @@ public class GetAllOrdersHandler(
         };
 
         return Result.Success(response);
+    }
+
+    private static DateTime? ParsePeriod(string? period)
+    {
+        if (string.IsNullOrWhiteSpace(period))
+        {
+            return null;
+        }
+
+        return period.ToLower() switch
+        {
+            "24h" => DateTime.UtcNow.AddHours(-24),
+            "7d" => DateTime.UtcNow.AddDays(-7),
+            "30d" => DateTime.UtcNow.AddDays(-30),
+            _ => null
+        };
     }
 }

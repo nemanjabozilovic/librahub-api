@@ -4,4 +4,3 @@ public record BookCoverDto
 {
     public string? CoverRef { get; init; }
 }
-

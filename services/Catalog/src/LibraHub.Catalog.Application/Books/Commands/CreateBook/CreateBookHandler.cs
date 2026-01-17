@@ -15,15 +15,13 @@ public class CreateBookHandler(
     {
         var book = new Book(Guid.NewGuid(), request.Title);
 
-        Isbn isbn;
-        try
+        var isbnResult = TryCreateIsbn(request.Isbn);
+        if (isbnResult.IsFailure)
         {
-            isbn = new Isbn(request.Isbn);
+            return Result.Failure<Guid>(isbnResult.Error!);
         }
-        catch (ArgumentException)
-        {
-            return Result.Failure<Guid>(Error.Validation("Invalid ISBN format"));
-        }
+
+        var isbn = isbnResult.Value;
 
         book.UpdateMetadata(
             title: null,
@@ -64,5 +62,18 @@ public class CreateBookHandler(
             cancellationToken);
 
         return Result.Success(book.Id);
+    }
+
+    private static Result<Isbn> TryCreateIsbn(string isbnValue)
+    {
+        try
+        {
+            var isbn = new Isbn(isbnValue);
+            return Result.Success(isbn);
+        }
+        catch (ArgumentException)
+        {
+            return Result.Failure<Isbn>(Error.Validation("Invalid ISBN format"));
+        }
     }
 }

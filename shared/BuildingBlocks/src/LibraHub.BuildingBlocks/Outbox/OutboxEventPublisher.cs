@@ -4,19 +4,14 @@ using System.Text.Json;
 
 namespace LibraHub.BuildingBlocks.Outbox;
 
-public class OutboxEventPublisher<TDbContext> : IOutboxWriter where TDbContext : DbContext
+public class OutboxEventPublisher<TDbContext>(TDbContext context) : IOutboxWriter where TDbContext : DbContext
 {
-    private readonly TDbContext _context;
-    private readonly JsonSerializerOptions _jsonOptions;
+    private readonly TDbContext _context = context;
 
-    public OutboxEventPublisher(TDbContext context)
+    private readonly JsonSerializerOptions _jsonOptions = new()
     {
-        _context = context;
-        _jsonOptions = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
-    }
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
 
     public async Task WriteAsync<T>(T integrationEvent, string eventType, CancellationToken cancellationToken = default) where T : class
     {

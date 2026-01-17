@@ -1,4 +1,5 @@
 using LibraHub.BuildingBlocks.Abstractions;
+using LibraHub.BuildingBlocks.Results;
 using LibraHub.Notifications.Application.Abstractions;
 using LibraHub.Notifications.Domain.Errors;
 using MediatR;
@@ -7,21 +8,22 @@ namespace LibraHub.Notifications.Application.Preferences.Queries.GetPreferences;
 
 public class GetPreferencesHandler(
     IUserNotificationSettingsRepository settingsRepository,
-    ICurrentUser currentUser) : IRequestHandler<GetPreferencesQuery, GetPreferencesDto>
+    ICurrentUser currentUser) : IRequestHandler<GetPreferencesQuery, Result<GetPreferencesDto>>
 {
-    public async Task<GetPreferencesDto> Handle(GetPreferencesQuery request, CancellationToken cancellationToken)
+    public async Task<Result<GetPreferencesDto>> Handle(GetPreferencesQuery request, CancellationToken cancellationToken)
     {
-        if (!currentUser.UserId.HasValue)
+        var userIdResult = currentUser.RequireUserId(NotificationsErrors.User.NotAuthenticated);
+        if (userIdResult.IsFailure)
         {
-            throw new UnauthorizedAccessException(NotificationsErrors.User.NotAuthenticated);
+            return Result.Failure<GetPreferencesDto>(userIdResult.Error!);
         }
 
-        var userId = currentUser.UserId.Value;
+        var userId = userIdResult.Value;
         var settings = await settingsRepository.GetByUserIdAsync(userId, cancellationToken);
 
-        return new GetPreferencesDto
+        return Result.Success(new GetPreferencesDto
         {
             EmailEnabled = settings?.EmailEnabled ?? false
-        };
+        });
     }
 }

@@ -123,7 +123,6 @@ public class BooksController(IMediator mediator) : ControllerBase
         return result.ToNoContentActionResult(this);
     }
 
-    // Used by Orders service for checkout pricing validation and order totals.
     [HttpPost("pricing/quote")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(OrderPricingQuoteResponseDto), StatusCodes.Status200OK)]

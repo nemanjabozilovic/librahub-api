@@ -9,4 +9,3 @@ public record InternalUserInfoDto
     public bool IsActive { get; init; }
     public bool IsEmailVerified { get; init; }
 }
-

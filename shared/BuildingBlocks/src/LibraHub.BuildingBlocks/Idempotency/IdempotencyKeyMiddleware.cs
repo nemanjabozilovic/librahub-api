@@ -26,14 +26,12 @@ public class IdempotencyKeyMiddleware(RequestDelegate next, ILogger<IdempotencyK
                     return;
                 }
 
-                // Capture response
                 var originalBodyStream = context.Response.Body;
                 using var responseBody = new MemoryStream();
                 context.Response.Body = responseBody;
 
                 await next(context);
 
-                // Store response if successful
                 if (context.Response.StatusCode >= 200 && context.Response.StatusCode < 300)
                 {
                     responseBody.Seek(0, SeekOrigin.Begin);

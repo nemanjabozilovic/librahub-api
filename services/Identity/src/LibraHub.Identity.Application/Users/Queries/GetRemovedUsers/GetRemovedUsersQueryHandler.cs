@@ -6,15 +6,9 @@ using Error = LibraHub.BuildingBlocks.Results.Error;
 
 namespace LibraHub.Identity.Application.Users.Queries.GetRemovedUsers;
 
-public class GetRemovedUsersQueryHandler : IRequestHandler<GetRemovedUsersQuery, Result<GetRemovedUsersResponseDto>>
+public class GetRemovedUsersQueryHandler(
+    IUserRepository userRepository) : IRequestHandler<GetRemovedUsersQuery, Result<GetRemovedUsersResponseDto>>
 {
-    private readonly IUserRepository _userRepository;
-
-    public GetRemovedUsersQueryHandler(IUserRepository userRepository)
-    {
-        _userRepository = userRepository;
-    }
-
     public async Task<Result<GetRemovedUsersResponseDto>> Handle(GetRemovedUsersQuery request, CancellationToken cancellationToken)
     {
         if (request.Skip < 0)
@@ -27,22 +21,10 @@ public class GetRemovedUsersQueryHandler : IRequestHandler<GetRemovedUsersQuery,
             return Result.Failure<GetRemovedUsersResponseDto>(Error.Validation("Take must be between 1 and 100"));
         }
 
-        var users = await _userRepository.GetRemovedUsersPagedAsync(request.Skip, request.Take, cancellationToken);
-        var totalCount = await _userRepository.CountRemovedAsync(cancellationToken);
+        var users = await userRepository.GetRemovedUsersPagedAsync(request.Skip, request.Take, cancellationToken);
+        var totalCount = await userRepository.CountRemovedAsync(cancellationToken);
 
-        var userDtos = users.Select(user => new UserDto
-        {
-            Id = user.Id,
-            Email = user.Email,
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            DisplayName = user.DisplayName,
-            Roles = user.Roles.Select(r => r.Role.ToString()).ToList(),
-            EmailVerified = user.EmailVerified,
-            Status = user.Status.ToString(),
-            CreatedAt = new DateTimeOffset(user.CreatedAt, TimeSpan.Zero),
-            LastLoginAt = user.LastLoginAt.HasValue ? new DateTimeOffset(user.LastLoginAt.Value, TimeSpan.Zero) : null
-        }).ToList();
+        var userDtos = users.Select(UserDtoMapper.MapFromUser).ToList();
 
         var response = new GetRemovedUsersResponseDto
         {
@@ -53,4 +35,3 @@ public class GetRemovedUsersQueryHandler : IRequestHandler<GetRemovedUsersQuery,
         return Result.Success(response);
     }
 }
-

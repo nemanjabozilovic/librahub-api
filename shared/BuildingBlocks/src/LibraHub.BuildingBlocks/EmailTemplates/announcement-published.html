@@ -10,11 +10,11 @@
         <p>Dear @Model.FullName,</p>
         @if (Model.BookId == null)
         {
-            <p>A new general announcement has been published.</p>
+        <p>A new announcement has been published.</p>
         }
         else
         {
-            <p>A new announcement has been published for a book you might be interested in.</p>
+        <p>A new announcement has been published for a book you might be interested in.</p>
         }
         <p><strong>Announcement Title:</strong> @Model.AnnouncementTitle</p>
         <div style="margin: 12px 0; padding: 12px; background: #f7f7f7; border-radius: 6px; white-space: pre-line;">@Model.AnnouncementContent</div>

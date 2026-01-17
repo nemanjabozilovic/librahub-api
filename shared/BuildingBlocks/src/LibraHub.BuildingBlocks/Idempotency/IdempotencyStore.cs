@@ -2,16 +2,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LibraHub.BuildingBlocks.Idempotency;
 
-public class IdempotencyStore<TDbContext, TIdempotencyKey> : IIdempotencyStore
+public class IdempotencyStore<TDbContext, TIdempotencyKey>(TDbContext context) : IIdempotencyStore
     where TDbContext : DbContext
     where TIdempotencyKey : class, new()
 {
-    private readonly TDbContext _context;
-
-    public IdempotencyStore(TDbContext context)
-    {
-        _context = context;
-    }
+    private readonly TDbContext _context = context;
 
     public async Task<IdempotencyResponse?> GetResponseAsync(string idempotencyKey, CancellationToken cancellationToken = default)
     {

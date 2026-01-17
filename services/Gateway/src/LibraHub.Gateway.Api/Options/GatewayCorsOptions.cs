@@ -9,5 +9,3 @@ public class GatewayCorsOptions
     [MinLength(1)]
     public List<string> AllowedOrigins { get; set; } = ["http://localhost:3000"];
 }
-
-

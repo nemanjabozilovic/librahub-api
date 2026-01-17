@@ -20,7 +20,7 @@ public class PreferencesController(IMediator mediator) : ControllerBase
     {
         var query = new GetPreferencesQuery();
         var result = await mediator.Send(query, cancellationToken);
-        return Ok(result);
+        return result.ToActionResult(this);
     }
 
     [HttpPost]
@@ -34,7 +34,7 @@ public class PreferencesController(IMediator mediator) : ControllerBase
         var command = new UpdatePreferencesCommand(
             request.EmailEnabled);
 
-        await mediator.Send(command, cancellationToken);
-        return Ok();
+        var result = await mediator.Send(command, cancellationToken);
+        return result.ToActionResult(this);
     }
 }

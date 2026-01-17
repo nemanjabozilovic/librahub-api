@@ -23,7 +23,7 @@ public class NotificationsController(IMediator mediator) : ControllerBase
     {
         var query = new GetMyNotificationsQuery(skip, take);
         var result = await mediator.Send(query, cancellationToken);
-        return Ok(result);
+        return result.ToActionResult(this);
     }
 
     [HttpPost("{notificationId}/read")]
@@ -35,8 +35,8 @@ public class NotificationsController(IMediator mediator) : ControllerBase
         CancellationToken cancellationToken = default)
     {
         var command = new MarkAsReadCommand(notificationId);
-        await mediator.Send(command, cancellationToken);
-        return Ok();
+        var result = await mediator.Send(command, cancellationToken);
+        return result.ToActionResult(this);
     }
 
     [HttpGet("unread-count")]
@@ -45,7 +45,7 @@ public class NotificationsController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetUnreadCount(CancellationToken cancellationToken = default)
     {
         var query = new GetUnreadCountQuery();
-        var count = await mediator.Send(query, cancellationToken);
-        return Ok(count);
+        var result = await mediator.Send(query, cancellationToken);
+        return result.ToActionResult(this);
     }
 }

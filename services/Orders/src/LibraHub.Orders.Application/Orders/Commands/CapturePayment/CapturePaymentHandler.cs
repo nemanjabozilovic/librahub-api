@@ -19,12 +19,13 @@ public class CapturePaymentHandler(
 {
     public async Task<Result> Handle(CapturePaymentCommand request, CancellationToken cancellationToken)
     {
-        if (!currentUser.UserId.HasValue)
+        var userIdResult = currentUser.RequireUserId(OrdersErrors.User.NotAuthenticated);
+        if (userIdResult.IsFailure)
         {
-            return Result.Failure(Error.Unauthorized(OrdersErrors.User.NotAuthenticated));
+            return Result.Failure(userIdResult.Error!);
         }
 
-        var userId = currentUser.UserId.Value;
+        var userId = userIdResult.Value;
 
         var order = await orderRepository.GetByIdAndUserIdAsync(request.OrderId, userId, cancellationToken);
         if (order == null)
@@ -85,18 +86,7 @@ public class CapturePaymentHandler(
                     OrderId = order.Id,
                     UserId = order.UserId,
                     PaymentId = payment.Id,
-                    Items = order.Items.Select(i => new Contracts.Orders.V1.OrderItemDto
-                    {
-                        BookId = i.BookId,
-                        BookTitle = i.BookTitle,
-                        BasePrice = i.BasePrice.Amount,
-                        FinalPrice = i.FinalPrice.Amount,
-                        VatRate = i.VatRate,
-                        VatAmount = i.VatAmount.Amount,
-                        PromotionId = i.PromotionId,
-                        PromotionName = i.PromotionName,
-                        DiscountAmount = i.DiscountAmount
-                    }).ToList(),
+                    Items = order.Items.Select(Commands.OrderItemEventMapper.MapToEventDto).ToList(),
                     Subtotal = order.Subtotal.Amount,
                     VatTotal = order.VatTotal.Amount,
                     Total = order.Total.Amount,

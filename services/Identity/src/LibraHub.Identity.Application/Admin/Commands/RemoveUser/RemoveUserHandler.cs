@@ -11,40 +11,19 @@ using Error = LibraHub.BuildingBlocks.Results.Error;
 
 namespace LibraHub.Identity.Application.Admin.Commands.RemoveUser;
 
-public class RemoveUserHandler : IRequestHandler<RemoveUserCommand, Result>
+public class RemoveUserHandler(
+    IUserRepository userRepository,
+    IRefreshTokenRepository refreshTokenRepository,
+    IOutboxWriter outboxWriter,
+    IClock clock,
+    IObjectStorage objectStorage,
+    IConfiguration configuration,
+    IUnitOfWork unitOfWork,
+    ILogger<RemoveUserHandler> logger) : IRequestHandler<RemoveUserCommand, Result>
 {
-    private readonly IUserRepository _userRepository;
-    private readonly IRefreshTokenRepository _refreshTokenRepository;
-    private readonly IOutboxWriter _outboxWriter;
-    private readonly IClock _clock;
-    private readonly IObjectStorage _objectStorage;
-    private readonly IConfiguration _configuration;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger<RemoveUserHandler> _logger;
-
-    public RemoveUserHandler(
-        IUserRepository userRepository,
-        IRefreshTokenRepository refreshTokenRepository,
-        IOutboxWriter outboxWriter,
-        IClock clock,
-        IObjectStorage objectStorage,
-        IConfiguration configuration,
-        IUnitOfWork unitOfWork,
-        ILogger<RemoveUserHandler> logger)
-    {
-        _userRepository = userRepository;
-        _refreshTokenRepository = refreshTokenRepository;
-        _outboxWriter = outboxWriter;
-        _clock = clock;
-        _objectStorage = objectStorage;
-        _configuration = configuration;
-        _unitOfWork = unitOfWork;
-        _logger = logger;
-    }
-
     public async Task<Result> Handle(RemoveUserCommand request, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
+        var user = await userRepository.GetByIdAsync(request.UserId, cancellationToken);
         if (user == null)
         {
             return Result.Failure(Error.NotFound("User not found"));
@@ -62,17 +41,17 @@ public class RemoveUserHandler : IRequestHandler<RemoveUserCommand, Result>
         {
             UserId = user.Id,
             Reason = request.Reason,
-            OccurredAt = _clock.UtcNowOffset
+            OccurredAt = clock.UtcNowOffset
         };
 
-        await _unitOfWork.ExecuteInTransactionAsync(async ct =>
+        await unitOfWork.ExecuteInTransactionAsync(async ct =>
         {
             user.Remove(request.Reason);
-            await _userRepository.UpdateAsync(user, ct);
+            await userRepository.UpdateAsync(user, ct);
 
-            await _refreshTokenRepository.RevokeAllForUserAsync(user.Id, ct);
+            await refreshTokenRepository.RevokeAllForUserAsync(user.Id, ct);
 
-            await _outboxWriter.WriteAsync(integrationEvent, EventTypes.UserRemoved, ct);
+            await outboxWriter.WriteAsync(integrationEvent, EventTypes.UserRemoved, ct);
         }, cancellationToken);
 
         return Result.Success();
@@ -85,7 +64,7 @@ public class RemoveUserHandler : IRequestHandler<RemoveUserCommand, Result>
             return Result.Success();
         }
 
-        var adminCount = await _userRepository.CountAdminsAsync(cancellationToken);
+        var adminCount = await userRepository.CountAdminsAsync(cancellationToken);
         if (adminCount <= 1)
         {
             return Result.Failure(Error.Validation("Cannot remove the last admin user"));
@@ -101,7 +80,7 @@ public class RemoveUserHandler : IRequestHandler<RemoveUserCommand, Result>
             return;
         }
 
-        var bucketName = _configuration["Storage:AvatarsBucketName"];
+        var bucketName = configuration["Storage:AvatarsBucketName"];
         if (string.IsNullOrWhiteSpace(bucketName))
         {
             return;
@@ -115,13 +94,11 @@ public class RemoveUserHandler : IRequestHandler<RemoveUserCommand, Result>
 
         try
         {
-            await _objectStorage.DeleteAsync(bucketName, objectKey, cancellationToken);
+            await objectStorage.DeleteAsync(bucketName, objectKey, cancellationToken);
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to delete avatar for user {AvatarUrl}", avatarUrl);
+            logger.LogWarning(ex, "Failed to delete avatar for user {AvatarUrl}", avatarUrl);
         }
     }
 }
-
-

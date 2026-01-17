@@ -16,4 +16,3 @@ public sealed class InternalAccessHeaderHandler(IOptions<InternalAccessOptions> 
         return base.SendAsync(request, cancellationToken);
     }
 }
-

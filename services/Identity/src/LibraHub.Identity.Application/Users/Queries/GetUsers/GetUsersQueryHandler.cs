@@ -5,15 +5,9 @@ using Error = LibraHub.BuildingBlocks.Results.Error;
 
 namespace LibraHub.Identity.Application.Users.Queries.GetUsers;
 
-public class GetUsersQueryHandler : IRequestHandler<GetUsersQuery, Result<GetUsersResponseDto>>
+public class GetUsersQueryHandler(
+    IUserRepository userRepository) : IRequestHandler<GetUsersQuery, Result<GetUsersResponseDto>>
 {
-    private readonly IUserRepository _userRepository;
-
-    public GetUsersQueryHandler(IUserRepository userRepository)
-    {
-        _userRepository = userRepository;
-    }
-
     public async Task<Result<GetUsersResponseDto>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
     {
         if (request.Skip < 0)
@@ -26,22 +20,10 @@ public class GetUsersQueryHandler : IRequestHandler<GetUsersQuery, Result<GetUse
             return Result.Failure<GetUsersResponseDto>(Error.Validation("Take must be between 1 and 100"));
         }
 
-        var users = await _userRepository.GetUsersPagedAsync(request.Skip, request.Take, cancellationToken);
-        var totalCount = await _userRepository.CountAllAsync(cancellationToken);
+        var users = await userRepository.GetUsersPagedAsync(request.Skip, request.Take, cancellationToken);
+        var totalCount = await userRepository.CountAllAsync(cancellationToken);
 
-        var userDtos = users.Select(user => new UserDto
-        {
-            Id = user.Id,
-            Email = user.Email,
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            DisplayName = user.DisplayName,
-            Roles = user.Roles.Select(r => r.Role.ToString()).ToList(),
-            EmailVerified = user.EmailVerified,
-            Status = user.Status.ToString(),
-            CreatedAt = new DateTimeOffset(user.CreatedAt, TimeSpan.Zero),
-            LastLoginAt = user.LastLoginAt.HasValue ? new DateTimeOffset(user.LastLoginAt.Value, TimeSpan.Zero) : null
-        }).ToList();
+        var userDtos = users.Select(UserDtoMapper.MapFromUser).ToList();
 
         var response = new GetUsersResponseDto
         {

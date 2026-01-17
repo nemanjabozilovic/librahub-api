@@ -25,4 +25,3 @@ public class GetBookCoverHandler(
         return Result.Success(new BookCoverDto { CoverRef = storedObject.ObjectKey });
     }
 }
-

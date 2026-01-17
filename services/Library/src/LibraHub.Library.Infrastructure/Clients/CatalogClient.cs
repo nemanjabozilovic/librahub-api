@@ -88,4 +88,3 @@ public class CatalogClient : ICatalogClient
         return Result.Success(dict);
     }
 }
-

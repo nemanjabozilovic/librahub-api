@@ -1,4 +1,5 @@
 using LibraHub.BuildingBlocks.Abstractions;
+using LibraHub.BuildingBlocks.Results;
 using LibraHub.Notifications.Application.Abstractions;
 using LibraHub.Notifications.Domain.Errors;
 using MediatR;
@@ -7,16 +8,18 @@ namespace LibraHub.Notifications.Application.Notifications.Queries.GetUnreadCoun
 
 public class GetUnreadCountHandler(
     INotificationRepository notificationRepository,
-    ICurrentUser currentUser) : IRequestHandler<GetUnreadCountQuery, int>
+    ICurrentUser currentUser) : IRequestHandler<GetUnreadCountQuery, Result<int>>
 {
-    public async Task<int> Handle(GetUnreadCountQuery request, CancellationToken cancellationToken)
+    public async Task<Result<int>> Handle(GetUnreadCountQuery request, CancellationToken cancellationToken)
     {
-        if (!currentUser.UserId.HasValue)
+        var userIdResult = currentUser.RequireUserId(NotificationsErrors.User.NotAuthenticated);
+        if (userIdResult.IsFailure)
         {
-            throw new UnauthorizedAccessException(NotificationsErrors.User.NotAuthenticated);
+            return Result.Failure<int>(userIdResult.Error!);
         }
 
-        var userId = currentUser.UserId.Value;
-        return await notificationRepository.GetUnreadCountByUserIdAsync(userId, cancellationToken);
+        var userId = userIdResult.Value;
+        var count = await notificationRepository.GetUnreadCountByUserIdAsync(userId, cancellationToken);
+        return Result.Success(count);
     }
 }

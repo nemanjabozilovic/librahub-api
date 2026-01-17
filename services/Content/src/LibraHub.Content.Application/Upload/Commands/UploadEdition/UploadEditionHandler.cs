@@ -23,17 +23,10 @@ public class UploadEditionHandler(
 {
     public async Task<Result<Guid>> Handle(UploadEditionCommand request, CancellationToken cancellationToken)
     {
-        var bookInfoResult = await catalogClient.GetBookInfoAsync(request.BookId, cancellationToken);
+        var bookInfoResult = await ValidateBookInfoAsync(request.BookId, cancellationToken);
         if (bookInfoResult.IsFailure)
         {
-            return Result.Failure<Guid>(bookInfoResult.Error ?? Error.NotFound(ContentErrors.Book.NotFound));
-        }
-
-        var bookInfo = bookInfoResult.Value;
-
-        if (bookInfo.IsBlocked)
-        {
-            return Result.Failure<Guid>(Error.Validation(ContentErrors.Book.Blocked));
+            return Result.Failure<Guid>(bookInfoResult.Error!);
         }
 
         if (!Enum.TryParse<BookFormat>(request.Format, ignoreCase: true, out var format))
@@ -101,5 +94,23 @@ public class UploadEditionHandler(
             cancellationToken);
 
         return Result.Success(edition.Id);
+    }
+
+    private async Task<Result> ValidateBookInfoAsync(Guid bookId, CancellationToken cancellationToken)
+    {
+        var bookInfoResult = await catalogClient.GetBookInfoAsync(bookId, cancellationToken);
+        if (bookInfoResult.IsFailure)
+        {
+            return Result.Failure(bookInfoResult.Error ?? Error.NotFound(ContentErrors.Book.NotFound));
+        }
+
+        var bookInfo = bookInfoResult.Value;
+
+        if (bookInfo.IsBlocked)
+        {
+            return Result.Failure(Error.Validation(ContentErrors.Book.Blocked));
+        }
+
+        return Result.Success();
     }
 }

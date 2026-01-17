@@ -8,4 +8,3 @@ public record UpdateAnnouncementCommand(
     Guid? BookId,
     string? Title,
     string? Content) : IRequest<Result>;
-

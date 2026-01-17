@@ -5,36 +5,29 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LibraHub.Orders.Infrastructure.Repositories;
 
-public class PaymentRepository : IPaymentRepository
+public class PaymentRepository(OrdersDbContext context) : IPaymentRepository
 {
-    private readonly OrdersDbContext _context;
-
-    public PaymentRepository(OrdersDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<Payment?> GetByIdAsync(Guid paymentId, CancellationToken cancellationToken = default)
     {
-        return await _context.Payments
+        return await context.Payments
             .FirstOrDefaultAsync(p => p.Id == paymentId, cancellationToken);
     }
 
     public async Task<Payment?> GetByOrderIdAsync(Guid orderId, CancellationToken cancellationToken = default)
     {
-        return await _context.Payments
+        return await context.Payments
             .FirstOrDefaultAsync(p => p.OrderId == orderId, cancellationToken);
     }
 
     public async Task AddAsync(Payment payment, CancellationToken cancellationToken = default)
     {
-        await _context.Payments.AddAsync(payment, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
+        await context.Payments.AddAsync(payment, cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task UpdateAsync(Payment payment, CancellationToken cancellationToken = default)
     {
-        _context.Payments.Update(payment);
-        await _context.SaveChangesAsync(cancellationToken);
+        context.Payments.Update(payment);
+        await context.SaveChangesAsync(cancellationToken);
     }
 }

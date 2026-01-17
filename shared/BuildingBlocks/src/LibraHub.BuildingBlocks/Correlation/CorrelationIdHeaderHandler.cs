@@ -17,4 +17,3 @@ public sealed class CorrelationIdHeaderHandler : DelegatingHandler
         return base.SendAsync(request, cancellationToken);
     }
 }
-

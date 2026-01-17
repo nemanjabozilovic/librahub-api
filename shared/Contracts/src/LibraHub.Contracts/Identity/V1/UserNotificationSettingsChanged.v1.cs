@@ -10,4 +10,3 @@ public record UserNotificationSettingsChangedV1
     public bool EmailPromotionsEnabled { get; init; }
     public DateTimeOffset OccurredAt { get; init; }
 }
-

@@ -25,14 +25,12 @@ public class UpdateBookHandler(
         Isbn? isbn = null;
         if (!string.IsNullOrWhiteSpace(request.Isbn))
         {
-            try
+            var isbnResult = TryCreateIsbn(request.Isbn);
+            if (isbnResult.IsFailure)
             {
-                isbn = new Isbn(request.Isbn);
+                return Result.Failure(isbnResult.Error!);
             }
-            catch
-            {
-                return Result.Failure(Error.Validation("Invalid ISBN format"));
-            }
+            isbn = isbnResult.Value;
         }
 
         book.UpdateMetadata(
@@ -45,59 +43,17 @@ public class UpdateBookHandler(
 
         if (request.Authors != null)
         {
-            var existingAuthors = book.Authors.Select(a => a.Name).ToList();
-            foreach (var author in request.Authors)
-            {
-                if (!existingAuthors.Contains(author))
-                {
-                    book.AddAuthor(author);
-                }
-            }
-            foreach (var existingAuthor in existingAuthors)
-            {
-                if (!request.Authors.Contains(existingAuthor))
-                {
-                    book.RemoveAuthor(existingAuthor);
-                }
-            }
+            UpdateAuthors(book, request.Authors);
         }
 
         if (request.Categories != null)
         {
-            var existingCategories = book.Categories.Select(c => c.Name).ToList();
-            foreach (var category in request.Categories)
-            {
-                if (!existingCategories.Contains(category))
-                {
-                    book.AddCategory(category);
-                }
-            }
-            foreach (var existingCategory in existingCategories)
-            {
-                if (!request.Categories.Contains(existingCategory))
-                {
-                    book.RemoveCategory(existingCategory);
-                }
-            }
+            UpdateCategories(book, request.Categories);
         }
 
         if (request.Tags != null)
         {
-            var existingTags = book.Tags.Select(t => t.Name).ToList();
-            foreach (var tag in request.Tags)
-            {
-                if (!existingTags.Contains(tag))
-                {
-                    book.AddTag(tag);
-                }
-            }
-            foreach (var existingTag in existingTags)
-            {
-                if (!request.Tags.Contains(existingTag))
-                {
-                    book.RemoveTag(existingTag);
-                }
-            }
+            UpdateTags(book, request.Tags);
         }
 
         await bookRepository.UpdateAsync(book, cancellationToken);
@@ -118,5 +74,81 @@ public class UpdateBookHandler(
         await CacheInvalidationHelper.InvalidateBookCacheAsync(cache, book.Id, cancellationToken);
 
         return Result.Success();
+    }
+
+    private static Result<Isbn> TryCreateIsbn(string isbnValue)
+    {
+        try
+        {
+            var isbn = new Isbn(isbnValue);
+            return Result.Success(isbn);
+        }
+        catch (ArgumentException)
+        {
+            return Result.Failure<Isbn>(Error.Validation("Invalid ISBN format"));
+        }
+    }
+
+    private static void UpdateAuthors(Book book, List<string> newAuthors)
+    {
+        var existingAuthors = book.Authors.Select(a => a.Name).ToList();
+
+        foreach (var author in newAuthors)
+        {
+            if (!existingAuthors.Contains(author))
+            {
+                book.AddAuthor(author);
+            }
+        }
+
+        foreach (var existingAuthor in existingAuthors)
+        {
+            if (!newAuthors.Contains(existingAuthor))
+            {
+                book.RemoveAuthor(existingAuthor);
+            }
+        }
+    }
+
+    private static void UpdateCategories(Book book, List<string> newCategories)
+    {
+        var existingCategories = book.Categories.Select(c => c.Name).ToList();
+
+        foreach (var category in newCategories)
+        {
+            if (!existingCategories.Contains(category))
+            {
+                book.AddCategory(category);
+            }
+        }
+
+        foreach (var existingCategory in existingCategories)
+        {
+            if (!newCategories.Contains(existingCategory))
+            {
+                book.RemoveCategory(existingCategory);
+            }
+        }
+    }
+
+    private static void UpdateTags(Book book, List<string> newTags)
+    {
+        var existingTags = book.Tags.Select(t => t.Name).ToList();
+
+        foreach (var tag in newTags)
+        {
+            if (!existingTags.Contains(tag))
+            {
+                book.AddTag(tag);
+            }
+        }
+
+        foreach (var existingTag in existingTags)
+        {
+            if (!newTags.Contains(existingTag))
+            {
+                book.RemoveTag(existingTag);
+            }
+        }
     }
 }

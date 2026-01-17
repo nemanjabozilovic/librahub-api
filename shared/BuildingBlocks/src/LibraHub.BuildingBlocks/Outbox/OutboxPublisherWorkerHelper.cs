@@ -5,18 +5,13 @@ using RabbitMQ.Client;
 
 namespace LibraHub.BuildingBlocks.Outbox;
 
-public class OutboxPublisherWorkerHelper<TDbContext> : OutboxPublisherWorker where TDbContext : DbContext
+public class OutboxPublisherWorkerHelper<TDbContext>(
+    IServiceProvider serviceProvider,
+    ILogger<OutboxPublisherWorkerHelper<TDbContext>> logger,
+    IConnection connection,
+    string exchangeName = "librahub.events") : OutboxPublisherWorker(logger, connection, exchangeName) where TDbContext : DbContext
 {
-    private readonly IServiceProvider _serviceProvider;
-
-    public OutboxPublisherWorkerHelper(
-        IServiceProvider serviceProvider,
-        ILogger<OutboxPublisherWorkerHelper<TDbContext>> logger,
-        IConnection connection,
-        string exchangeName = "librahub.events") : base(logger, connection, exchangeName)
-    {
-        _serviceProvider = serviceProvider;
-    }
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
 
     protected override async Task<List<OutboxMessage>> GetPendingMessagesAsync(int batchSize, CancellationToken cancellationToken)
     {

@@ -10,4 +10,3 @@ public class DeleteAnnouncementValidator : AbstractValidator<DeleteAnnouncementC
             .NotEmpty().WithMessage("Announcement ID is required");
     }
 }
-

@@ -21,4 +21,3 @@ public class UploadAnnouncementImageValidator : AbstractValidator<UploadAnnounce
             .WithMessage("File must be a valid image (JPEG, PNG, WebP, or GIF)");
     }
 }
-

@@ -13,12 +13,13 @@ public class GetMyOrdersHandler(
 {
     public async Task<Result<GetMyOrdersResponseDto>> Handle(GetMyOrdersQuery request, CancellationToken cancellationToken)
     {
-        if (!currentUser.UserId.HasValue)
+        var userIdResult = currentUser.RequireUserId(OrdersErrors.User.NotAuthenticated);
+        if (userIdResult.IsFailure)
         {
-            return Result.Failure<GetMyOrdersResponseDto>(Error.Unauthorized(OrdersErrors.User.NotAuthenticated));
+            return Result.Failure<GetMyOrdersResponseDto>(userIdResult.Error!);
         }
 
-        var userId = currentUser.UserId.Value;
+        var userId = userIdResult.Value;
 
         if (request.Page < 1)
         {

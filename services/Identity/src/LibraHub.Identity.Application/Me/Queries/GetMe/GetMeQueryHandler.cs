@@ -10,45 +10,34 @@ using Error = LibraHub.BuildingBlocks.Results.Error;
 
 namespace LibraHub.Identity.Application.Me.Queries.GetMe;
 
-public class GetMeQueryHandler : IRequestHandler<GetMeQuery, Result<GetMeResponseDto>>
+public class GetMeQueryHandler(
+    IUserRepository userRepository,
+    ICurrentUser currentUser,
+    IOptions<IdentityOptions> identityOptions,
+    ILogger<GetMeQueryHandler> logger) : IRequestHandler<GetMeQuery, Result<GetMeResponseDto>>
 {
-    private readonly IUserRepository _userRepository;
-    private readonly ICurrentUser _currentUser;
-    private readonly ILogger<GetMeQueryHandler> _logger;
-    private readonly IdentityOptions _identityOptions;
-
-    public GetMeQueryHandler(
-        IUserRepository userRepository,
-        ICurrentUser currentUser,
-        IOptions<IdentityOptions> identityOptions,
-        ILogger<GetMeQueryHandler> logger)
-    {
-        _userRepository = userRepository;
-        _currentUser = currentUser;
-        _identityOptions = identityOptions.Value;
-        _logger = logger;
-    }
+    private readonly IdentityOptions _identityOptions = identityOptions.Value;
 
     public async Task<Result<GetMeResponseDto>> Handle(GetMeQuery request, CancellationToken cancellationToken)
     {
-        if (!_currentUser.UserId.HasValue)
+        if (!currentUser.UserId.HasValue)
         {
-            _logger.LogWarning("Invalid or missing user ID in token");
+            logger.LogWarning("Invalid or missing user ID in token");
             return Result.Failure<GetMeResponseDto>(Error.Unauthorized("Invalid or missing user identifier in token"));
         }
 
-        var userId = _currentUser.UserId.Value;
+        var userId = currentUser.UserId.Value;
 
-        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        var user = await userRepository.GetByIdAsync(userId, cancellationToken);
         if (user == null)
         {
-            _logger.LogWarning("User not found: {UserId}", userId);
+            logger.LogWarning("User not found: {UserId}", userId);
             return Result.Failure<GetMeResponseDto>(Error.Unauthorized("User not found"));
         }
 
         if (user.Status != UserStatus.Active)
         {
-            _logger.LogWarning("User account is not active: {UserId}, Status: {Status}", userId, user.Status);
+            logger.LogWarning("User account is not active: {UserId}, Status: {Status}", userId, user.Status);
             return Result.Failure<GetMeResponseDto>(Error.Forbidden("Account is removed"));
         }
 
@@ -62,7 +51,7 @@ public class GetMeQueryHandler : IRequestHandler<GetMeQuery, Result<GetMeRespons
             LastName = user.LastName,
             DisplayName = user.DisplayName,
             Phone = user.Phone,
-            Avatar = BuildAvatarUrl(user.Avatar, user.Id),
+            Avatar = AvatarUrlHelper.BuildAvatarUrl(user.Avatar, user.Id, _identityOptions.GatewayBaseUrl),
             DateOfBirth = user.DateOfBirth != default ? new DateTimeOffset(user.DateOfBirth, TimeSpan.Zero) : null,
             Roles = roles,
             EmailVerified = user.EmailVerified,
@@ -72,50 +61,5 @@ public class GetMeQueryHandler : IRequestHandler<GetMeQuery, Result<GetMeRespons
         };
 
         return Result.Success(response);
-    }
-
-    private string? BuildAvatarUrl(string? avatar, Guid userId)
-    {
-        var relative = NormalizeAvatarPath(avatar, userId);
-        if (string.IsNullOrWhiteSpace(relative))
-        {
-            return null;
-        }
-
-        return $"{_identityOptions.GatewayBaseUrl.TrimEnd('/')}{relative}";
-    }
-
-    private static string? NormalizeAvatarPath(string? avatar, Guid userId)
-    {
-        if (string.IsNullOrWhiteSpace(avatar))
-        {
-            return null;
-        }
-
-        var path = avatar.Trim();
-
-        if (path.StartsWith("http", StringComparison.OrdinalIgnoreCase))
-        {
-            if (Uri.TryCreate(path, UriKind.Absolute, out var uri))
-            {
-                path = uri.AbsolutePath;
-            }
-        }
-
-        var marker = "/avatar/";
-        var idx = path.LastIndexOf(marker, StringComparison.OrdinalIgnoreCase);
-        if (idx < 0)
-        {
-            return path.StartsWith("/api/", StringComparison.OrdinalIgnoreCase) ? path : null;
-        }
-
-        var after = path[(idx + marker.Length)..];
-        var fileName = Path.GetFileName(after);
-        if (string.IsNullOrWhiteSpace(fileName))
-        {
-            return null;
-        }
-
-        return $"/api/users/{userId}/avatar/{fileName}";
     }
 }

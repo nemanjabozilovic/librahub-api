@@ -3,20 +3,16 @@ using System.Text.Json;
 
 namespace LibraHub.BuildingBlocks.Caching;
 
-public class StatisticsCacheHelper
+public class StatisticsCacheHelper(IDistributedCache cache)
 {
-    private readonly IDistributedCache _cache;
-    private readonly JsonSerializerOptions _jsonOptions;
-    private static readonly TimeSpan DefaultCacheExpiration = TimeSpan.FromMinutes(5);
+    private readonly IDistributedCache _cache = cache;
 
-    public StatisticsCacheHelper(IDistributedCache cache)
+    private readonly JsonSerializerOptions _jsonOptions = new()
     {
-        _cache = cache;
-        _jsonOptions = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        };
-    }
+        PropertyNameCaseInsensitive = true
+    };
+
+    private static readonly TimeSpan DefaultCacheExpiration = TimeSpan.FromMinutes(5);
 
     public async Task<T?> GetAsync<T>(string cacheKey, CancellationToken cancellationToken = default) where T : class
     {
@@ -32,7 +28,6 @@ public class StatisticsCacheHelper
         }
         catch
         {
-            // If deserialization fails, remove invalid cache entry
             await _cache.RemoveAsync(cacheKey, cancellationToken);
             return null;
         }

@@ -19,4 +19,3 @@ public record OrderPricingQuoteItemDto
     public string? PromotionName { get; init; }
     public decimal? DiscountAmount { get; init; }
 }
-

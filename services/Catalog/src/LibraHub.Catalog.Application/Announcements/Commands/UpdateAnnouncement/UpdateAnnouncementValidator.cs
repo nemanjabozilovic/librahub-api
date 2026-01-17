@@ -18,4 +18,3 @@ public class UpdateAnnouncementValidator : AbstractValidator<UpdateAnnouncementC
             .When(x => !string.IsNullOrWhiteSpace(x.Content));
     }
 }
-

@@ -6,4 +6,3 @@ namespace LibraHub.Identity.Application.Users.Commands.UpdateNotificationSetting
 public record UpdateNotificationSettingsCommand(
     bool? EmailAnnouncementsEnabled,
     bool? EmailPromotionsEnabled) : IRequest<Result>;
-

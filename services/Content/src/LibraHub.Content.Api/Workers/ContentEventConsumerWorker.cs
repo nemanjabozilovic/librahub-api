@@ -39,4 +39,3 @@ public class ContentEventConsumerWorker : EventConsumerWorker
         }
     }
 }
-

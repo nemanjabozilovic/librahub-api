@@ -21,4 +21,3 @@ public record UpdateMyProfileRequestDto
     public bool EmailAnnouncementsEnabled { get; init; }
     public bool EmailPromotionsEnabled { get; init; }
 }
-

@@ -28,15 +28,10 @@ public class RegisterHandler(
 {
     public async Task<Result> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(request.RecaptchaToken))
+        var recaptchaResult = await ValidateRecaptchaAsync(request.RecaptchaToken, cancellationToken);
+        if (recaptchaResult.IsFailure)
         {
-            return Result.Failure(Error.Validation("reCAPTCHA token is required"));
-        }
-
-        var isRecaptchaValid = await recaptchaService.VerifyAsync(request.RecaptchaToken, cancellationToken);
-        if (!isRecaptchaValid)
-        {
-            return Result.Failure(Error.Validation("reCAPTCHA verification failed"));
+            return recaptchaResult;
         }
 
         var emailLower = request.Email.ToLowerInvariant();
@@ -153,5 +148,21 @@ public class RegisterHandler(
             logger.LogError(ex, "Failed to send welcome email to {Email}. Error: {ErrorMessage}",
                 user.Email, ex.Message);
         }
+    }
+
+    private async Task<Result> ValidateRecaptchaAsync(string? recaptchaToken, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(recaptchaToken))
+        {
+            return Result.Failure(Error.Validation("reCAPTCHA token is required"));
+        }
+
+        var isRecaptchaValid = await recaptchaService.VerifyAsync(recaptchaToken, cancellationToken);
+        if (!isRecaptchaValid)
+        {
+            return Result.Failure(Error.Validation("reCAPTCHA verification failed"));
+        }
+
+        return Result.Success();
     }
 }

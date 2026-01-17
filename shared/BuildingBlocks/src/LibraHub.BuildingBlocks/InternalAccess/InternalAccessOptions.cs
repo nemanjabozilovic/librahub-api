@@ -9,4 +9,3 @@ public class InternalAccessOptions
     [Required(ErrorMessage = "InternalAccess:ApiKey is required")]
     public string ApiKey { get; set; } = string.Empty;
 }
-

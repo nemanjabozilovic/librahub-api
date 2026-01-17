@@ -21,15 +21,10 @@ public class LoginHandler(
 {
     public async Task<Result<AuthTokensDto>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(request.RecaptchaToken))
+        var recaptchaResult = await ValidateRecaptchaAsync(request.RecaptchaToken, cancellationToken);
+        if (recaptchaResult.IsFailure)
         {
-            return Result.Failure<AuthTokensDto>(Error.Validation("reCAPTCHA token is required"));
-        }
-
-        var isRecaptchaValid = await recaptchaService.VerifyAsync(request.RecaptchaToken, cancellationToken);
-        if (!isRecaptchaValid)
-        {
-            return Result.Failure<AuthTokensDto>(Error.Validation("reCAPTCHA verification failed"));
+            return Result.Failure<AuthTokensDto>(recaptchaResult.Error!);
         }
 
         var emailLower = request.Email.ToLowerInvariant();
@@ -80,5 +75,21 @@ public class LoginHandler(
             RefreshToken = refreshTokenValue,
             ExpiresAt = refreshTokenExpiresAt
         });
+    }
+
+    private async Task<Result> ValidateRecaptchaAsync(string? recaptchaToken, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(recaptchaToken))
+        {
+            return Result.Failure(Error.Validation("reCAPTCHA token is required"));
+        }
+
+        var isRecaptchaValid = await recaptchaService.VerifyAsync(recaptchaToken, cancellationToken);
+        if (!isRecaptchaValid)
+        {
+            return Result.Failure(Error.Validation("reCAPTCHA verification failed"));
+        }
+
+        return Result.Success();
     }
 }

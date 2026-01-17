@@ -6,4 +6,3 @@ public record OrderPricingQuoteRequestDto
     public Guid? UserId { get; init; }
     public DateTimeOffset? AtUtc { get; init; }
 }
-

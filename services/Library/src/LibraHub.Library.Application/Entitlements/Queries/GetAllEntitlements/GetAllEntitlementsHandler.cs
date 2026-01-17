@@ -23,43 +23,19 @@ public class GetAllEntitlementsHandler(
             return Result.Failure<GetAllEntitlementsResponseDto>(Error.Validation("PageSize must be between 1 and 100"));
         }
 
-        EntitlementStatus? status = null;
-        if (!string.IsNullOrWhiteSpace(request.Status))
+        var statusResult = ParseEntitlementStatus(request.Status);
+        if (statusResult.IsFailure)
         {
-            if (Enum.TryParse<EntitlementStatus>(request.Status, true, out var parsedStatus))
-            {
-                status = parsedStatus;
-            }
-            else
-            {
-                return Result.Failure<GetAllEntitlementsResponseDto>(Error.Validation($"Invalid status: {request.Status}. Valid values are: Active, Revoked"));
-            }
+            return Result.Failure<GetAllEntitlementsResponseDto>(statusResult.Error!);
         }
 
-        EntitlementSource? source = null;
-        if (!string.IsNullOrWhiteSpace(request.Source))
+        var sourceResult = ParseEntitlementSource(request.Source);
+        if (sourceResult.IsFailure)
         {
-            if (Enum.TryParse<EntitlementSource>(request.Source, true, out var parsedSource))
-            {
-                source = parsedSource;
-            }
-            else
-            {
-                return Result.Failure<GetAllEntitlementsResponseDto>(Error.Validation($"Invalid source: {request.Source}. Valid values are: Purchase, AdminGrant, Promotion"));
-            }
+            return Result.Failure<GetAllEntitlementsResponseDto>(sourceResult.Error!);
         }
 
-        DateTime? fromDate = null;
-        if (!string.IsNullOrWhiteSpace(request.Period))
-        {
-            fromDate = request.Period.ToLower() switch
-            {
-                "24h" => DateTime.UtcNow.AddHours(-24),
-                "7d" => DateTime.UtcNow.AddDays(-7),
-                "30d" => DateTime.UtcNow.AddDays(-30),
-                _ => null
-            };
-        }
+        var fromDate = ParsePeriod(request.Period);
 
         var skip = (request.Page - 1) * request.PageSize;
         var entitlements = await entitlementRepository.GetAllAsync(
@@ -67,16 +43,16 @@ public class GetAllEntitlementsHandler(
             request.PageSize,
             request.UserId,
             request.BookId,
-            status,
-            source,
+            statusResult.Value,
+            sourceResult.Value,
             fromDate,
             cancellationToken);
 
         var totalCount = await entitlementRepository.CountAllAsync(
             request.UserId,
             request.BookId,
-            status,
-            source,
+            statusResult.Value,
+            sourceResult.Value,
             fromDate,
             cancellationToken);
 
@@ -123,5 +99,51 @@ public class GetAllEntitlementsHandler(
         };
 
         return Result.Success(response);
+    }
+
+    private static Result<EntitlementStatus?> ParseEntitlementStatus(string? statusValue)
+    {
+        if (string.IsNullOrWhiteSpace(statusValue))
+        {
+            return Result.Success<EntitlementStatus?>(null);
+        }
+
+        if (Enum.TryParse<EntitlementStatus>(statusValue, true, out var parsedStatus))
+        {
+            return Result.Success<EntitlementStatus?>(parsedStatus);
+        }
+
+        return Result.Failure<EntitlementStatus?>(Error.Validation($"Invalid status: {statusValue}. Valid values are: Active, Revoked"));
+    }
+
+    private static Result<EntitlementSource?> ParseEntitlementSource(string? sourceValue)
+    {
+        if (string.IsNullOrWhiteSpace(sourceValue))
+        {
+            return Result.Success<EntitlementSource?>(null);
+        }
+
+        if (Enum.TryParse<EntitlementSource>(sourceValue, true, out var parsedSource))
+        {
+            return Result.Success<EntitlementSource?>(parsedSource);
+        }
+
+        return Result.Failure<EntitlementSource?>(Error.Validation($"Invalid source: {sourceValue}. Valid values are: Purchase, AdminGrant, Promotion"));
+    }
+
+    private static DateTime? ParsePeriod(string? period)
+    {
+        if (string.IsNullOrWhiteSpace(period))
+        {
+            return null;
+        }
+
+        return period.ToLower() switch
+        {
+            "24h" => DateTime.UtcNow.AddHours(-24),
+            "7d" => DateTime.UtcNow.AddDays(-7),
+            "30d" => DateTime.UtcNow.AddDays(-30),
+            _ => null
+        };
     }
 }

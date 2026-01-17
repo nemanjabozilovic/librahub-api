@@ -6,6 +6,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
+
 namespace LibraHub.Orders.Infrastructure.Clients;
 
 public class IdentityClient : IIdentityClient

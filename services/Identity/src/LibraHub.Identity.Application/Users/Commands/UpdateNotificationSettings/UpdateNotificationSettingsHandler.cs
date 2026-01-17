@@ -58,4 +58,3 @@ public class UpdateNotificationSettingsHandler(
         return Result.Success();
     }
 }
-

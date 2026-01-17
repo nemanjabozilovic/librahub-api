@@ -4,21 +4,15 @@ using System.Text.Json;
 
 namespace LibraHub.BuildingBlocks.Caching;
 
-public class RedisCache : ICache
+public class RedisCache(IDistributedCache cache, IConnectionMultiplexer connectionMultiplexer) : ICache
 {
-    private readonly IDistributedCache _cache;
-    private readonly IConnectionMultiplexer _connectionMultiplexer;
-    private readonly JsonSerializerOptions _jsonOptions;
+    private readonly IDistributedCache _cache = cache;
+    private readonly IConnectionMultiplexer _connectionMultiplexer = connectionMultiplexer;
 
-    public RedisCache(IDistributedCache cache, IConnectionMultiplexer connectionMultiplexer)
+    private readonly JsonSerializerOptions _jsonOptions = new()
     {
-        _cache = cache;
-        _connectionMultiplexer = connectionMultiplexer;
-        _jsonOptions = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        };
-    }
+        PropertyNameCaseInsensitive = true
+    };
 
     public async Task<T?> GetAsync<T>(string cacheKey, CancellationToken cancellationToken = default) where T : class
     {

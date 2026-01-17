@@ -16,12 +16,13 @@ public class CancelOrderHandler(
 {
     public async Task<Result> Handle(CancelOrderCommand request, CancellationToken cancellationToken)
     {
-        if (!currentUser.UserId.HasValue)
+        var userIdResult = currentUser.RequireUserId(OrdersErrors.User.NotAuthenticated);
+        if (userIdResult.IsFailure)
         {
-            return Result.Failure(Error.Unauthorized(OrdersErrors.User.NotAuthenticated));
+            return Result.Failure(userIdResult.Error!);
         }
 
-        var userId = currentUser.UserId.Value;
+        var userId = userIdResult.Value;
 
         var order = await orderRepository.GetByIdAndUserIdAsync(request.OrderId, userId, cancellationToken);
         if (order == null)

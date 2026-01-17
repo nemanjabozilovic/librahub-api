@@ -3,16 +3,10 @@ using System.Net.Http.Json;
 
 namespace LibraHub.BuildingBlocks.Http;
 
-public class ServiceClientHelper
+public class ServiceClientHelper(HttpClient httpClient, ILogger<ServiceClientHelper> logger)
 {
-    private readonly HttpClient _httpClient;
-    private readonly ILogger<ServiceClientHelper> _logger;
-
-    public ServiceClientHelper(HttpClient httpClient, ILogger<ServiceClientHelper> logger)
-    {
-        _httpClient = httpClient;
-        _logger = logger;
-    }
+    private readonly HttpClient _httpClient = httpClient;
+    private readonly ILogger<ServiceClientHelper> _logger = logger;
 
     public async Task<T?> GetAsync<T>(
         string baseUrl,

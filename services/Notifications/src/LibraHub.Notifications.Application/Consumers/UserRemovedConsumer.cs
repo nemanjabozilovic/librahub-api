@@ -31,4 +31,3 @@ public class UserRemovedConsumer(
             notifications.Count, @event.UserId);
     }
 }
-
