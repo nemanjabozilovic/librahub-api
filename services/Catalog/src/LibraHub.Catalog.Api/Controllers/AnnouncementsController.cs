@@ -83,15 +83,16 @@ public class AnnouncementsController(IMediator mediator) : ControllerBase
         return result.ToNoContentActionResult(this);
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete]
     [Authorize(Roles = "Librarian")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> DeleteAnnouncement(
-        Guid id,
+    public async Task<IActionResult> DeleteAnnouncements(
+        [FromBody] DeleteAnnouncementsRequestDto request,
         CancellationToken cancellationToken)
     {
-        var command = new DeleteAnnouncementCommand(id);
+        var command = new DeleteAnnouncementCommand(request.AnnouncementIds);
         var result = await mediator.Send(command, cancellationToken);
         return result.ToNoContentActionResult(this);
     }

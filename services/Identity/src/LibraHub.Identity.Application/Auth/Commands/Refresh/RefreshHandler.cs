@@ -1,4 +1,3 @@
-using LibraHub.BuildingBlocks.Abstractions;
 using LibraHub.BuildingBlocks.Results;
 using LibraHub.Identity.Application.Abstractions;
 using LibraHub.Identity.Application.Auth.Dtos;
@@ -10,8 +9,7 @@ namespace LibraHub.Identity.Application.Auth.Commands.Refresh;
 public class RefreshHandler(
     IUserRepository userRepository,
     IRefreshTokenRepository refreshTokenRepository,
-    ITokenService tokenService,
-    IClock clock) : IRequestHandler<RefreshCommand, Result<AuthTokensDto>>
+    ITokenService tokenService) : IRequestHandler<RefreshCommand, Result<AuthTokensDto>>
 {
     public async Task<Result<AuthTokensDto>> Handle(RefreshCommand request, CancellationToken cancellationToken)
     {

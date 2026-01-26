@@ -2,7 +2,6 @@ using LibraHub.BuildingBlocks.Abstractions;
 using LibraHub.BuildingBlocks.Results;
 using LibraHub.Catalog.Application.Abstractions;
 using LibraHub.Catalog.Application.Options;
-using LibraHub.Catalog.Domain.Errors;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -14,35 +13,53 @@ public class DeleteAnnouncementHandler(
     IAnnouncementRepository announcementRepository,
     IObjectStorage objectStorage,
     IOptions<UploadOptions> uploadOptions,
+    IUnitOfWork unitOfWork,
     ILogger<DeleteAnnouncementHandler> logger) : IRequestHandler<DeleteAnnouncementCommand, Result>
 {
     public async Task<Result> Handle(DeleteAnnouncementCommand request, CancellationToken cancellationToken)
     {
-        var announcement = await announcementRepository.GetByIdAsync(request.AnnouncementId, cancellationToken);
-        if (announcement == null)
+        if (request.AnnouncementIds == null || request.AnnouncementIds.Count == 0)
         {
-            return Result.Failure(Error.NotFound(CatalogErrors.Announcement.NotFound));
+            return Result.Failure(Error.Validation("At least one announcement ID is required"));
         }
 
-        if (!string.IsNullOrWhiteSpace(announcement.ImageRef))
+        var announcements = new List<Domain.Announcements.Announcement>();
+
+        foreach (var announcementId in request.AnnouncementIds)
         {
-            try
+            var announcement = await announcementRepository.GetByIdAsync(announcementId, cancellationToken);
+            if (announcement == null)
             {
-                await objectStorage.DeleteAsync(
-                    uploadOptions.Value.AnnouncementImagesBucketName,
-                    announcement.ImageRef,
-                    cancellationToken);
-                logger.LogInformation("Deleted announcement image: {ImageRef} for AnnouncementId: {AnnouncementId}", announcement.ImageRef, announcement.Id);
+                return Result.Failure(Error.NotFound($"Announcement with ID {announcementId} not found"));
             }
-            catch (Exception ex)
-            {
-                logger.LogWarning(ex, "Failed to delete announcement image: {ImageRef} for AnnouncementId: {AnnouncementId}. Continuing with announcement deletion.", announcement.ImageRef, announcement.Id);
-            }
+
+            announcements.Add(announcement);
         }
 
-        await announcementRepository.DeleteAsync(announcement, cancellationToken);
+        await unitOfWork.ExecuteInTransactionAsync(async ct =>
+        {
+            foreach (var announcement in announcements)
+            {
+                if (!string.IsNullOrWhiteSpace(announcement.ImageRef))
+                {
+                    try
+                    {
+                        await objectStorage.DeleteAsync(
+                            uploadOptions.Value.AnnouncementImagesBucketName,
+                            announcement.ImageRef,
+                            ct);
+                        logger.LogInformation("Deleted announcement image: {ImageRef} for AnnouncementId: {AnnouncementId}", announcement.ImageRef, announcement.Id);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogWarning(ex, "Failed to delete announcement image: {ImageRef} for AnnouncementId: {AnnouncementId}. Continuing with announcement deletion.", announcement.ImageRef, announcement.Id);
+                    }
+                }
+            }
 
-        logger.LogInformation("Deleted announcement: {AnnouncementId}", announcement.Id);
+            await announcementRepository.DeleteRangeAsync(announcements, ct);
+            logger.LogInformation("Deleted {Count} announcement(s)", announcements.Count);
+        }, cancellationToken);
 
         return Result.Success();
     }

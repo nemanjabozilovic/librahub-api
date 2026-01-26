@@ -1,14 +1,11 @@
 using LibraHub.BuildingBlocks.Abstractions;
-using LibraHub.BuildingBlocks.Options;
-using Microsoft.Extensions.Options;
 using Minio;
 
 namespace LibraHub.BuildingBlocks.Storage;
 
-public class MinioObjectStorage(MinioClient minioClient, IOptions<StorageOptions> options) : IObjectStorage
+public class MinioObjectStorage(MinioClient minioClient) : IObjectStorage
 {
     private readonly MinioClient _minioClient = minioClient;
-    private readonly StorageOptions _options = options.Value;
 
     public async Task<string> UploadAsync(
         string bucketName,

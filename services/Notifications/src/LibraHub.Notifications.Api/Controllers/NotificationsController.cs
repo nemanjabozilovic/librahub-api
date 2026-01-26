@@ -1,4 +1,6 @@
 using LibraHub.BuildingBlocks.Results;
+using LibraHub.Notifications.Api.Dtos;
+using LibraHub.Notifications.Application.Notifications.Commands.DeleteNotifications;
 using LibraHub.Notifications.Application.Notifications.Commands.MarkAsRead;
 using LibraHub.Notifications.Application.Notifications.Queries.GetMyNotifications;
 using LibraHub.Notifications.Application.Notifications.Queries.GetUnreadCount;
@@ -26,15 +28,17 @@ public class NotificationsController(IMediator mediator) : ControllerBase
         return result.ToActionResult(this);
     }
 
-    [HttpPost("{notificationId}/read")]
+    [HttpPost("read")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(Error), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> MarkAsRead(
-        Guid notificationId,
+        [FromBody] MarkAsReadRequestDto request,
         CancellationToken cancellationToken = default)
     {
-        var command = new MarkAsReadCommand(notificationId);
+        var command = new MarkAsReadCommand(request.NotificationIds);
         var result = await mediator.Send(command, cancellationToken);
         return result.ToActionResult(this);
     }
@@ -47,5 +51,19 @@ public class NotificationsController(IMediator mediator) : ControllerBase
         var query = new GetUnreadCountQuery();
         var result = await mediator.Send(query, cancellationToken);
         return result.ToActionResult(this);
+    }
+
+    [HttpDelete]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> DeleteNotifications(
+        [FromBody] DeleteNotificationsRequestDto request,
+        CancellationToken cancellationToken = default)
+    {
+        var command = new DeleteNotificationsCommand(request.NotificationIds);
+        var result = await mediator.Send(command, cancellationToken);
+        return result.ToNoContentActionResult(this);
     }
 }

@@ -3,4 +3,4 @@ using MediatR;
 
 namespace LibraHub.Notifications.Application.Notifications.Commands.MarkAsRead;
 
-public record MarkAsReadCommand(Guid NotificationId) : IRequest<Result>;
+public record MarkAsReadCommand(List<Guid> NotificationIds) : IRequest<Result>;

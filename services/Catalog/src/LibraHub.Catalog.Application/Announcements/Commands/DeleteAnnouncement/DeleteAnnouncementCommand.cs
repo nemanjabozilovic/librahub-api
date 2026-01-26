@@ -3,4 +3,4 @@ using MediatR;
 
 namespace LibraHub.Catalog.Application.Announcements.Commands.DeleteAnnouncement;
 
-public record DeleteAnnouncementCommand(Guid AnnouncementId) : IRequest<Result>;
+public record DeleteAnnouncementCommand(List<Guid> AnnouncementIds) : IRequest<Result>;

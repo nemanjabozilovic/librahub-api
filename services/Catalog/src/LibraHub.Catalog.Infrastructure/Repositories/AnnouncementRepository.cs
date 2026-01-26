@@ -24,7 +24,7 @@ public class AnnouncementRepository : IAnnouncementRepository
     {
         return await _context.Announcements
             .Where(a => a.BookId == bookId)
-            .OrderByDescending(a => a.CreatedAt)
+            .OrderByDescending(a => a.PublishedAt ?? a.CreatedAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
@@ -57,8 +57,7 @@ public class AnnouncementRepository : IAnnouncementRepository
     public async Task<List<Announcement>> GetAllAsync(int page, int pageSize, CancellationToken cancellationToken = default)
     {
         return await _context.Announcements
-            .OrderByDescending(a => a.Status == AnnouncementStatus.Published ? 1 : 0)
-            .ThenByDescending(a => a.PublishedAt ?? a.CreatedAt)
+            .OrderByDescending(a => a.PublishedAt ?? a.CreatedAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
@@ -86,5 +85,15 @@ public class AnnouncementRepository : IAnnouncementRepository
     {
         _context.Announcements.Remove(announcement);
         await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task DeleteRangeAsync(IEnumerable<Announcement> announcements, CancellationToken cancellationToken = default)
+    {
+        _context.Announcements.RemoveRange(announcements);
+
+        if (_context.Database.CurrentTransaction == null)
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+        }
     }
 }

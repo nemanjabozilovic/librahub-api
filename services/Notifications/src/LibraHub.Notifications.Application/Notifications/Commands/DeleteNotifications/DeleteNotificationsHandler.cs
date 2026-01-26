@@ -5,14 +5,14 @@ using LibraHub.Notifications.Domain.Errors;
 using MediatR;
 using Error = LibraHub.BuildingBlocks.Results.Error;
 
-namespace LibraHub.Notifications.Application.Notifications.Commands.MarkAsRead;
+namespace LibraHub.Notifications.Application.Notifications.Commands.DeleteNotifications;
 
-public class MarkAsReadHandler(
+public class DeleteNotificationsHandler(
     INotificationRepository notificationRepository,
     ICurrentUser currentUser,
-    IUnitOfWork unitOfWork) : IRequestHandler<MarkAsReadCommand, Result>
+    IUnitOfWork unitOfWork) : IRequestHandler<DeleteNotificationsCommand, Result>
 {
-    public async Task<Result> Handle(MarkAsReadCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteNotificationsCommand request, CancellationToken cancellationToken)
     {
         var userIdResult = currentUser.RequireUserId(NotificationsErrors.User.NotAuthenticated);
         if (userIdResult.IsFailure)
@@ -47,11 +47,7 @@ public class MarkAsReadHandler(
 
         await unitOfWork.ExecuteInTransactionAsync(async ct =>
         {
-            foreach (var notification in notifications)
-            {
-                notification.MarkAsRead();
-                await notificationRepository.UpdateAsync(notification, ct);
-            }
+            await notificationRepository.DeleteRangeAsync(notifications, ct);
         }, cancellationToken);
 
         return Result.Success();

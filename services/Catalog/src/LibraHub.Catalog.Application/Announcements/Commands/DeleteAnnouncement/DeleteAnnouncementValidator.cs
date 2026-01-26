@@ -6,7 +6,10 @@ public class DeleteAnnouncementValidator : AbstractValidator<DeleteAnnouncementC
 {
     public DeleteAnnouncementValidator()
     {
-        RuleFor(x => x.AnnouncementId)
-            .NotEmpty().WithMessage("Announcement ID is required");
+        RuleFor(x => x.AnnouncementIds)
+            .NotEmpty().WithMessage("At least one announcement ID is required");
+
+        RuleForEach(x => x.AnnouncementIds)
+            .NotEmpty().WithMessage("Announcement ID cannot be empty");
     }
 }

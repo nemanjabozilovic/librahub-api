@@ -56,12 +56,26 @@ public class NotificationRepository(NotificationsDbContext context) : INotificat
     public async Task UpdateAsync(Notification notification, CancellationToken cancellationToken = default)
     {
         context.Notifications.Update(notification);
-        await context.SaveChangesAsync(cancellationToken);
+
+        if (context.Database.CurrentTransaction == null)
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
     }
 
     public async Task DeleteAsync(Notification notification, CancellationToken cancellationToken = default)
     {
         context.Notifications.Remove(notification);
+
+        if (context.Database.CurrentTransaction == null)
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
+    }
+
+    public async Task DeleteRangeAsync(IEnumerable<Notification> notifications, CancellationToken cancellationToken = default)
+    {
+        context.Notifications.RemoveRange(notifications);
 
         if (context.Database.CurrentTransaction == null)
         {

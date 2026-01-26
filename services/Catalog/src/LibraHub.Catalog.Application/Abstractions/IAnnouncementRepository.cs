@@ -23,4 +23,6 @@ public interface IAnnouncementRepository
     Task UpdateAsync(Announcement announcement, CancellationToken cancellationToken = default);
 
     Task DeleteAsync(Announcement announcement, CancellationToken cancellationToken = default);
+
+    Task DeleteRangeAsync(IEnumerable<Announcement> announcements, CancellationToken cancellationToken = default);
 }

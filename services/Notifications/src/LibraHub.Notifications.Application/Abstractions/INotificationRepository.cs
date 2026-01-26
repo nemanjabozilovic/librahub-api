@@ -21,4 +21,6 @@ public interface INotificationRepository
     Task UpdateAsync(Notification notification, CancellationToken cancellationToken = default);
 
     Task DeleteAsync(Notification notification, CancellationToken cancellationToken = default);
+
+    Task DeleteRangeAsync(IEnumerable<Notification> notifications, CancellationToken cancellationToken = default);
 }

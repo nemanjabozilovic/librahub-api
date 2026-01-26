@@ -259,19 +259,6 @@ public class Book
             throw new InvalidOperationException("Book content is not ready for publishing (missing cover or editions)");
         }
     }
-
-    public bool CanBePublished(PricingPolicy pricingPolicy, BookContentState? contentState)
-    {
-        try
-        {
-            ValidatePublishingRequirements(pricingPolicy, contentState);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
-    }
 }
 
 public class BookAuthor
