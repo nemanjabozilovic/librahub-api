@@ -23,7 +23,6 @@ public static class ServiceCollectionExtensions
         });
 
         services.AddSingleton<ICache, RedisCache>();
-        services.AddSingleton<StatisticsCacheHelper>();
 
         return services;
     }

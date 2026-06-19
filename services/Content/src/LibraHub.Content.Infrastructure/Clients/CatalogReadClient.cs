@@ -5,7 +5,6 @@ using LibraHub.Content.Application.Options;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Text.Json;
 
 namespace LibraHub.Content.Infrastructure.Clients;
 
@@ -14,7 +13,6 @@ public class CatalogReadClient : ICatalogReadClient
     private readonly HttpClient _httpClient;
     private readonly ReadAccessOptions _options;
     private readonly IMemoryCache _cache;
-    private readonly JsonSerializerOptions _jsonOptions;
     private readonly ILogger<CatalogReadClient> _logger;
     private static readonly TimeSpan CacheExpiration = TimeSpan.FromMinutes(5);
 
@@ -28,10 +26,6 @@ public class CatalogReadClient : ICatalogReadClient
         _options = options.Value;
         _cache = cache;
         _logger = logger;
-        _jsonOptions = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        };
     }
 
     public async Task<Result<BookInfo>> GetBookInfoAsync(Guid bookId, CancellationToken cancellationToken = default)

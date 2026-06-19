@@ -35,9 +35,4 @@ public class Money
 
         return new Money(Amount + other.Amount, Currency);
     }
-
-    public Money Multiply(decimal factor)
-    {
-        return new Money(Amount * factor, Currency);
-    }
 }
