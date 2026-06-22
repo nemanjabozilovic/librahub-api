@@ -1,7 +1,6 @@
 using LibraHub.BuildingBlocks.Abstractions;
 using LibraHub.BuildingBlocks.Results;
 using LibraHub.Library.Application.Abstractions;
-using LibraHub.Library.Domain.Books;
 using LibraHub.Library.Domain.Errors;
 using MediatR;
 

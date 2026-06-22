@@ -5,6 +5,7 @@ using LibraHub.Contracts.Library.V1;
 using LibraHub.Contracts.Orders.V1;
 using LibraHub.Library.Application.Abstractions;
 using LibraHub.Library.Application.Consumers;
+using LibraHub.Library.Application.Entitlements;
 using LibraHub.Library.Domain.Entitlements;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
@@ -29,7 +30,7 @@ public class OrderPaidConsumerTests
     }
 
     private OrderPaidConsumer CreateConsumer() => new(
-        _entitlementRepository.Object,
+        new EntitlementGrantService(_entitlementRepository.Object),
         _outboxWriter.Object,
         _inboxRepository.Object,
         _unitOfWork.Object,

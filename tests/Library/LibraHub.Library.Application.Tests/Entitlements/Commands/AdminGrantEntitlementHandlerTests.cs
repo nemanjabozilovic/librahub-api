@@ -2,6 +2,7 @@ using LibraHub.BuildingBlocks.Abstractions;
 using LibraHub.Contracts.Common;
 using LibraHub.Contracts.Library.V1;
 using LibraHub.Library.Application.Abstractions;
+using LibraHub.Library.Application.Entitlements;
 using LibraHub.Library.Application.Entitlements.Commands.AdminGrantEntitlement;
 using LibraHub.Library.Domain.Entitlements;
 using Moq;
@@ -15,7 +16,7 @@ public class AdminGrantEntitlementHandlerTests
     private readonly Mock<IOutboxWriter> _outboxWriter = new();
 
     private AdminGrantEntitlementHandler CreateHandler() =>
-        new(_entitlementRepository.Object, _outboxWriter.Object);
+        new(new EntitlementGrantService(_entitlementRepository.Object), _outboxWriter.Object);
 
     private static Entitlement CreateRevoked(Guid userId, Guid bookId)
     {

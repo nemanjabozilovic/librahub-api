@@ -31,8 +31,7 @@ public static class ServiceCollectionExtensions
             options.UseNpgsql(connectionString, npgsqlOptions =>
                 {
                     npgsqlOptions.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(5), errorCodesToAdd: null);
-                })
-                   .UseLazyLoadingProxies());
+                }));
 
         return services;
     }
@@ -53,6 +52,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<BuildingBlocks.Abstractions.ICurrentUser, BuildingBlocks.CurrentUser.CurrentUser>();
         services.AddScoped<IIdempotencyStore, IdempotencyStore<LibraryDbContext, IdempotencyKey>>();
         services.AddScoped<BuildingBlocks.Inbox.IInboxRepository, Infrastructure.Repositories.InboxRepository>();
+
+        services.AddScoped<Application.Entitlements.EntitlementGrantService>();
 
         services.AddScoped<Application.Consumers.OrderPaidConsumer>();
         services.AddScoped<Application.Consumers.OrderRefundedConsumer>();

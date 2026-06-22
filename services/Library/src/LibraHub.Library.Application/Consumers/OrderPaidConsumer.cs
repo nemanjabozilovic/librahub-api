@@ -2,10 +2,10 @@ using LibraHub.BuildingBlocks.Abstractions;
 using LibraHub.Contracts.Common;
 using LibraHub.Contracts.Library.V1;
 using LibraHub.Contracts.Orders.V1;
-using LibraHub.Library.Application.Abstractions;
+using LibraHub.Library.Application.Entitlements;
+using LibraHub.Library.Application.Resilience;
 using LibraHub.Library.Domain.Entitlements;
 using Microsoft.EntityFrameworkCore;
-using LibraHub.Library.Application.Resilience;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using Polly;
@@ -14,7 +14,7 @@ using Polly.Retry;
 namespace LibraHub.Library.Application.Consumers;
 
 public class OrderPaidConsumer(
-    IEntitlementRepository entitlementRepository,
+    EntitlementGrantService entitlementGrantService,
     BuildingBlocks.Abstractions.IOutboxWriter outboxWriter,
     BuildingBlocks.Inbox.IInboxRepository inboxRepository,
     IUnitOfWork unitOfWork,
@@ -49,23 +49,7 @@ public class OrderPaidConsumer(
 
     public async Task HandleAsync(OrderPaidV1 @event, CancellationToken cancellationToken)
     {
-        if (@event == null)
-        {
-            logger.LogError("Received null OrderPaid event");
-            throw new ArgumentNullException(nameof(@event));
-        }
-
-        if (@event.OrderId == Guid.Empty)
-        {
-            logger.LogError("Received OrderPaid event with empty OrderId");
-            throw new ArgumentException("OrderId cannot be empty", nameof(@event));
-        }
-
-        if (@event.UserId == Guid.Empty)
-        {
-            logger.LogError("Received OrderPaid event with empty UserId for OrderId: {OrderId}", @event.OrderId);
-            throw new ArgumentException("UserId cannot be empty", nameof(@event));
-        }
+        ValidateEvent(@event);
 
         if (@event.Items == null || @event.Items.Count == 0)
         {
@@ -80,90 +64,12 @@ public class OrderPaidConsumer(
             "Processing OrderPaid event for OrderId: {OrderId}, UserId: {UserId}, Items: {ItemCount}, MessageId: {MessageId}",
             @event.OrderId, @event.UserId, @event.Items.Count, messageId);
 
-        var context = new Context
-        {
-            { "Logger", logger },
-            { "OrderId", @event.OrderId.ToString() }
-        };
-
         try
         {
-            await RetryPolicy.ExecuteAsync(async (ctx, ct) =>
-            {
-                await unitOfWork.ExecuteInTransactionAsync(async transactionCt =>
-                {
-                    if (await inboxRepository.IsProcessedAsync(messageId, transactionCt))
-                    {
-                        logger.LogInformation(
-                            "OrderPaid event already processed for MessageId: {MessageId}, OrderId: {OrderId}",
-                            messageId, @event.OrderId);
-                        return;
-                    }
-
-                    foreach (var item in @event.Items)
-                    {
-                        if (item == null || item.BookId == Guid.Empty)
-                        {
-                            logger.LogWarning(
-                                "Skipping invalid item in OrderId: {OrderId}, BookId: {BookId}",
-                                @event.OrderId, item?.BookId);
-                            continue;
-                        }
-
-                        var existing = await entitlementRepository.GetByUserAndBookAsync(
-                            @event.UserId,
-                            item.BookId,
-                            transactionCt);
-
-                        if (existing != null)
-                        {
-                            if (existing.IsActive)
-                            {
-                                logger.LogInformation(
-                                    "Entitlement already exists and is active for UserId: {UserId}, BookId: {BookId}",
-                                    @event.UserId, item.BookId);
-                            }
-                            else
-                            {
-                                existing.Reactivate();
-                                await entitlementRepository.UpdateAsync(existing, transactionCt);
-
-                                logger.LogInformation(
-                                    "Reactivated entitlement for UserId: {UserId}, BookId: {BookId}",
-                                    @event.UserId, item.BookId);
-                            }
-                        }
-                        else
-                        {
-                            var entitlement = new Entitlement(
-                                Guid.NewGuid(),
-                                @event.UserId,
-                                item.BookId,
-                                EntitlementSource.Purchase,
-                                @event.OrderId);
-
-                            await entitlementRepository.AddAsync(entitlement, transactionCt);
-
-                            logger.LogInformation(
-                                "Created entitlement for UserId: {UserId}, BookId: {BookId}",
-                                @event.UserId, item.BookId);
-                        }
-
-                        await outboxWriter.WriteAsync(
-                            new EntitlementGrantedV1
-                            {
-                                UserId = @event.UserId,
-                                BookId = item.BookId,
-                                Source = EntitlementSource.Purchase.ToString(),
-                                AcquiredAtUtc = @event.PaidAt
-                            },
-                            EventTypes.EntitlementGranted,
-                            transactionCt);
-                    }
-
-                    await inboxRepository.MarkAsProcessedAsync(messageId, EventType, transactionCt);
-                }, ct);
-            }, context, cancellationToken);
+            await RetryPolicy.ExecuteAsync(
+                (_, ct) => ProcessOrderAsync(@event, messageId, ct),
+                CreateRetryContext(@event.OrderId),
+                cancellationToken);
 
             logger.LogInformation(
                 "Completed processing OrderPaid event for OrderId: {OrderId}, ProcessedItems: {ItemCount}",
@@ -185,6 +91,102 @@ public class OrderPaidConsumer(
 
             await InitiateRefundAsync(@event, ex, cancellationToken);
         }
+    }
+
+    private void ValidateEvent(OrderPaidV1 @event)
+    {
+        if (@event == null)
+        {
+            logger.LogError("Received null OrderPaid event");
+            throw new ArgumentNullException(nameof(@event));
+        }
+
+        if (@event.OrderId == Guid.Empty)
+        {
+            logger.LogError("Received OrderPaid event with empty OrderId");
+            throw new ArgumentException("OrderId cannot be empty", nameof(@event));
+        }
+
+        if (@event.UserId == Guid.Empty)
+        {
+            logger.LogError("Received OrderPaid event with empty UserId for OrderId: {OrderId}", @event.OrderId);
+            throw new ArgumentException("UserId cannot be empty", nameof(@event));
+        }
+    }
+
+    private Context CreateRetryContext(Guid orderId) => new()
+    {
+        { "Logger", logger },
+        { "OrderId", orderId.ToString() }
+    };
+
+    private async Task ProcessOrderAsync(OrderPaidV1 @event, string messageId, CancellationToken cancellationToken)
+    {
+        await unitOfWork.ExecuteInTransactionAsync(async transactionCt =>
+        {
+            if (await inboxRepository.IsProcessedAsync(messageId, transactionCt))
+            {
+                logger.LogInformation(
+                    "OrderPaid event already processed for MessageId: {MessageId}, OrderId: {OrderId}",
+                    messageId, @event.OrderId);
+                return;
+            }
+
+            foreach (var item in @event.Items)
+            {
+                await ProcessItemAsync(@event, item, transactionCt);
+            }
+
+            await inboxRepository.MarkAsProcessedAsync(messageId, EventType, transactionCt);
+        }, cancellationToken);
+    }
+
+    private async Task ProcessItemAsync(OrderPaidV1 @event, OrderItemDto item, CancellationToken cancellationToken)
+    {
+        if (item == null || item.BookId == Guid.Empty)
+        {
+            logger.LogWarning(
+                "Skipping invalid item in OrderId: {OrderId}, BookId: {BookId}",
+                @event.OrderId, item?.BookId);
+            return;
+        }
+
+        var (_, outcome) = await entitlementGrantService.GrantOrReactivateAsync(
+            @event.UserId,
+            item.BookId,
+            EntitlementSource.Purchase,
+            @event.OrderId,
+            cancellationToken);
+
+        switch (outcome)
+        {
+            case EntitlementGrantOutcome.AlreadyActive:
+                logger.LogInformation(
+                    "Entitlement already exists and is active for UserId: {UserId}, BookId: {BookId}",
+                    @event.UserId, item.BookId);
+                break;
+            case EntitlementGrantOutcome.Reactivated:
+                logger.LogInformation(
+                    "Reactivated entitlement for UserId: {UserId}, BookId: {BookId}",
+                    @event.UserId, item.BookId);
+                break;
+            case EntitlementGrantOutcome.Created:
+                logger.LogInformation(
+                    "Created entitlement for UserId: {UserId}, BookId: {BookId}",
+                    @event.UserId, item.BookId);
+                break;
+        }
+
+        await outboxWriter.WriteAsync(
+            new EntitlementGrantedV1
+            {
+                UserId = @event.UserId,
+                BookId = item.BookId,
+                Source = EntitlementSource.Purchase.ToString(),
+                AcquiredAtUtc = @event.PaidAt
+            },
+            EventTypes.EntitlementGranted,
+            cancellationToken);
     }
 
     private async Task InitiateRefundAsync(OrderPaidV1 @event, Exception originalException, CancellationToken cancellationToken)
