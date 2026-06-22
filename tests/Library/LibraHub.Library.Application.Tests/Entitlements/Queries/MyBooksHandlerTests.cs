@@ -46,8 +46,8 @@ public class MyBooksHandlerTests
             .ReturnsAsync(new List<Entitlement> { entitlement });
 
         _bookSnapshotStore
-            .Setup(s => s.GetByIdAsync(bookId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new BookSnapshot(bookId, "Snapshot Title", "Snapshot Author"));
+            .Setup(s => s.GetByIdsAsync(It.IsAny<IReadOnlyCollection<Guid>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<BookSnapshot> { new(bookId, "Snapshot Title", "Snapshot Author") });
 
         var catalogDict = new Dictionary<Guid, CatalogBookDetailsDto>
         {
@@ -89,8 +89,8 @@ public class MyBooksHandlerTests
             .ReturnsAsync(new List<Entitlement> { entitlement });
 
         _bookSnapshotStore
-            .Setup(s => s.GetByIdAsync(bookId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((BookSnapshot?)null);
+            .Setup(s => s.GetByIdsAsync(It.IsAny<IReadOnlyCollection<Guid>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<BookSnapshot>());
         _catalogClient
             .Setup(c => c.GetBookDetailsByIdsAsync(It.IsAny<List<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Failure<Dictionary<Guid, CatalogBookDetailsDto>>(Error.Unexpected("down")));

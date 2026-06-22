@@ -28,7 +28,7 @@ public class RegisterHandler(
 {
     public async Task<Result> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
-        var recaptchaResult = await ValidateRecaptchaAsync(request.RecaptchaToken, cancellationToken);
+        var recaptchaResult = await recaptchaService.ValidateAsync(request.RecaptchaToken, cancellationToken);
         if (recaptchaResult.IsFailure)
         {
             return recaptchaResult;
@@ -148,21 +148,5 @@ public class RegisterHandler(
             logger.LogError(ex, "Failed to send welcome email to {Email}. Error: {ErrorMessage}",
                 user.Email, ex.Message);
         }
-    }
-
-    private async Task<Result> ValidateRecaptchaAsync(string? recaptchaToken, CancellationToken cancellationToken)
-    {
-        if (string.IsNullOrWhiteSpace(recaptchaToken))
-        {
-            return Result.Failure(Error.Validation("reCAPTCHA token is required"));
-        }
-
-        var isRecaptchaValid = await recaptchaService.VerifyAsync(recaptchaToken, cancellationToken);
-        if (!isRecaptchaValid)
-        {
-            return Result.Failure(Error.Validation("reCAPTCHA verification failed"));
-        }
-
-        return Result.Success();
     }
 }

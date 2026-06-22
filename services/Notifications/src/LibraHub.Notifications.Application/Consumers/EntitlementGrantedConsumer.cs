@@ -91,40 +91,19 @@ public class EntitlementGrantedConsumer(
 
         if (emailEnabled && !string.IsNullOrWhiteSpace(userSettings!.Email))
         {
-            try
-            {
-                var userInfoResult = await identityClient.GetUserInfoAsync(userId, cancellationToken);
-                var userInfo = userInfoResult.IsSuccess ? userInfoResult.Value : null;
-
-                if (userInfo != null && !string.IsNullOrWhiteSpace(userInfo.Email) && userInfo.IsActive)
+            await NotificationConsumerHelper.SendTemplatedEmailIfActiveAsync(
+                identityClient,
+                notificationSender,
+                logger,
+                userId,
+                NotificationMessages.EntitlementGranted.Title,
+                "ENTITLEMENT_GRANTED",
+                fullName => new
                 {
-                    var emailSubject = NotificationMessages.EntitlementGranted.Title;
-                    var fullName = !string.IsNullOrWhiteSpace(userInfo.FullName)
-                        ? userInfo.FullName
-                        : userInfo.Email.Split('@')[0];
-
-                    var emailModel = new
-                    {
-                        FullName = fullName,
-                        BookId = @event.BookId
-                    };
-                    await notificationSender.SendEmailWithTemplateAsync(
-                        userInfo.Email,
-                        emailSubject,
-                        "ENTITLEMENT_GRANTED",
-                        emailModel,
-                        cancellationToken);
-                }
-                else
-                {
-                    logger.LogWarning("User info not found, inactive, or email not available for UserId: {UserId}, skipping email notification", userId);
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Failed to send email notification to UserId: {UserId} for BookId: {BookId}",
-                    userId, @event.BookId);
-            }
+                    FullName = fullName,
+                    BookId = @event.BookId
+                },
+                cancellationToken);
         }
 
         logger.LogInformation("EntitlementGranted notification created for UserId: {UserId}, BookId: {BookId}", userId, @event.BookId);

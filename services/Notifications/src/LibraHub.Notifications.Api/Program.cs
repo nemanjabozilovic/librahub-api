@@ -1,6 +1,4 @@
-using LibraHub.BuildingBlocks.Correlation;
-using LibraHub.BuildingBlocks.Idempotency;
-using LibraHub.BuildingBlocks.Middlewares;
+using LibraHub.BuildingBlocks.Hosting;
 using LibraHub.BuildingBlocks.Observability;
 using LibraHub.Notifications.Api.Extensions;
 
@@ -23,17 +21,7 @@ if (app.Environment.IsDevelopment())
     app.UseNotificationsSwagger();
 }
 
-if (!app.Environment.IsDevelopment())
-{
-    app.UseHttpsRedirection();
-}
-
-app.UseMiddleware<CorrelationIdMiddleware>();
-app.UseMiddleware<IdempotencyKeyMiddleware>();
-app.UseMiddleware<ExceptionHandlingMiddleware>();
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllers();
+app.UseLibraHubPipeline(useIdempotency: true);
 app.MapNotificationsSignalRHub(builder.Configuration);
 app.UseNotificationsDatabaseMigrations();
 

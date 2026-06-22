@@ -5,11 +5,11 @@ using LibraHub.Contracts.Orders.V1;
 using LibraHub.Library.Application.Abstractions;
 using LibraHub.Library.Domain.Entitlements;
 using Microsoft.EntityFrameworkCore;
+using LibraHub.Library.Application.Resilience;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using Polly;
 using Polly.Retry;
-using System.Net;
 
 namespace LibraHub.Library.Application.Consumers;
 
@@ -25,9 +25,9 @@ public class OrderPaidConsumer(
     private const int MaxRetryAttempts = 5;
 
     private static readonly AsyncRetryPolicy RetryPolicy = Policy
-        .Handle<NpgsqlException>(ex => IsTransientPostgresError(ex))
-        .Or<DbUpdateException>(ex => ex.InnerException is NpgsqlException npgsqlEx && IsTransientPostgresError(npgsqlEx))
-        .Or<HttpRequestException>(ex => IsTransientHttpError(ex))
+        .Handle<NpgsqlException>(ex => TransientErrorDetector.IsTransientPostgresError(ex))
+        .Or<DbUpdateException>(ex => ex.InnerException is NpgsqlException npgsqlEx && TransientErrorDetector.IsTransientPostgresError(npgsqlEx))
+        .Or<HttpRequestException>(ex => TransientErrorDetector.IsTransientHttpError(ex))
         .Or<TimeoutException>()
         .WaitAndRetryAsync(
             retryCount: MaxRetryAttempts,
@@ -46,20 +46,6 @@ public class OrderPaidConsumer(
                         orderId, retryCount, MaxRetryAttempts, timespan.TotalMilliseconds);
                 }
             });
-
-    private static bool IsTransientPostgresError(NpgsqlException ex)
-    {
-        var transientErrorCodes = new[] { "40001", "40P01", "08000", "08003", "08006", "08007", "57P01", "57P02", "57P03" };
-        return transientErrorCodes.Contains(ex.SqlState);
-    }
-
-    private static bool IsTransientHttpError(HttpRequestException ex)
-    {
-        return ex.InnerException is WebException webEx &&
-               (webEx.Status == WebExceptionStatus.Timeout ||
-                webEx.Status == WebExceptionStatus.ConnectFailure ||
-                webEx.Status == WebExceptionStatus.ReceiveFailure);
-    }
 
     public async Task HandleAsync(OrderPaidV1 @event, CancellationToken cancellationToken)
     {
@@ -183,7 +169,7 @@ public class OrderPaidConsumer(
                 "Completed processing OrderPaid event for OrderId: {OrderId}, ProcessedItems: {ItemCount}",
                 @event.OrderId, @event.Items.Count);
         }
-        catch (Exception ex) when (IsRetryableException(ex))
+        catch (Exception ex) when (TransientErrorDetector.IsRetryable(ex))
         {
             logger.LogError(ex,
                 "Unexpected retryable exception after all retries exhausted for OrderId: {OrderId}. " +
@@ -252,13 +238,5 @@ public class OrderPaidConsumer(
         {
             logger.LogError(ex, "Failed to mark empty order as processed for OrderId: {OrderId}", orderId);
         }
-    }
-
-    private static bool IsRetryableException(Exception ex)
-    {
-        return ex is NpgsqlException npgsqlEx && IsTransientPostgresError(npgsqlEx) ||
-               ex is DbUpdateException dbEx && dbEx.InnerException is NpgsqlException innerNpgsqlEx && IsTransientPostgresError(innerNpgsqlEx) ||
-               ex is HttpRequestException httpEx && IsTransientHttpError(httpEx) ||
-               ex is TimeoutException;
     }
 }

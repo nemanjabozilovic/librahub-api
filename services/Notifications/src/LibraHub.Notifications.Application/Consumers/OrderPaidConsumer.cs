@@ -91,42 +91,21 @@ public class OrderPaidConsumer(
 
         if (emailEnabled && !string.IsNullOrWhiteSpace(userSettings!.Email))
         {
-            try
-            {
-                var userInfoResult = await identityClient.GetUserInfoAsync(userId, cancellationToken);
-                var userInfo = userInfoResult.IsSuccess ? userInfoResult.Value : null;
-
-                if (userInfo != null && !string.IsNullOrWhiteSpace(userInfo.Email) && userInfo.IsActive)
+            await NotificationConsumerHelper.SendTemplatedEmailIfActiveAsync(
+                identityClient,
+                notificationSender,
+                logger,
+                userId,
+                NotificationMessages.OrderPaid.Title,
+                "ORDER_PAID",
+                fullName => new
                 {
-                    var emailSubject = NotificationMessages.OrderPaid.Title;
-                    var fullName = !string.IsNullOrWhiteSpace(userInfo.FullName)
-                        ? userInfo.FullName
-                        : userInfo.Email.Split('@')[0];
-
-                    var emailModel = new
-                    {
-                        FullName = fullName,
-                        OrderId = @event.OrderId,
-                        Total = @event.Total,
-                        Currency = @event.Currency
-                    };
-                    await notificationSender.SendEmailWithTemplateAsync(
-                        userInfo.Email,
-                        emailSubject,
-                        "ORDER_PAID",
-                        emailModel,
-                        cancellationToken);
-                }
-                else
-                {
-                    logger.LogWarning("User info not found, inactive, or email not available for UserId: {UserId}, skipping email notification", userId);
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Failed to send email notification to UserId: {UserId} for OrderId: {OrderId}",
-                    userId, @event.OrderId);
-            }
+                    FullName = fullName,
+                    OrderId = @event.OrderId,
+                    Total = @event.Total,
+                    Currency = @event.Currency
+                },
+                cancellationToken);
         }
 
         logger.LogInformation("OrderPaid notification created for UserId: {UserId}, OrderId: {OrderId}", userId, @event.OrderId);

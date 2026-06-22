@@ -20,6 +20,18 @@ public class BookSnapshotStore : IBookSnapshotStore
             .FirstOrDefaultAsync(s => s.BookId == bookId, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<BookSnapshot>> GetByIdsAsync(IReadOnlyCollection<Guid> bookIds, CancellationToken cancellationToken = default)
+    {
+        if (bookIds.Count == 0)
+        {
+            return Array.Empty<BookSnapshot>();
+        }
+
+        return await _context.BookSnapshots
+            .Where(s => bookIds.Contains(s.BookId))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task AddOrUpdateAsync(BookSnapshot snapshot, CancellationToken cancellationToken = default)
     {
         var existing = await _context.BookSnapshots

@@ -32,16 +32,9 @@ public class MyBooksHandler(
             cancellationToken);
 
         var bookIds = pagedEntitlements.Select(e => e.BookId).ToList();
-        var snapshotDict = new Dictionary<Guid, BookSnapshot>();
 
-        foreach (var bookId in bookIds)
-        {
-            var snapshot = await bookSnapshotStore.GetByIdAsync(bookId, cancellationToken);
-            if (snapshot != null)
-            {
-                snapshotDict[snapshot.BookId] = snapshot;
-            }
-        }
+        var snapshots = await bookSnapshotStore.GetByIdsAsync(bookIds, cancellationToken);
+        var snapshotDict = snapshots.ToDictionary(s => s.BookId);
 
         var catalogDictResult = await catalogClient.GetBookDetailsByIdsAsync(bookIds, cancellationToken);
         var catalogDict = catalogDictResult.IsSuccess

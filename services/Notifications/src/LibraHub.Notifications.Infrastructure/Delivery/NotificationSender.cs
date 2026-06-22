@@ -1,5 +1,6 @@
 using LibraHub.BuildingBlocks.Abstractions;
 using LibraHub.Notifications.Application.Abstractions;
+using LibraHub.Notifications.Application.Constants;
 using Microsoft.Extensions.Logging;
 
 namespace LibraHub.Notifications.Infrastructure.Delivery;
@@ -17,7 +18,7 @@ public class NotificationSender(
 
             await notificationHub.SendToUserAsync(
                 userId,
-                "ReceiveNotification",
+                NotificationClientMethods.ReceiveNotification,
                 new { Title = title, Message = message },
                 cancellationToken);
 
@@ -47,7 +48,7 @@ public class NotificationSender(
 
             await notificationHub.SendToUserAsync(
                 userId,
-                "ReceiveAnnouncement",
+                NotificationClientMethods.ReceiveAnnouncement,
                 new
                 {
                     AnnouncementId = announcementId,
