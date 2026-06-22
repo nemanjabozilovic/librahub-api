@@ -1,6 +1,7 @@
 using LibraHub.BuildingBlocks.Results;
 using LibraHub.Contracts.Common;
 using LibraHub.Contracts.Library.V1;
+using LibraHub.Library.Application.Abstractions;
 using LibraHub.Library.Domain.Entitlements;
 using LibraHub.Library.Domain.Errors;
 using MediatR;
@@ -10,6 +11,7 @@ namespace LibraHub.Library.Application.Entitlements.Commands.AdminGrantEntitleme
 
 public class AdminGrantEntitlementHandler(
     EntitlementGrantService entitlementGrantService,
+    IBookSnapshotStore bookSnapshotStore,
     BuildingBlocks.Abstractions.IOutboxWriter outboxWriter) : IRequestHandler<AdminGrantEntitlementCommand, Result<Guid>>
 {
     public async Task<Result<Guid>> Handle(AdminGrantEntitlementCommand request, CancellationToken cancellationToken)
@@ -26,13 +28,16 @@ public class AdminGrantEntitlementHandler(
             return Result.Failure<Guid>(Error.Validation(LibraryErrors.Entitlement.AlreadyExists));
         }
 
+        var snapshot = await bookSnapshotStore.GetByIdAsync(entitlement.BookId, cancellationToken);
+
         await outboxWriter.WriteAsync(
             new EntitlementGrantedV1
             {
                 UserId = entitlement.UserId,
                 BookId = entitlement.BookId,
                 Source = entitlement.Source.ToString(),
-                AcquiredAtUtc = new DateTimeOffset(entitlement.AcquiredAt, TimeSpan.Zero)
+                AcquiredAtUtc = new DateTimeOffset(entitlement.AcquiredAt, TimeSpan.Zero),
+                BookTitle = snapshot?.Title ?? string.Empty
             },
             EventTypes.EntitlementGranted,
             cancellationToken);

@@ -183,7 +183,8 @@ public class OrderPaidConsumer(
                 UserId = @event.UserId,
                 BookId = item.BookId,
                 Source = EntitlementSource.Purchase.ToString(),
-                AcquiredAtUtc = @event.PaidAt
+                AcquiredAtUtc = @event.PaidAt,
+                BookTitle = item.BookTitle
             },
             EventTypes.EntitlementGranted,
             cancellationToken);

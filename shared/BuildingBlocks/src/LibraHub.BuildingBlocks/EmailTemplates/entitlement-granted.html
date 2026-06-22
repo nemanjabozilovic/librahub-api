@@ -9,7 +9,14 @@
         <h2 style="color: #2c3e50;">Book Added to Your Library</h2>
         <p>Dear @Model.FullName,</p>
         <p>A new book has been added to your library.</p>
-        <p><strong>Book ID:</strong> @Model.BookId</p>
+        @if (!string.IsNullOrWhiteSpace(Model.BookTitle))
+        {
+            <p><strong>Book:</strong> @Model.BookTitle</p>
+        }
+        else
+        {
+            <p><strong>Book ID:</strong> @Model.BookId</p>
+        }
         <p>You can now access this book from your library.</p>
         <p>Best regards,<br />LibraHub Team</p>
     </div>

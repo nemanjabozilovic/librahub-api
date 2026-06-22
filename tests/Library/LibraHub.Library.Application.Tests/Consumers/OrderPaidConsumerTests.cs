@@ -42,7 +42,7 @@ public class OrderPaidConsumerTests
         OrderId = orderId,
         UserId = userId,
         PaidAt = DateTimeOffset.UtcNow,
-        Items = bookIds.Select(b => new OrderItemDto { BookId = b }).ToList()
+        Items = bookIds.Select(b => new OrderItemDto { BookId = b, BookTitle = "Clean Code" }).ToList()
     };
 
     [Fact]
@@ -59,7 +59,9 @@ public class OrderPaidConsumerTests
         _entitlementRepository.Verify(r => r.AddAsync(
             It.Is<Entitlement>(e => e.UserId == userId && e.BookId == bookId && e.Source == EntitlementSource.Purchase && e.OrderId == orderId),
             It.IsAny<CancellationToken>()), Times.Once);
-        _outboxWriter.Verify(o => o.WriteAsync(It.IsAny<EntitlementGrantedV1>(), EventTypes.EntitlementGranted, It.IsAny<CancellationToken>()), Times.Once);
+        _outboxWriter.Verify(o => o.WriteAsync(
+            It.Is<EntitlementGrantedV1>(e => e.BookId == bookId && e.BookTitle == "Clean Code"),
+            EventTypes.EntitlementGranted, It.IsAny<CancellationToken>()), Times.Once);
         _inboxRepository.Verify(i => i.MarkAsProcessedAsync($"OrderPaid_{orderId}", EventTypes.OrderPaid, It.IsAny<CancellationToken>()), Times.Once);
     }
 

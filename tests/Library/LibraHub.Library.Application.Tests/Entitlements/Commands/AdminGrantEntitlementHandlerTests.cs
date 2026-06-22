@@ -13,10 +13,11 @@ namespace LibraHub.Library.Application.Tests.Entitlements.Commands;
 public class AdminGrantEntitlementHandlerTests
 {
     private readonly Mock<IEntitlementRepository> _entitlementRepository = new();
+    private readonly Mock<IBookSnapshotStore> _bookSnapshotStore = new();
     private readonly Mock<IOutboxWriter> _outboxWriter = new();
 
     private AdminGrantEntitlementHandler CreateHandler() =>
-        new(new EntitlementGrantService(_entitlementRepository.Object), _outboxWriter.Object);
+        new(new EntitlementGrantService(_entitlementRepository.Object), _bookSnapshotStore.Object, _outboxWriter.Object);
 
     private static Entitlement CreateRevoked(Guid userId, Guid bookId)
     {

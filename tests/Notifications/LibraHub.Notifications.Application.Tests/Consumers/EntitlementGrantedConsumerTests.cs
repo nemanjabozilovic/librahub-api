@@ -44,7 +44,8 @@ public class EntitlementGrantedConsumerTests
     {
         UserId = _userId,
         BookId = _bookId,
-        Source = "Purchase"
+        Source = "Purchase",
+        BookTitle = "Clean Code"
     };
 
     private UserNotificationSettings Settings(bool isActive = true, bool isStaff = false, bool emailEnabled = false, bool inAppEnabled = true)
@@ -85,8 +86,8 @@ public class EntitlementGrantedConsumerTests
 
         await consumer.HandleAsync(Event(), CancellationToken.None);
 
-        _notificationRepository.Verify(r => r.AddAsync(It.Is<Notification>(n => n.Type == NotificationType.EntitlementGranted), It.IsAny<CancellationToken>()), Times.Once);
-        _notificationSender.Verify(s => s.SendInAppAsync(_userId, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
+        _notificationRepository.Verify(r => r.AddAsync(It.Is<Notification>(n => n.Type == NotificationType.EntitlementGranted && n.Message.Contains("Clean Code")), It.IsAny<CancellationToken>()), Times.Once);
+        _notificationSender.Verify(s => s.SendInAppAsync(_userId, It.IsAny<string>(), It.Is<string>(m => m.Contains("Clean Code")), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]

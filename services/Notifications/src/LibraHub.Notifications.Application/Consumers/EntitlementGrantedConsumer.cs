@@ -61,7 +61,7 @@ public class EntitlementGrantedConsumer(
                         userId,
                         NotificationType.EntitlementGranted,
                         NotificationMessages.EntitlementGranted.Title,
-                        NotificationMessages.EntitlementGranted.GetMessage(@event.BookId));
+                        NotificationMessages.EntitlementGranted.GetMessage(@event.BookTitle, @event.BookId));
 
                     await notificationRepository.AddAsync(notification, ct);
                 }
@@ -101,7 +101,8 @@ public class EntitlementGrantedConsumer(
                 fullName => new
                 {
                     FullName = fullName,
-                    BookId = @event.BookId
+                    BookId = @event.BookId,
+                    BookTitle = @event.BookTitle
                 },
                 cancellationToken);
         }

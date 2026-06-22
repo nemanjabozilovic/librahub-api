@@ -26,9 +26,11 @@ public static class NotificationMessages
     {
         public const string Title = "Book added to your library";
 
-        public static string GetMessage(Guid bookId)
+        public static string GetMessage(string bookTitle, Guid bookId)
         {
-            return $"A new book has been added to your library. Book ID: {bookId}";
+            return string.IsNullOrWhiteSpace(bookTitle)
+                ? $"A new book has been added to your library. Book ID: {bookId}"
+                : $"'{bookTitle}' has been added to your library.";
         }
     }
 
