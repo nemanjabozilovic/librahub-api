@@ -16,10 +16,7 @@ public class BookRepository : IBookRepository
 
     public async Task<Book?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await _context.Books
-            .Include(b => b.Authors)
-            .Include(b => b.Categories)
-            .Include(b => b.Tags)
+        return await IncludeBookGraph(_context.Books)
             .FirstOrDefaultAsync(b => b.Id == id, cancellationToken);
     }
 
@@ -63,13 +60,17 @@ public class BookRepository : IBookRepository
         };
     }
 
-    private IQueryable<Book> BuildSearchQuery(string? searchTerm, bool includeAllStatuses = false)
+    private static IQueryable<Book> IncludeBookGraph(IQueryable<Book> query)
     {
-        var query = _context.Books
+        return query
             .Include(b => b.Authors)
             .Include(b => b.Categories)
-            .Include(b => b.Tags)
-            .AsQueryable();
+            .Include(b => b.Tags);
+    }
+
+    private IQueryable<Book> BuildSearchQuery(string? searchTerm, bool includeAllStatuses = false)
+    {
+        var query = IncludeBookGraph(_context.Books);
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
