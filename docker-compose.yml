@@ -80,8 +80,8 @@ services:
     image: changemakerstudiosus/papercut-smtp:latest
     container_name: librahub-papercut-smtp
     ports:
-      - "8082:80"
-      - "25:25"
+      - "8082:8080"
+      - "2525:2525"
     networks:
       - librahub-network
 

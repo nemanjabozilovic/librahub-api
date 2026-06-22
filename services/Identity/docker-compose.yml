@@ -13,6 +13,7 @@ services:
       - ConnectionStrings__RabbitMQ=amqp://librahub_mq:R%40bb1tMQ_L1br%40Hub_2026%21S3cur3_P%40ss@librahub-rabbitmq:5672/
       - ConnectionStrings__Redis=librahub-redis:6379
       - EmailConfig__Host=papercut-smtp
+      - EmailConfig__Port=2525
       - Storage__Endpoint=librahub-minio:9000
       - Identity__GatewayBaseUrl=http://localhost:5000
       - InternalAccess__ApiKey=librahub_internal_dev_2026

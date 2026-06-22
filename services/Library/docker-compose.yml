@@ -21,6 +21,7 @@ services:
       - Library__RabbitMq__Password=R@bb1tMQ_L1br@Hub_2026!S3cur3_P@ss
       - Library__RabbitMq__ExchangeName=librahub.events
       - EmailConfig__Host=papercut-smtp
+      - EmailConfig__Port=2525
       - InternalAccess__ApiKey=librahub_internal_dev_2026
     ports:
       - "60990:8080"
